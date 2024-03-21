@@ -20,52 +20,38 @@ EcoTS là một dự án nhằm mục đích phân loại rác và khuyến khí
 
 ## Hướng Dẫn Cài Đặt và Sử Dụng
 
-```gradle
-// Đoạn code Gradle để cài đặt và chạy ứng dụng
-Clone Repository:
+```md
+# Clone Repository:
 
-shell
-Copy code
 git clone https://github.com/yourusername/EcoTS.git
-Cài Đặt Backend:
 
-Mở terminal/cmd và di chuyển vào thư mục backend:
+# Cài Đặt Backend:
 
-shell
-Copy code
+- Mở terminal/cmd và di chuyển vào thư mục `backend`:
+
 cd EcoTS/backend
-Cài đặt các dependencies và khởi động Spring Boot:
 
-shell
-Copy code
+- Cài đặt các dependencies và khởi động Spring Boot:
+
 ./gradlew bootRun
-Cài Đặt Flutter App:
 
-Mở terminal/cmd và di chuyển vào thư mục flutter_app:
+# Cài Đặt Flutter App:
 
-shell
-Copy code
+- Mở terminal/cmd và di chuyển vào thư mục `flutter_app`:
+
 cd EcoTS/flutter_app
-Cài đặt các dependencies và khởi chạy ứng dụng Flutter:
 
-shell
-Copy code
+- Cài đặt các dependencies và khởi chạy ứng dụng Flutter:
+
 flutter pub get
 flutter run
-Cấu Hình Cơ Sở Dữ Liệu:
 
-Tạo cơ sở dữ liệu PostgreSQL và MongoDB với các thông tin cấu hình tương ứng.
-Cập nhật các thông tin cấu hình trong file application.properties của Spring Boot.
-Chạy Ứng Dụng:
+# Cấu Hình Cơ Sở Dữ Liệu:
 
-Khởi động lại backend sau khi cấu hình xong.
-Khởi động ứng dụng di động Flutter để trải nghiệm.
-Đóng Góp
-Chúng tôi luôn chào đón mọi đóng góp từ cộng đồng. Nếu bạn muốn góp phần vào dự án, vui lòng tham khảo Hướng Dẫn Đóng Góp.
+- Tạo cơ sở dữ liệu PostgreSQL và MongoDB với các thông tin cấu hình tương ứng.
+- Cập nhật các thông tin cấu hình trong file `application.properties` của Spring Boot.
 
-Liên Hệ
-Nếu bạn có bất kỳ câu hỏi hoặc đề xuất nào, xin vui lòng liên hệ với chúng tôi qua email: example@email.com.
+# Chạy Ứng Dụng:
 
-Hãy cùng nhau xây dựng một môi trường sống xanh hơn!
-
-© 2024 EcoTS. Được phát triển bởi Your Name.
+- Khởi động lại backend sau khi cấu hình xong.
+- Khởi động ứng dụng di động Flutter để trải nghiệm.
