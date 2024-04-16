@@ -52,6 +52,12 @@ dependencies {
 	implementation ("org.springdoc:springdoc-openapi-ui:1.8.0")
 
 	implementation ("org.springframework.boot:spring-boot-starter-mail:3.2.4")
+
+	//For Gradle, add to dependencies section of build.gradle
+	implementation ("com.cloudinary:cloudinary-http44:1.36.0")
+	implementation ("com.cloudinary:cloudinary-taglib:1.36.0")
+	implementation("io.github.cdimascio:dotenv-java:2.2.4")
+
 }
 
 tasks.withType<Test> {
