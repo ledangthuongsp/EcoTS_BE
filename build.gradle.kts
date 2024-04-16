@@ -32,6 +32,26 @@ dependencies {
 	annotationProcessor("org.projectlombok:lombok")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testImplementation("org.springframework.security:spring-security-test")
+
+	implementation ("org.springframework.boot:spring-boot-starter-data-rest")
+	developmentOnly ("org.springframework.boot:spring-boot-devtools")
+
+	implementation ("org.mapstruct:mapstruct:1.5.5.Final")
+	implementation ("io.jsonwebtoken:jjwt-api:0.11.5")
+	implementation ("io.jsonwebtoken:jjwt-impl:0.11.5")
+	implementation ("io.jsonwebtoken:jjwt-jackson:0.11.5")
+
+	implementation ("io.springfox:springfox-swagger2:3.0.0")
+	implementation ("io.springfox:springfox-swagger-ui:3.0.0")
+	implementation ("io.springfox:springfox-boot-starter:3.0.0")
+	implementation ("javax.servlet:javax.servlet-api:4.0.1")
+
+
+	implementation ("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.4.0")
+	implementation ("org.springframework.boot:spring-boot-starter-validation")
+	implementation ("org.springdoc:springdoc-openapi-ui:1.8.0")
+
+	implementation ("org.springframework.boot:spring-boot-starter-mail:3.2.4")
 }
 
 tasks.withType<Test> {

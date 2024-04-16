@@ -1,5 +1,16 @@
-FROM eclipse-temurin:17-jdk-alpine
-VOLUME /tmp
-ARG JAR_FILE=build/libs/EcoTS-0.0.1-SNAPSHOT.jar
-COPY ${JAR_FILE} app.jar
-ENTRYPOINT ["java","-jar","/app.jar"]
+#
+# Build stage
+#
+FROM gradle:8.6-jdk17 AS build
+WORKDIR /app
+COPY . /app/
+RUN gradle clean build --no-daemon
+
+#
+# Package stage
+#
+FROM openjdk:17-alpine
+WORKDIR /app
+COPY --from=build /app/build/libs/*.jar /app/app.jar
+EXPOSE 7050
+ENTRYPOINT ["java","-jar","app.jar"]
