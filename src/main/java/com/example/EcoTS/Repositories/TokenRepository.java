@@ -1,20 +1,16 @@
 package com.example.EcoTS.Repositories;
 
-import com.example.EcoTS.Models.Users;
+import com.example.EcoTS.Models.Tokens;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 import org.springframework.stereotype.Repository;
-
-import java.util.Optional;
 
 import io.swagger.v3.oas.annotations.Hidden;
 
 @Repository
 @RepositoryRestResource
 @Hidden
-public interface UserRepository extends JpaRepository<Users, Long> {
+public interface TokenRepository extends JpaRepository<Tokens, Long> {
 
-    Optional<Users> findByUsername(String username);
-    Optional<Users> findByEmail (String email);
 }
