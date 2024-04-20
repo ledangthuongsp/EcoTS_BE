@@ -23,9 +23,4 @@ public class OtpUtils {
         int randomNumber = random.nextInt(900000) + 100000; // Tạo số ngẫu nhiên từ 100000 đến 999999
         return String.valueOf(randomNumber);
     }
-    // Check và Xóa các OTP sau mỗi 10 giay
-    //@Scheduled(fixedRate = 10000) // Mỗi 10 giây
-    //public void deleteExpiredOTP() {
-    //verificationRepository.deleteByExpireTime();
-    //}
 }
