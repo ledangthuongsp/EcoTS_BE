@@ -1,7 +1,47 @@
 package com.example.EcoTS.Services.UserService;
 
+import com.example.EcoTS.Models.Users;
+import com.example.EcoTS.Repositories.UserRepository;
+import com.example.EcoTS.Services.CloudinaryService.CloudinaryService;
+import com.example.EcoTS.Services.SecurityService.JwtService;
+
+import org.apache.logging.log4j.message.Message;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.util.Optional;
 
 @Service
 public class UserService {
+
+    @Autowired
+    private CloudinaryService cloudinaryService;
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private JwtService jwtService;
+    public String uploadUserAvatar(String token, MultipartFile file) throws IOException {
+        // Lấy thông tin người dùng từ UserRepository
+        String username = jwtService.getUsername(token);
+        Optional<Users> optionalUser = userRepository.findByUsername(username);
+
+        if (optionalUser.isEmpty()) {
+            return null;
+        }
+
+        Users user = optionalUser.get();
+        // Lấy URL avatar hiện tại của người dùng
+        String currentAvatarUrl = user.getAvatarUrl();
+
+        // Tải lên avatar mới và cập nhật URL avatar cho người dùng
+        String newAvatarUrl = cloudinaryService.userUploadAvatar(file, currentAvatarUrl);
+        user.setAvatarUrl(newAvatarUrl);
+        userRepository.save(user);
+
+        return newAvatarUrl;
+    }
 }
