@@ -10,11 +10,14 @@ import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.PostPersist;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -41,22 +44,20 @@ public class Users implements UserDetails {
     private Long id;
     @Column(nullable=false, unique = true)
     private String username;
-
     @Column(nullable=false, unique = true)
     private String email;
-
     @Column(nullable=false)
     private String password;
-
     private String fullName;
     private String phoneNumber;
     private String address;
-
     private String personalId;
     private LocalDate dayOfBirth;
     private String avatarUrl;
     private String gender;
     private String role;
+
+
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private Timestamp createdAt;

@@ -5,6 +5,7 @@ import com.example.EcoTS.Models.Users;
 import com.example.EcoTS.Services.SecurityService.AuthenticationService;
 import com.example.EcoTS.Services.SecurityService.JwtService;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -21,16 +22,12 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @CrossOrigin
 @Tag(name = "Authentication", description = "Authentication APIs")
 public class SignUpController {
-    private final JwtService jwtService;
-    private final AuthenticationService authenticationService;
 
-    public SignUpController(JwtService jwtService, AuthenticationService authenticationService) {
-        this.jwtService = jwtService;
-        this.authenticationService = authenticationService;
-    }
+    @Autowired
+    private AuthenticationService authenticationService;
     @PostMapping("/auth/signup")
     public ResponseEntity<Users> register(@RequestBody SignUpDTO registerUserDto) {
         Users registeredUser = authenticationService.signup(registerUserDto);
-        return ResponseEntity.ok(registeredUser);
+        return ResponseEntity.ok().body(registeredUser);
     }
 }
