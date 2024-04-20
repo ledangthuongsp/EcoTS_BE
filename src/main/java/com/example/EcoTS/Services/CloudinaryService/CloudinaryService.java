@@ -1,9 +1,9 @@
 package com.example.EcoTS.Services.CloudinaryService;
-
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -18,13 +18,14 @@ import java.util.Map;
 import lombok.RequiredArgsConstructor;
 
 @Service
-@RequiredArgsConstructor
 public class CloudinaryService {
+    private static final Logger log = LoggerFactory.getLogger(CloudinaryService.class);
     @Value("${cloudinary.cloud-name}")
     private String cloudName;
-    @Autowired
-    private Cloudinary cloudinary;
-
+    private final Cloudinary cloudinary;
+    public CloudinaryService(Cloudinary cloudinary) {
+        this.cloudinary = cloudinary;
+    }
     public String uploadFileDonations(MultipartFile file) throws IOException {
         Map response = cloudinary.uploader().upload(file.getBytes(),
                 ObjectUtils.asMap(
@@ -42,59 +43,44 @@ public class CloudinaryService {
     }
 
     public String userUploadAvatar(MultipartFile newAvatar, String oldAvatar) throws IOException {
-        // Tải lên avatar mới
         Map uploadResult = cloudinary.uploader().upload(newAvatar.getBytes(),
                 ObjectUtils.asMap(
                         "resource_type", "auto",
-                        "folder", "User Avatar"
+                        "folder", "UserAvatar"
                 ));
         String newAvatarUrl = (String) uploadResult.get("url");
 
-        // Kiểm tra và xóa avatar cũ nếu nó tồn tại
-        if (oldAvatar != null && !oldAvatar.isEmpty() && avatarExists(oldAvatar)) {
-            deleteAvatar(oldAvatar);
-        }
-
-        return newAvatarUrl;
-    }
-    // Phương thức kiểm tra xem avatar có tồn tại trên Cloudinary không
-    private boolean avatarExists(String avatarUrl) {
-        try {
-            Map result = cloudinary.uploader().upload(avatarUrl, ObjectUtils.asMap(
-                    "resource_type", "image",
-                    "folder", "User Avatar",
-                    "public_id", extractPublicIdFromUrl(avatarUrl)
-            ));
-            return result != null && result.get("existing") == Boolean.TRUE;
-        } catch (IOException e) {
-            return false;
-        }
-    }
-    private void deleteAvatar(String avatarUrl) throws IOException {
-        if (avatarUrl != null && !avatarUrl.isEmpty()) {
-            // Trích xuất public_id từ URL
-            String publicId = extractPublicIdFromUrl(avatarUrl);
-            if (publicId != null && !publicId.isEmpty()) {
-                cloudinary.uploader().destroy(publicId, ObjectUtils.asMap(
-                        "resource_type", "image"
-                ));
+        if (oldAvatar != null && !oldAvatar.isEmpty()) {
+            try {
+                deleteAvatar(extractPublicIdFromUrl(oldAvatar));
+            } catch (IllegalArgumentException | URISyntaxException e) {
+                log.error("Failed to delete old avatar: " + e.getMessage());
             }
         }
+        return newAvatarUrl;
     }
-    private String extractPublicIdFromUrl(String avatarUrl) {
-        try {
-            // Giả định rằng URL của bạn có dạng:
-            // http://res.cloudinary.com/{cloud_name}/image/upload/v{version}/{public_id}.{file_extension}
-            // Bạn cần cắt chuỗi để lấy phần {public_id}
-            URI uri = new URI(avatarUrl);
-            String path = uri.getPath();
-            String publicId = path.split("/")[path.split("/").length - 1]; // Lấy phần tử cuối cùng của path
-            publicId = publicId.substring(0, publicId.lastIndexOf('.')); // Loại bỏ phần mở rộng file
-            return publicId;
-        } catch (URISyntaxException e) {
-            // Xử lý lỗi nếu URL không hợp lệ
-            return null;
+
+    private void deleteAvatar(String publicId) throws IOException {
+        Map result = cloudinary.uploader().destroy(publicId, ObjectUtils.asMap(
+                "resource_type", "image",
+                "invalidate", true
+        ));
+        log.info("Deleted image with public_id: " + publicId);
+    }
+
+    private String extractPublicIdFromUrl(String avatarUrl) throws URISyntaxException, IllegalArgumentException {
+        URI uri = new URI(avatarUrl);
+        String path = uri.getPath();
+        int uploadIndex = path.lastIndexOf("upload/");
+        if (uploadIndex == -1) {
+            throw new IllegalArgumentException("URL does not contain 'upload/'");
         }
+        int startIndex = uploadIndex + "upload/".length();
+        int endIndex = path.lastIndexOf('.');
+        if (endIndex == -1) {
+            throw new IllegalArgumentException("URL does not have a proper file extension");
+        }
+        return path.substring(startIndex, endIndex);
     }
 }
 
