@@ -17,9 +17,14 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 @Controller
 @RestController
 @CrossOrigin
+@Tag(name = "Authentication", description = "Authentication APIs")
 public class SignInController {
     private final JwtService jwtService;
     private final JwtRefreshService jwtRefreshService;

@@ -26,11 +26,8 @@ import lombok.experimental.FieldDefaults;
 @Builder
 @Getter
 @Setter
-
-
-@ApiModel
 public class Verifications {
-    @jakarta.persistence.Id
+    @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long Id;
     private Long codeOTP;
