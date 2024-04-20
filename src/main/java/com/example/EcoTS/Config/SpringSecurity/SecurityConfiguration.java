@@ -39,7 +39,7 @@ public class SecurityConfiguration {
                         .contentSecurityPolicy(csp-> csp
                                 .policyDirectives("upgrade-insecure-requests;")))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/test", "/users/**").permitAll()
+                        .requestMatchers("/test", "/users/**","/donate/**").permitAll()
                         .requestMatchers("/auth/**").permitAll()
                         .requestMatchers("/v3/api-docs", "/v3/api-docs/**", "/swagger-resources",
                                 "/swagger-resources/**", "configuration/ui", "configuration/security",
@@ -56,8 +56,6 @@ public class SecurityConfiguration {
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration().applyPermitDefaultValues();
         configuration.setAllowedOrigins(List.of("http://localhost:7050", "https://ecots-be.onrender.com", "http://localhost:5173")); // Specify your server's origin
-        configuration.addAllowedOrigin("http://127.0.0.1:61266"); // Dart VM Service
-        configuration.addAllowedOrigin("http://127.0.0.1:9101"); // Flutter DevTools
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("Authorization", "Cache-Control", "Content-Type", "Accept", "Access-Control-Allow-Origin"));
         configuration.setAllowCredentials(true);
