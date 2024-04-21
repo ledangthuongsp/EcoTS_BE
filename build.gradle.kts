@@ -61,7 +61,9 @@ dependencies {
 	implementation ("org.modelmapper:modelmapper:3.2.0")
 
 
-	
+	//Implement ZXing to generate Barcode and QRCode
+	implementation("com.google.zxing:core:3.5.3")
+	implementation("com.google.zxing:javase:3.5.3")
 }
 
 tasks.withType<Test> {
