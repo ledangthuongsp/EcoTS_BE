@@ -1,8 +1,13 @@
 package com.example.EcoTS.Models;
 
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 
 import io.swagger.annotations.ApiModel;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -33,4 +38,11 @@ public class Verifications {
     private Long codeOTP;
     private LocalDateTime expireTime;
     private String email;
+    @CreationTimestamp
+    @Column(name = "created_at", updatable = false)
+    private Timestamp createdAt;
+
+    @UpdateTimestamp
+    @Column(name = "updated_at")
+    private Timestamp updatedAt;
 }
