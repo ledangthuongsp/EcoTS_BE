@@ -44,10 +44,11 @@ public class Points {
 
     @OneToOne
     @JoinColumn(name = "user_id", referencedColumnName = "id")
+    private Users user;
+
 
     private Long saveCo2;
     private Long totalTrashCollect;
-    private Users user;
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private Timestamp createdAt;
