@@ -19,6 +19,8 @@ import java.io.ObjectInputFilter;
 import java.util.List;
 import java.util.Optional;
 
+import jakarta.transaction.Transactional;
+
 @Service
 public class UserService {
 
@@ -51,8 +53,10 @@ public class UserService {
     public List<Users> getAllUsers() {
         return userRepository.findAll();
     }
+    @Transactional
     public Users getUserByUsername(String username) {
-        Optional<Users> optionalUser = userRepository.findByUsername(username);
-        return optionalUser.orElse(null);
+        return userRepository.findByUsername(username)
+                .orElseThrow(()
+                -> new IllegalArgumentException("User not found. Please check your username."));
     }
 }

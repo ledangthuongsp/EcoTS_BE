@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -28,19 +29,16 @@ public class UserController {
     private UserService userService; // Service to handle user retrieval and management
     @Autowired
     private JwtService jwtService;
-    @GetMapping("/{username}") // Endpoint to get a user by username
+    @GetMapping("/username") // Endpoint to get a user by username
     @Operation(summary = "Get user by username", description = "Retrieve a user profile by their username")
-    public Users getUserByUsername(@PathVariable String username) {
-        return userService.getUserByUsername(username);
+    public ResponseEntity<Users> getUserByUsername(@RequestParam("username") String username) {
+        Users user = userService.getUserByUsername(username);
+        return ResponseEntity.ok(user);
     }
-    @GetMapping("{token}")
-    public ResponseEntity<Users> getUserInfo(@RequestHeader("Authorization") String authorizationHeader) {
-        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
+    @GetMapping("/token")
+    public ResponseEntity<Users> getUserInfo(@RequestParam("token") String token) {
 
-        String token = authorizationHeader.substring(7);
-        String username = jwtService.extractUsername(token);
+        String username = jwtService.getUsername(token);
 
         if (username == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
@@ -54,7 +52,7 @@ public class UserController {
 
         return ResponseEntity.ok(user);
     }
-    @GetMapping("/users/get-all-users")
+    @GetMapping("/get-all-users")
     public ResponseEntity<List<Users>> getAllUsers() {
         List<Users> users = userService.getAllUsers();
 
