@@ -1,6 +1,7 @@
 package com.example.EcoTS.DTOs.Request.User;
 
 
+import java.sql.Timestamp;
 import java.time.LocalDate;
 
 import lombok.Getter;
@@ -11,7 +12,7 @@ import lombok.Setter;
 public class ChangeInfoRequest {
     private String token;
     private String fullName;
-    private LocalDate dayOfBirth;
+    private Timestamp dayOfBirth;
     private String gender;
     private String address;
     private String phoneNumber;
