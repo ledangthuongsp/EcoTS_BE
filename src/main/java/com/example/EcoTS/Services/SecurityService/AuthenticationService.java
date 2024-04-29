@@ -3,6 +3,7 @@ package com.example.EcoTS.Services.SecurityService;
 import com.example.EcoTS.DTOs.Request.Auth.SignInDTO;
 import com.example.EcoTS.DTOs.Request.Auth.SignUpDTO;
 import com.example.EcoTS.Enum.Roles;
+import com.example.EcoTS.Models.Points;
 import com.example.EcoTS.Models.Users;
 import com.example.EcoTS.Models.Verifications;
 import com.example.EcoTS.Repositories.TokenRepository;
@@ -59,6 +60,12 @@ public class AuthenticationService {
         user.setFullName(input.getFullName());
         user.setDayOfBirth(input.getDayOfBirth());
         user.setRole(Roles.CUSTOMER.name());
+
+        Points points = new Points();
+        points.setPoint(0.0);
+        points.setUser(user);
+        points.setSaveCo2(0L);
+        points.setTotalTrashCollect(0L);
         return userRepository.save(user);
     }
 

@@ -42,6 +42,7 @@ public class SignInController {
 
         String jwtTokenAccess = jwtService.generateToken(authenticatedUser);
         String jwtTokenRefresh = jwtRefreshService.generateToken(authenticatedUser);
+
         Tokens tokens = new Tokens();
         tokens.setUser(authenticatedUser);
         tokens.setTokenRefresh(jwtTokenRefresh);
