@@ -45,11 +45,28 @@ public class DonationService {
 
         return donationRepository.save(volunteer);
     }
-    public void donatePoints(Long userId, Long donationId, double points) {
+    public void donatePoints(String username, Long donationId, double donationPoints) {
+        // Tìm userId từ username
+        Users user = userRepository.findByUsername(username).orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        // Tìm điểm của người dùng từ userId
+        Points userPoints = pointRepository.findByUserId(user.getId())
+                .orElseThrow(() -> new IllegalArgumentException("User points not found"));
+
+        // Kiểm tra xem người dùng có đủ điểm để donate không
+        if (userPoints.getPoint() < donationPoints) {
+            throw new IllegalArgumentException("Insufficient points");
+        }
+
+        // Cập nhật điểm của người dùng
+        userPoints.setPoint(userPoints.getPoint() - donationPoints);
+        pointRepository.save(userPoints);
+
+        // Tìm donation để cập nhật tổng điểm
         Donations donation = donationRepository.findById(donationId).orElseThrow(() -> new IllegalArgumentException("Donation not found"));
 
-        // Cập nhật totalDonations của donations
-        donation.setTotalDonations(donation.getTotalDonations() + points);
+        // Cập nhật tổng điểm của donation
+        donation.setTotalDonations(donation.getTotalDonations() + donationPoints);
         donationRepository.save(donation);
     }
 }
