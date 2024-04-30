@@ -28,7 +28,7 @@ public class DonatePointsController {
     private DonationService donationService;
     @Autowired
     private JwtService jwtService;
-    @PostMapping("/donatePoints")
+    @PostMapping("/donate-points")
     public ResponseEntity<String> donatePoints(@RequestHeader("Authorization") String token,
                                                @PathVariable Long donationId,
                                                @RequestParam double points) {
