@@ -2,12 +2,7 @@ package com.example.EcoTS.Controllers.Test;
 
 import com.example.EcoTS.Models.Test.Books;
 import com.example.EcoTS.Services.TestService.BookService;
-
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,33 +10,34 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/book-rest-controller")
+@CrossOrigin
+@RequestMapping("/book-rest-controller")
 public class BookRestController {
 
     @Autowired
     private BookService bookService;
 
-    @PostMapping
-    public ResponseEntity<Object> addBook(@RequestBody Books book) {
-        bookService.addBook(book);
-        return new ResponseEntity<>("Book added successfully", HttpStatus.CREATED);
+    @PostMapping("/add")
+    public ResponseEntity<Books> addBook(@RequestBody Books book) {
+        Books savedBook = bookService.addBook(book);
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedBook);
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<Object> updateBook(@PathVariable long id, @RequestBody Books book) {
-        bookService.updateBook(id, book);
-        return new ResponseEntity<>("Book updated successfully", HttpStatus.OK);
+    @PutMapping("/update/{id}")
+    public ResponseEntity<Books> updateBook(@PathVariable long id, @RequestBody Books book) {
+        Books updatedBook = bookService.updateBook(id, book);
+        return ResponseEntity.ok(updatedBook);
     }
 
-    @GetMapping("/{author}")
+    @GetMapping("/find/{author}")
     public ResponseEntity<List<Books>> getBooksByAuthor(@PathVariable String author) {
         List<Books> books = bookService.getBooksByAuthor(author);
-        return new ResponseEntity<>(books, HttpStatus.OK);
+        return ResponseEntity.ok(books);
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Object> deleteBook(@PathVariable long id) {
-        bookService.deleteBook(id);
-        return new ResponseEntity<>("Book deleted successfully", HttpStatus.OK);
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<Books> deleteBook(@PathVariable long id) {
+        Books deletedBook = bookService.deleteBook(id);
+        return ResponseEntity.ok(deletedBook);
     }
 }

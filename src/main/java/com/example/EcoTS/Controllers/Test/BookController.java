@@ -1,50 +1,49 @@
 package com.example.EcoTS.Controllers.Test;
 
 import com.example.EcoTS.DTOs.Test.BookRequest;
+import com.example.EcoTS.DTOs.Test.BookResponse;
 import com.example.EcoTS.Models.Test.Books;
 import com.example.EcoTS.Services.TestService.BookService;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
+
 @Controller
-@RequestMapping("/api/book-controller")
+@CrossOrigin
+@RequestMapping("/book-controller")
 public class BookController {
     @Autowired
     private BookService booksService;
 
     @PostMapping("/add")
-    public String addBook(@ModelAttribute("bookRequest") BookRequest bookRequest) {
-        booksService.addBook(bookRequest.toBooks());
-        return "redirect:/books";
+    @ResponseBody
+    public BookResponse addBook(@RequestBody BookRequest bookRequest) {
+        Books book = booksService.addBook(bookRequest.toBooks());
+        return new BookResponse(book);
     }
 
     @PutMapping("/update/{id}")
-    public String updateBook(@PathVariable long id, @ModelAttribute("bookRequest") BookRequest bookRequest) {
-        booksService.updateBook(id, bookRequest.toBooks());
-        return "redirect:/books";
+    @ResponseBody
+    public BookResponse updateBook(@PathVariable long id, @RequestBody BookRequest bookRequest) {
+        Books updatedBook = booksService.updateBook(id, bookRequest.toBooks());
+        return new BookResponse(updatedBook);
     }
 
     @GetMapping("/author/{author}")
-    public String getBooksByAuthor(@PathVariable String author, Model model) {
+    @ResponseBody
+    public List<BookResponse> getBooksByAuthor(@PathVariable String author) {
         List<Books> books = booksService.getBooksByAuthor(author);
-        model.addAttribute("books", books);
-        return "books-list";
+        return books.stream().map(BookResponse::new).collect(Collectors.toList());
     }
 
     @DeleteMapping("/delete/{id}")
-    public String deleteBook(@PathVariable long id) {
-        booksService.deleteBook(id);
-        return "redirect:/books";
+    @ResponseBody
+    public BookResponse deleteBook(@PathVariable long id) {
+        Books book = booksService.deleteBook(id);
+        return new BookResponse(book);
     }
-
 }
+

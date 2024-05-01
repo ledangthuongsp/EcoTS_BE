@@ -46,11 +46,9 @@ dependencies {
 	implementation ("io.springfox:springfox-boot-starter:3.0.0")
 	implementation ("javax.servlet:javax.servlet-api:4.0.1")
 
-
 	implementation ("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.4.0")
 	implementation ("org.springframework.boot:spring-boot-starter-validation")
 	implementation ("org.springdoc:springdoc-openapi-ui:1.8.0")
-
 
 	implementation ("org.springframework.boot:spring-boot-starter-mail:3.2.4")
 
