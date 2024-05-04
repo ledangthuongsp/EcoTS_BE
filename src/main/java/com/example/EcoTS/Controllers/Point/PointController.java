@@ -1,13 +1,21 @@
 package com.example.EcoTS.Controllers.Point;
 
+import com.example.EcoTS.Models.Points;
+import com.example.EcoTS.Models.Users;
 import com.example.EcoTS.Repositories.PointRepository;
 import com.example.EcoTS.Repositories.UserRepository;
 import com.example.EcoTS.Services.SecurityService.JwtService;
 import com.example.EcoTS.Services.UserService.UserService;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.awt.Point;
+import java.util.Optional;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.Data;
@@ -24,4 +32,13 @@ public class PointController {
     private UserService userService;
     @Autowired
     private JwtService jwtService;
+
+    @GetMapping("/point/get-user-point")
+    public ResponseEntity<Points> getUserPoints(@RequestParam String token)
+    {
+        String username = jwtService.getUsername(token);
+        Users user = userRepository.findByUsername(username).orElseThrow(() -> new IllegalArgumentException("User not found"));
+        Optional<Points> userPoints = pointRepository.findByUserId(user.getId());
+        return ResponseEntity.ok(userPoints.get());
+    }
 }

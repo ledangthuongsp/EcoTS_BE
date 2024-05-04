@@ -8,6 +8,7 @@ import com.example.EcoTS.Repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.awt.Point;
 import java.util.Optional;
 @Service
 public class PointService {
@@ -20,11 +21,14 @@ public class PointService {
         String[] data = barcodeData.split(":");
         String username = data[0];
         Users user = userRepository.findByUsername(username).orElseThrow(() -> new IllegalArgumentException("User not found"));
-
         Optional<Points> userPoints = pointRepository.findByUserId(user.getId());
         Points point = new Points();
         point = userPoints.get();
         point.setPoint(point.getPoint() + points);
         pointRepository.save(point);
+    }
+    public Points formAddPoints(String username, String email)
+    {
+        return null;
     }
 }
