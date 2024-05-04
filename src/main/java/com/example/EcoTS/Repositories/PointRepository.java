@@ -12,7 +12,6 @@ import java.util.Optional;
 import io.swagger.v3.oas.annotations.Hidden;
 
 @Repository
-@Hidden
 public interface PointRepository extends JpaRepository<Points, Long> {
     Optional<Points> findById(Long id);
     Optional<Points> findByUserId(Long userId);

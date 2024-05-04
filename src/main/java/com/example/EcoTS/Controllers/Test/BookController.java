@@ -24,21 +24,18 @@ public class BookController {
         Books book = booksService.addBook(bookRequest.toBooks());
         return new BookResponse(book);
     }
-
     @PutMapping("/update/{id}")
     @ResponseBody
     public BookResponse updateBook(@PathVariable long id, @RequestBody BookRequest bookRequest) {
         Books updatedBook = booksService.updateBook(id, bookRequest.toBooks());
         return new BookResponse(updatedBook);
     }
-
     @GetMapping("/author/{author}")
     @ResponseBody
     public List<BookResponse> getBooksByAuthor(@PathVariable String author) {
         List<Books> books = booksService.getBooksByAuthor(author);
         return books.stream().map(BookResponse::new).collect(Collectors.toList());
     }
-
     @DeleteMapping("/delete/{id}")
     @ResponseBody
     public BookResponse deleteBook(@PathVariable long id) {

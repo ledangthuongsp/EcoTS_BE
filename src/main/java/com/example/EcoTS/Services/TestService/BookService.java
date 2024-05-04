@@ -19,7 +19,6 @@ public class BookService {
     public Books addBook(Books book) {
         return bookRepository.save(book);
     }
-
     @Transactional
     public Books updateBook(long id, Books updatedBook) {
         return bookRepository.findById(id)

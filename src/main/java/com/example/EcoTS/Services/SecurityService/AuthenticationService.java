@@ -112,8 +112,5 @@ public class AuthenticationService {
         }else {
             return "OTP wrong! Please fill again";
         }
-
-
-
     }
 }

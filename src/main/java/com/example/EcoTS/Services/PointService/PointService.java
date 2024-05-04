@@ -6,9 +6,10 @@ import com.example.EcoTS.Repositories.PointRepository;
 import com.example.EcoTS.Repositories.UserRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.Optional;
-
+@Service
 public class PointService {
     @Autowired
     private UserRepository userRepository;
