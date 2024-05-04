@@ -1,5 +1,6 @@
 package com.example.EcoTS.Controllers.UserInformation;
 
+import com.example.EcoTS.DTOs.Response.User.UserResponse;
 import com.example.EcoTS.Models.Users;
 import com.example.EcoTS.Services.SecurityService.JwtService;
 import com.example.EcoTS.Services.UserService.UserService;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.sql.Timestamp;
 import java.util.List;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -31,12 +33,22 @@ public class UserController {
     private JwtService jwtService;
     @GetMapping("/username") // Endpoint to get a user by username
     @Operation(summary = "Get user by username", description = "Retrieve a user profile by their username")
-    public ResponseEntity<Users> getUserByUsername(@RequestParam("username") String username) {
+    public ResponseEntity<UserResponse> getUserByUsername(@RequestParam("username") String username) {
         Users user = userService.getUserByUsername(username);
-        return ResponseEntity.ok(user);
+        UserResponse userResponse = new UserResponse();
+        userResponse.setId(user.getId());
+        userResponse.setUsername(username);
+        userResponse.setEmail(user.getEmail());
+        userResponse.setFullName(user.getFullName());
+        userResponse.setRole(user.getRole());
+        userResponse.setAvatarUrl(user.getAvatarUrl());
+        userResponse.setDayOfBirth(user.getDayOfBirth());
+        userResponse.setPhoneNumber(user.getPhoneNumber());
+        userResponse.setAddress(user.getAddress());
+        return ResponseEntity.ok(userResponse);
     }
     @GetMapping("/token")
-    public ResponseEntity<Users> getUserInfo(@RequestParam("token") String token) {
+    public ResponseEntity<UserResponse> getUserInfo(@RequestParam("token") String token) {
 
         String username = jwtService.getUsername(token);
 
@@ -49,8 +61,17 @@ public class UserController {
         if (user == null) {
             return ResponseEntity.notFound().build();
         }
-
-        return ResponseEntity.ok(user);
+        UserResponse userResponse = new UserResponse();
+        userResponse.setId(user.getId());
+        userResponse.setUsername(username);
+        userResponse.setEmail(user.getEmail());
+        userResponse.setFullName(user.getFullName());
+        userResponse.setRole(user.getRole());
+        userResponse.setAvatarUrl(user.getAvatarUrl());
+        userResponse.setDayOfBirth(user.getDayOfBirth());
+        userResponse.setPhoneNumber(user.getPhoneNumber());
+        userResponse.setAddress(user.getAddress());
+        return ResponseEntity.ok(userResponse);
     }
     @GetMapping("/get-all-users")
     public ResponseEntity<List<Users>> getAllUsers() {

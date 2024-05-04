@@ -33,17 +33,7 @@ public class DonationCRUDController {
     private DonationService donationService;
     @Autowired
     private Cloudinary cloudinary;
-    @PostMapping("/donate/upload")
-    public ResponseEntity<?> uploadImage(@RequestParam("file") MultipartFile file) {
-        try {
-            @SuppressWarnings("unchecked")
-            Map<String, String> uploadResult = cloudinary.uploader().upload(file.getBytes(), ObjectUtils.emptyMap());
-            return ResponseEntity.ok(uploadResult.get("url"));
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Upload failed: " + e.getMessage());
-        }
-    }
-    @PostMapping(value = "/donate/create-donation", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
+    @PostMapping(value = "/admin/donate/create-donation", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
     public ResponseEntity<Donations> createVolunteer(
             @RequestParam("title") String title,
             @RequestParam("description") String description,

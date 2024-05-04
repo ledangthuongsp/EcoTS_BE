@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -30,7 +31,7 @@ public class DonatePointsController {
     private JwtService jwtService;
     @PostMapping("/donate-points")
     public ResponseEntity<String> donatePoints(@RequestHeader("Authorization") String token,
-                                               @PathVariable Long donationId,
+                                               @RequestParam Long donationId,
                                                @RequestParam double points) {
         // Giải mã token và lấy username
         String username = jwtService.getUsername(token);
