@@ -6,6 +6,7 @@ import com.example.EcoTS.Enum.Roles;
 import com.example.EcoTS.Models.Points;
 import com.example.EcoTS.Models.Users;
 import com.example.EcoTS.Models.Verifications;
+import com.example.EcoTS.Repositories.PointRepository;
 import com.example.EcoTS.Repositories.TokenRepository;
 import com.example.EcoTS.Repositories.UserRepository;
 import com.example.EcoTS.Repositories.VerificationRepository;
@@ -30,7 +31,7 @@ public class AuthenticationService {
     private final PasswordEncoder passwordEncoder;
 
     private final AuthenticationManager authenticationManager;
-
+    private final PointRepository pointRepository;
 
     @Autowired
     private VerificationRepository verificationRepository;
@@ -40,11 +41,12 @@ public class AuthenticationService {
             UserRepository userRepository,
             AuthenticationManager authenticationManager,
             PasswordEncoder passwordEncoder,
-            TokenRepository tokenRepository
-    ) {
+            TokenRepository tokenRepository,
+            PointRepository pointRepository) {
         this.authenticationManager = authenticationManager;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.pointRepository = pointRepository;
     }
 
     public Users signup(SignUpDTO input) {
@@ -66,6 +68,8 @@ public class AuthenticationService {
         points.setUser(user);
         points.setSaveCo2(0L);
         points.setTotalTrashCollect(0L);
+
+        pointRepository.save(points);
         return userRepository.save(user);
     }
 
