@@ -69,4 +69,7 @@ public class DonationService {
         donation.setTotalDonations(donation.getTotalDonations() + donationPoints);
         donationRepository.save(donation);
     }
+    public List<Donations> getAllDonation (){
+        return donationRepository.findAll();
+    }
 }
