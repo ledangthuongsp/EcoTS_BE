@@ -30,7 +30,7 @@ public class DonatePointsController {
     @Autowired
     private JwtService jwtService;
     @PostMapping("/donate-points")
-    public ResponseEntity<String> donatePoints(@RequestHeader("Authorization") String token,
+    public ResponseEntity<String> donatePoints(@RequestParam("Token") String token,
                                                @RequestParam Long donationId,
                                                @RequestParam double points) {
         // Giải mã token và lấy username

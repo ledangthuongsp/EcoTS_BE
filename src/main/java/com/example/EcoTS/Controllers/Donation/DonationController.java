@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -33,5 +34,10 @@ public class DonationController {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
         return new ResponseEntity<>(donationsList, HttpStatus.OK);
+    }
+    @GetMapping("/get-donation-by-id")
+    public ResponseEntity<Donations> donationGetById(@RequestParam  Long id)
+    {
+        return new ResponseEntity<>(donationService.getDonationById(id), HttpStatus.OK);
     }
 }

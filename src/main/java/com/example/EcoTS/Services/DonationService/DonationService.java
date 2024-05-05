@@ -7,20 +7,15 @@ import com.example.EcoTS.Repositories.DonationRepository;
 import com.example.EcoTS.Repositories.PointRepository;
 import com.example.EcoTS.Repositories.UserRepository;
 import com.example.EcoTS.Services.CloudinaryService.CloudinaryService;
-import com.google.zxing.NotFoundException;
-
-import net.bytebuddy.asm.Advice;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.util.List;
-
-import jakarta.transaction.Transactional;
+import java.util.Optional;
 
 @Service
 public class DonationService {
@@ -74,5 +69,9 @@ public class DonationService {
     }
     public List<Donations> getAllDonation (){
         return donationRepository.findAll();
+    }
+    public Donations getDonationById(Long id)
+    {
+        return donationRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Donation not found"));
     }
 }
