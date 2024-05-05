@@ -39,7 +39,7 @@ public class SecurityConfiguration {
                         .contentSecurityPolicy(csp-> csp
                                 .policyDirectives("upgrade-insecure-requests;")))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/test/**","/donate/**", "/generate/**", "/point/**").permitAll()
+                        .requestMatchers("/test/**","/donate/**", "/generate/**", "/point/**", "/materials/**").permitAll()
                         .requestMatchers("/auth/**", "/user/**", "/admin/**").permitAll()
                         .requestMatchers("/v3/api-docs", "/v3/api-docs/**", "/swagger-resources",
                                 "/swagger-resources/**", "configuration/ui", "configuration/security",
