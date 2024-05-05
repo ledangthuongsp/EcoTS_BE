@@ -8,7 +8,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.Getter;
 
 @RestController
 @CrossOrigin
@@ -19,6 +22,13 @@ public class MaterialController {
     @Autowired
     private MaterialRepository materialRepository;
 
+    // Lấy hết tất cả các vật liệu
+    @GetMapping("/get-all-materials")
+    public  ResponseEntity<List<Materials>> getAllMaterials()
+    {
+        List<Materials> materialsList = materialRepository.findAll();
+        return  ResponseEntity.ok(materialsList);
+    }
     // Thêm một vật liệu mới
     @PostMapping("/add")
     public ResponseEntity<String> addMaterial(@RequestBody Materials material) {

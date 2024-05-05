@@ -44,7 +44,7 @@ public class PointService {
         Points points = pointRepository.findByUserId(users.getId())
                 .orElseThrow(() -> new IllegalArgumentException("Point not found"));
         Materials materials = materialRepository.findByName(materialName).orElseThrow(() -> new IllegalArgumentException("Material not found"));
-
+        materialName = materialName.toUpperCase();
         double pointsToAdd = materials.getPointsPerKg() * totalTrashCollect;
         double co2Saved = materials.getCo2SavedPerKg() * totalTrashCollect;
         points.setPoint(points.getPoint() + pointsToAdd);
