@@ -1,10 +1,12 @@
 package com.example.EcoTS.Services.PointService;
 
+import com.example.EcoTS.Enum.Material;
 import com.example.EcoTS.Models.Points;
 import com.example.EcoTS.Models.Users;
 import com.example.EcoTS.Repositories.PointRepository;
 import com.example.EcoTS.Repositories.UserRepository;
 
+import org.apache.catalina.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -36,8 +38,19 @@ public class PointService {
         point.setPoint(point.getPoint() + points);
         pointRepository.save(point);
     }
-    public Points formAddPoints(String username, String email)
-    {
-        return null;
+    public Points formAddPoints(String username, String email, String materialString, double totalTrashCollect) {
+        Users users = userRepository.findByUsername(username)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+        Points points = pointRepository.findByUserId(users.getId())
+                .orElseThrow(() -> new IllegalArgumentException("Point not found"));
+
+        Material material = Material.valueOf(materialString.toUpperCase());
+        double pointsToAdd = material.getPointsPerKg() * totalTrashCollect;
+        double co2Saved = (material.getCo2SavedPerKg() * totalTrashCollect);
+        points.setPoint(points.getPoint() + pointsToAdd);
+        points.setTotalTrashCollect(points.getTotalTrashCollect() + totalTrashCollect);
+        points.setSaveCo2(points.getSaveCo2()+co2Saved);
+        pointRepository.save(points);
+        return points;
     }
 }

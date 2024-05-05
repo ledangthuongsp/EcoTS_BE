@@ -53,4 +53,10 @@ public class PointController {
     }
 //    @GetMapping("/admin/point/get-bar-code")
 //    public ResponseEntity<Points> getUsernameAndEmailByBarcode(@RequestParam )
+    @PutMapping("/admin/point/add-user-points-by-form")
+    public ResponseEntity<Points> addUserPointsByForm(@RequestParam String username, @RequestParam String email,@RequestParam String material, @RequestParam double totalTrashCollect)
+    {
+        Points points = pointService.formAddPoints(username,email, material, totalTrashCollect);
+        return ResponseEntity.ok(points);
+    }
 }
