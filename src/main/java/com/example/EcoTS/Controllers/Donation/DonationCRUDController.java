@@ -5,6 +5,8 @@ import com.cloudinary.utils.ObjectUtils;
 import com.example.EcoTS.Models.Donations;
 import com.example.EcoTS.Services.DonationService.DonationService;
 
+import net.bytebuddy.asm.Advice;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -13,6 +15,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.sql.Time;
+import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
@@ -23,7 +27,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@Controller
 @CrossOrigin
 @RequiredArgsConstructor
 @Tag(name ="Donations", description = "this api for CRUD donations")
@@ -33,7 +36,7 @@ public class DonationCRUDController {
     private DonationService donationService;
     @Autowired
     private Cloudinary cloudinary;
-    @PostMapping(value = "/admin/donate/create-donation", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
+    @PostMapping(value = "/donate/create-donation", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
     public ResponseEntity<Donations> createVolunteer(
             @RequestParam("title") String title,
             @RequestParam("description") String description,
