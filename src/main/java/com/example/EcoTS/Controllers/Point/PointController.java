@@ -48,9 +48,7 @@ public class PointController {
     }
     @PutMapping("/admin/point/add-user-points")
     public ResponseEntity<String> putUserPoints(@RequestParam String username, @RequestBody String email,@RequestParam double points) {
-
         pointService.awardPointsByUsernameAndEmail(username, points);
-
         return ResponseEntity.ok("Points added successfully.");
     }
 //    @GetMapping("/admin/point/get-bar-code")
