@@ -27,6 +27,15 @@ public class PointService {
         point.setPoint(point.getPoint() + points);
         pointRepository.save(point);
     }
+    public void awardPointsByUsernameAndEmail(String username, double points)
+    {
+        Users user = userRepository.findByUsername(username).orElseThrow(() -> new IllegalArgumentException("User not found"));
+        Optional<Points> userPoints = pointRepository.findByUserId(user.getId());
+        Points point = new Points();
+        point = userPoints.get();
+        point.setPoint(point.getPoint() + points);
+        pointRepository.save(point);
+    }
     public Points formAddPoints(String username, String email)
     {
         return null;
