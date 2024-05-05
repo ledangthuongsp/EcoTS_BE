@@ -36,7 +36,7 @@ public class DonationCRUDController {
     private DonationService donationService;
     @Autowired
     private Cloudinary cloudinary;
-    @PostMapping(value = "/donate/create-donation", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
+    @PostMapping(value = "/admin/donate/create-donation", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
     public ResponseEntity<Donations> createVolunteer(
             @RequestParam("title") String title,
             @RequestParam("description") String description,
