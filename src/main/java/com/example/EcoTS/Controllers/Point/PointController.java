@@ -38,7 +38,7 @@ public class PointController {
     {
         String username = jwtService.getUsername(token);
         Users user = userRepository.findByUsername(username).orElseThrow(() -> new IllegalArgumentException("User not found"));
-        Optional<Points> userPoints = pointRepository.findByUserId(user.getId());
-        return ResponseEntity.ok(userPoints.get());
+        Points userPoints = pointRepository.findByUserId(user.getId()).orElseThrow(() -> new IllegalArgumentException("Point with this user not found"));
+        return ResponseEntity.ok(userPoints);
     }
 }
