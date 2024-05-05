@@ -41,7 +41,6 @@ public class Points {
     @GeneratedValue (strategy = GenerationType.IDENTITY)
     private Long id;
     private double point;
-
     @OneToOne
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private Users user;
@@ -50,7 +49,6 @@ public class Points {
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private Timestamp createdAt;
-
     @UpdateTimestamp
     @Column(name = "updated_at")
     private Timestamp updatedAt;

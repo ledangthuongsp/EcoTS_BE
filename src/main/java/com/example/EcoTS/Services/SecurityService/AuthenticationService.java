@@ -55,6 +55,7 @@ public class AuthenticationService {
         if (existingUser.isPresent()) {
             throw new IllegalArgumentException("Username '" + input.getUsername() + "' already exists. Please choose a different username.");
         }
+
         Users user = new Users();
         user.setUsername(input.getUsername());
         user.setEmail(input.getEmail());
@@ -63,15 +64,18 @@ public class AuthenticationService {
         user.setDayOfBirth(input.getDayOfBirth());
         user.setRole(Roles.CUSTOMER.name());
 
+        Users savedUser = userRepository.save(user);
+
         Points points = new Points();
         points.setPoint(0.0);
-        points.setUser(user);
+        points.setUser(savedUser);
         points.setSaveCo2(0L);
         points.setTotalTrashCollect(0L);
-
         pointRepository.save(points);
-        return userRepository.save(user);
+
+        return savedUser;
     }
+
 
     public Users authenticate(SignInDTO input) {
         try {
