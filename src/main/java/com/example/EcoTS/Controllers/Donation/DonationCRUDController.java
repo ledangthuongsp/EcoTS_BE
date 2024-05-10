@@ -39,6 +39,7 @@ public class DonationCRUDController {
     @PostMapping(value = "/admin/donate/create-donation", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
     public ResponseEntity<Donations> createVolunteer(
             @RequestParam("title") String title,
+            @RequestParam("name") String name,
             @RequestParam("description") String description,
             @RequestPart("coverImage") List<MultipartFile> coverImage,
             @RequestPart("sponsorImages") List<MultipartFile> sponsorImages,

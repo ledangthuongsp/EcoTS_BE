@@ -28,11 +28,12 @@ public class DonationService {
     private PointRepository pointRepository;
     @Autowired
     private UserRepository userRepository;
-    public Donations createVolunteer(String title, String description, List<MultipartFile> coverImage, List<MultipartFile> sponsorImages, LocalDate startDate, LocalDate endDate, double totalDonations) throws IOException, IOException {
+    public Donations createVolunteer(String title, String name, String description, List<MultipartFile> coverImage, List<MultipartFile> sponsorImages, LocalDate startDate, LocalDate endDate, double totalDonations) throws IOException, IOException {
         List<String> coverImageUrl = cloudinaryService.uploadMultipleFilesDonations(coverImage);
         List<String> sponsorImageUrls = cloudinaryService.uploadMultipleFilesDonations(sponsorImages);
 
         Donations volunteer = new Donations();
+        volunteer.setName(name);
         volunteer.setTitle(title);
         volunteer.setDescription(description);
         volunteer.setCoverImageUrl(coverImageUrl);
