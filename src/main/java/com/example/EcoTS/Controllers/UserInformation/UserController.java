@@ -2,6 +2,7 @@ package com.example.EcoTS.Controllers.UserInformation;
 
 import com.example.EcoTS.DTOs.Response.User.UserResponse;
 import com.example.EcoTS.Models.Users;
+import com.example.EcoTS.Repositories.UserRepository;
 import com.example.EcoTS.Services.SecurityService.JwtService;
 import com.example.EcoTS.Services.UserService.UserService;
 
@@ -9,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -31,6 +33,8 @@ public class UserController {
     private UserService userService; // Service to handle user retrieval and management
     @Autowired
     private JwtService jwtService;
+    @Autowired
+    private UserRepository userRepository;
     @GetMapping("/username") // Endpoint to get a user by username
     @Operation(summary = "Get user by username", description = "Retrieve a user profile by their username")
     public ResponseEntity<UserResponse> getUserByUsername(@RequestParam("username") String username) {
@@ -80,5 +84,14 @@ public class UserController {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
         return new ResponseEntity<>(users, HttpStatus.OK);
+    }
+    @DeleteMapping("/delete-user-by-id")
+    public ResponseEntity <Users> deleteUserById(@RequestParam Long id)
+    {
+        if (!userRepository.existsById(id)) {
+            return ResponseEntity.notFound().build();
+        }
+        userRepository.deleteById(id);
+        return ResponseEntity.ok().build();
     }
 }
