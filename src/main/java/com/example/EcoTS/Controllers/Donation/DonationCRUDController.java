@@ -46,7 +46,7 @@ public class DonationCRUDController {
             @RequestParam("startDate") LocalDate startDate,
             @RequestParam("endDate") LocalDate endDate,
             @RequestParam("totalDonations") double totalDonations) throws IOException {
-        Donations volunteer = donationService.createVolunteer(title, description, coverImage, sponsorImages, startDate, endDate, totalDonations);
+        Donations volunteer = donationService.createVolunteer(title, name, description, coverImage, sponsorImages, startDate, endDate, totalDonations);
         return ResponseEntity.ok(volunteer);
     }
 }
