@@ -34,10 +34,11 @@ public class Locations {
     @GeneratedValue (strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String location;
     private String description;
     private String locationName;
     private String typeOfLocation;
+    private double latitude; // Vĩ độ
+    private double longitude; // Kinh độ
     private String review;
 
     @CreationTimestamp

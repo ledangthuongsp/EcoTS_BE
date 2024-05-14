@@ -62,6 +62,12 @@ dependencies {
 	//Implement ZXing to generate Barcode and QRCode
 	implementation("com.google.zxing:core:3.5.3")
 	implementation("com.google.zxing:javase:3.5.3")
+
+
+	//Implement Google Map APis
+	implementation ("com.google.maps:google-maps-services:2.2.0")
+	// https://mvnrepository.com/artifact/com.mapbox.mapboxsdk/mapbox-sdk-turf
+	implementation("com.mapbox.mapboxsdk:mapbox-sdk-turf:5.9.0-alpha.1")
 }
 
 tasks.withType<Test> {

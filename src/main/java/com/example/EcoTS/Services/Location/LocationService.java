@@ -20,10 +20,12 @@ public class LocationService {
     public Locations createNewLocation(@RequestParam LocationDTO locationDTO)
     {
         Locations newLocation = new Locations();
-        newLocation.setLocation(locationDTO.getLocation());
+
         newLocation.setLocationName(locationDTO.getLocationName());
         newLocation.setDescription(locationDTO.getDescription());
         newLocation.setTypeOfLocation(locationDTO.getTypeOfLocation());
+        newLocation.setLatitude(locationDTO.getLatitude());
+        newLocation.setLongitude(locationDTO.getLongitude());
         return locationRepository.save(newLocation);
     }
     public List<Locations> getLocationsByType(String type) {

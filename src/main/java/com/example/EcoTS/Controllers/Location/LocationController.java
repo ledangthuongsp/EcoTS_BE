@@ -1,11 +1,13 @@
 package com.example.EcoTS.Controllers.Location;
 
+import com.example.EcoTS.DTOs.Request.Location.LocationDTO;
 import com.example.EcoTS.Models.Locations;
 import com.example.EcoTS.Services.Location.LocationService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -28,5 +30,10 @@ public class LocationController {
     @GetMapping("/get-all")
     public List<Locations> getAllLocations() {
         return locationService.getAllLocations();
+    }
+    @PutMapping("/create-new-location")
+    public Locations createNewLocation(@RequestParam LocationDTO locationDTO)
+    {
+        return  locationService.createNewLocation(locationDTO);
     }
 }
