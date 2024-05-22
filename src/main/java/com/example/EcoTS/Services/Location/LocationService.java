@@ -17,6 +17,7 @@ public class LocationService {
 
     @Autowired
     private LocationRepository locationRepository;
+
     public Locations createNewLocation(@RequestParam LocationDTO locationDTO)
     {
         Locations newLocation = new Locations();
@@ -31,6 +32,7 @@ public class LocationService {
     public List<Locations> getLocationsByType(String type) {
         return locationRepository.findByTypeOfLocation(type);
     }
+
     public List<Locations> getAllLocations(){
         return locationRepository.findAll();
     }

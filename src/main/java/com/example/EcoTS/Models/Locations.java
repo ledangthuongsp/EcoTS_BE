@@ -1,5 +1,6 @@
 package com.example.EcoTS.Models;
 
+import io.swagger.v3.oas.annotations.Hidden;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
