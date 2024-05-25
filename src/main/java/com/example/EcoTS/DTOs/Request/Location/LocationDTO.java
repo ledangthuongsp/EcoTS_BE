@@ -3,6 +3,8 @@ package com.example.EcoTS.DTOs.Request.Location;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.List;
+
 @Getter
 @Setter
 public class LocationDTO {

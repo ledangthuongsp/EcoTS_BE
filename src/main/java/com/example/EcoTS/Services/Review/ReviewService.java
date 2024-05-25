@@ -13,6 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class ReviewService {
@@ -24,17 +25,17 @@ public class ReviewService {
     @Autowired
     private CloudinaryService cloudinaryService;
 
-    public Reviews addReview(Users user, Long locationId, String comment, int rating, List<String> attachmentUrls) {
+    public Reviews addReview(Users user, Long locationId, String comment, int rating, List<MultipartFile> attachmentUrls) throws IOException {
         Locations location = locationRepository.findById(locationId).orElseThrow(() -> new RuntimeException("Location not found"));
-
-        Reviews review = Reviews.builder()
-                .user(user)
-                .location(location)
-                .comment(comment)
-                .rating(rating)
-                .attachmentUrls(attachmentUrls)
-                .build();
-        return reviewRepository.save(review);
+        List<String> attachments = cloudinaryService.uploadMultipleFilesReview(attachmentUrls);
+        Reviews review = new Reviews();
+        review.setUser(user);
+        review.setLocation(location);
+        review.setComment(comment);
+        review.setRating(rating);
+        review.setAttachmentUrls(attachments);
+        reviewRepository.save(review);
+        return review;
     }
 
     public List<Reviews> getReviewsByLocation(Long locationId) {
