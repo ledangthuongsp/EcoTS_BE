@@ -82,6 +82,22 @@ public class CloudinaryService {
         }
         return path.substring(startIndex, endIndex);
     }
+    public String uploadFileReview(MultipartFile file) throws IOException {
+        Map response = cloudinary.uploader().upload(file.getBytes(),
+                ObjectUtils.asMap(
+                        "resource_type", "auto",
+                        "folder", "Reviews" // Thêm folder "Reviews"
+                ));
+        return (String) response.get("url");
+    }
+
+    public List<String> uploadMultipleFilesReview(List<MultipartFile> files) throws IOException {
+        List<String> urls = new ArrayList<>();
+        for (MultipartFile file : files) {
+            urls.add(uploadFileReview(file));
+        }
+        return urls;
+    }
 }
 
 

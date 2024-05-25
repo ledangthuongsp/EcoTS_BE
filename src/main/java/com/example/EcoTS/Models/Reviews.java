@@ -7,6 +7,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.sql.Timestamp;
+import java.util.List;
 
 @Data
 @Getter
@@ -35,7 +36,10 @@ public class Reviews {
     @Column(nullable = false)
     private int rating; // Số sao đánh giá
 
-    private String attachmentUrl; // URL hình ảnh hoặc video đính kèm
+
+    @ElementCollection
+    @Column(name = "attachment_urls")
+    private List<String> attachmentUrls; // URLs hình ảnh hoặc video đính kèm
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private Timestamp createdAt;

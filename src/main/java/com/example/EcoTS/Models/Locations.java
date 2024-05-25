@@ -5,6 +5,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.sql.Timestamp;
+import java.util.List;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -40,7 +41,8 @@ public class Locations {
     private String typeOfLocation;
     private double latitude; // Vĩ độ
     private double longitude; // Kinh độ
-
+    private String backGroundImgUrl;
+    private List<String> imgDetailsUrl;
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private Timestamp createdAt;

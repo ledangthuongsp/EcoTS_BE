@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -32,19 +33,20 @@ public class ReviewController {
             @RequestParam Long locationId,
             @RequestParam String comment,
             @RequestParam int rating,
-            @RequestParam(required = false) MultipartFile attachment) throws IOException {
+            @RequestPart(required = false) List<MultipartFile> attachments) throws IOException {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         Users user = (Users) authentication.getPrincipal();
 
-        String attachmentUrl = null;
-        if (attachment != null) {
-            attachmentUrl = cloudinaryService.uploadFileDonations(attachment);
+        List<String> attachmentUrls = new ArrayList<>();
+        if (attachments != null && !attachments.isEmpty()) {
+            attachmentUrls = cloudinaryService.uploadMultipleFilesReview(attachments);
         }
 
-        Reviews review = reviewService.addReview(user, locationId, comment, rating, attachmentUrl);
+        Reviews review = reviewService.addReview(user, locationId, comment, rating, attachmentUrls);
         return ResponseEntity.ok(review);
     }
+
     @GetMapping("/location/{locationId}")
     public ResponseEntity<List<Reviews>> getReviewsByLocation(@PathVariable Long locationId) {
         List<Reviews> reviews = reviewService.getReviewsByLocation(locationId);
