@@ -40,7 +40,6 @@ public class Locations {
     private String typeOfLocation;
     private double latitude; // Vĩ độ
     private double longitude; // Kinh độ
-    private String review;
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
