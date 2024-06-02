@@ -34,7 +34,7 @@ public class PredictionController {
 
     @Operation(summary = "Predict garbage type from image", description = "Uploads an image and returns the prediction of garbage type")
     @PostMapping(value = "/predict", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
-    public String predict(@RequestPart("file") MultipartFile file) {
+    public ResponseEntity<String> predict(@RequestPart("file") MultipartFile file) {
         try {
             String flaskApiUrl = "http://localhost:5000/detect";
             HttpHeaders headers = new HttpHeaders();
@@ -55,16 +55,20 @@ public class PredictionController {
             JSONObject jsonResponse = new JSONObject(responseBody);
             JSONArray predictions = jsonResponse.getJSONArray("predictions");
 
+            JSONObject result = new JSONObject();
+
             if (predictions.length() > 0) {
                 JSONObject firstPrediction = predictions.getJSONObject(0);
                 String className = firstPrediction.getString("class");
-                return "Detected class: " + className;
+                result.put("Detected class", className);
             } else {
-                return "No predictions found.";
+                result.put("Detected class", "No predictions found.");
             }
+
+            return ResponseEntity.ok(result.toString());
         } catch (IOException | JSONException e) {
             logger.error("Error during the request to Flask API", e);
-            return "Error processing file.";
+            return ResponseEntity.status(500).body("{\"error\": \"Error processing file.\"}");
         }
     }
 
