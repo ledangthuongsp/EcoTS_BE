@@ -30,6 +30,13 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-webflux")
 	compileOnly("org.projectlombok:lombok")
 	runtimeOnly("org.postgresql:postgresql")
+	// https://mvnrepository.com/artifact/org.tensorflow/tensorflow
+	implementation("org.tensorflow:tensorflow:1.15.0")
+	// https://mvnrepository.com/artifact/org.tensorflow/tensorflow-core-platform
+	implementation("org.tensorflow:tensorflow-core-platform:0.3.3")
+	// https://mvnrepository.com/artifact/org.tensorflow/tensorflow-core-api
+	implementation("org.tensorflow:tensorflow-core-api:0.3.3")
+
 	annotationProcessor("org.projectlombok:lombok")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testImplementation("org.springframework.security:spring-security-test")
