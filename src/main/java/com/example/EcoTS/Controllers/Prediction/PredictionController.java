@@ -36,7 +36,7 @@ public class PredictionController {
     @PostMapping(value = "/predict", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
     public ResponseEntity<String> predict(@RequestPart("file") MultipartFile file) {
         try {
-            String flaskApiUrl = "http://localhost:5000/detect";
+            String flaskApiUrl = "https://tensorflow-flask.onrender.com/detect";
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 
