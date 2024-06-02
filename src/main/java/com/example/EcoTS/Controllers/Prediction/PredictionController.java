@@ -60,9 +60,9 @@ public class PredictionController {
             if (predictions.length() > 0) {
                 JSONObject firstPrediction = predictions.getJSONObject(0);
                 String className = firstPrediction.getString("class");
-                result.put("Detected class", className);
+                result.put("class", className);
             } else {
-                result.put("Detected class", "No predictions found.");
+                result.put("class", "No predictions found.");
             }
 
             return ResponseEntity.ok(result.toString());
