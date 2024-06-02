@@ -21,7 +21,7 @@ public class PredictionController {
     @PostMapping(value = "/predict", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
     public String predict(@RequestPart("file") MultipartFile file) {
         try {
-            String flaskApiUrl = "http://localhost:5000/predict";
+            String flaskApiUrl = "http://localhost:5000/detect";
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 
