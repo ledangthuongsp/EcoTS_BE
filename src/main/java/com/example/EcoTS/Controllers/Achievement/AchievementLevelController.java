@@ -33,6 +33,11 @@ public class AchievementLevelController {
     {
         return ResponseEntity.ok().body(achievementLevelRepository.findAll());
     }
+    @GetMapping("/get-all-achievement-level-by-id")
+    public ResponseEntity<AchievementLevel> getAchievementLevelById(@RequestParam Long id)
+    {
+        return ResponseEntity.ok().body(achievementLevelRepository.findById(id).orElseThrow(() -> new RuntimeException("Achievement level not found")));
+    }
     @GetMapping("/get-achievement-level-by-achievement-id")
     public ResponseEntity<List<AchievementLevel>> getAchievementLevelByAchievementId(@RequestParam Long achievementId)
     {
