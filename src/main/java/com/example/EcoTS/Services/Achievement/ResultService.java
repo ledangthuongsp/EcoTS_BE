@@ -21,7 +21,6 @@ import java.util.Optional;
 public class ResultService {
     @Autowired
     private ResultRepository resultRepository;
-
     @Autowired
     private UserRepository userRepository;
     @Autowired

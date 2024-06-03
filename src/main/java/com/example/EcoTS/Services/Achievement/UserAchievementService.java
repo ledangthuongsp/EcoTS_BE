@@ -24,17 +24,10 @@ public class UserAchievementService {
     @Autowired
     private UserAchievementRepository userAchievementRepository;
     @Autowired
-    private ResultRepository resultRepository;
-    @Autowired
-    private AchievementLevelRepository achievementLevelRepository;
-    @Autowired
     private UserRepository userRepository;
-    @Autowired
-    private ResultService resultService;
 
     public UserAchievement createNew (Long userId, List<String> badgeUrl) {
-        //Cập nhật
-        List<AchievementAllProgressDTO> progressList = resultService.getAllAchievementProgress(userId);
+
         // Xuất
         Users users = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
         UserAchievement userAchievement = new UserAchievement();

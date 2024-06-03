@@ -1,5 +1,6 @@
 package com.example.EcoTS.Controllers.Achievement;
 
+import com.example.EcoTS.DTOs.Request.Achievement.AchievementAllProgressDTO;
 import com.example.EcoTS.Models.UserAchievement;
 import com.example.EcoTS.Models.Users;
 import com.example.EcoTS.Repositories.UserAchievementRepository;
@@ -11,15 +12,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @CrossOrigin
 @RequestMapping("/user-achievement")
 @Tag(name = "User Achievement")
 public class UserAchievementController {
+
     @Autowired
     private ResultService resultService;
-    @Autowired
-    private UserAchievementService userAchievementService;
     @Autowired
     private UserRepository userRepository;
     @Autowired
@@ -28,9 +30,11 @@ public class UserAchievementController {
     @GetMapping("/get-all-achievement-by-user-id")
     public ResponseEntity<UserAchievement> getAllAchievementByUserId(@RequestParam Long userId)
     {
+        //Cập nhật
+        resultService.getAllAchievementProgress(userId);
+        //Xuất
         Users users = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
         UserAchievement userAchievement = userAchievementRepository.findByUsers(users).orElseThrow(() -> new RuntimeException("User achievement not found"));
-
         return ResponseEntity.ok().body(userAchievement);
     }
 }
