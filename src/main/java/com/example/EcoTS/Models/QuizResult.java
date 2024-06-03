@@ -1,7 +1,6 @@
 package com.example.EcoTS.Models;
 
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 
 import java.sql.Timestamp;
 
@@ -20,7 +19,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.FieldDefaults;
 
-@Table(name = "quiz")
+@Table(name = "quiz_result")
 @Data
 @Entity
 @FieldDefaults(level = AccessLevel.PRIVATE)
@@ -29,22 +28,21 @@ import lombok.experimental.FieldDefaults;
 @Builder
 @Getter
 @Setter
-public class Quiz {
+public class QuizResult {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    Long id;
 
-    private String rightAnswer;
-    private String fakeAnswerOne;
-    private String fakeAnswerTwo;
-    private String fakeAnswerThree;
-    private String fakeAnswerFour;
-    private String fakeAnswerFive;
+    @Column(nullable = false)
+    Long userId;
+
+    @Column(nullable = false)
+    Long quizId;
+
+    @Column(nullable = false)
+    int score;
+
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
-    private Timestamp createdAt;
-
-    @UpdateTimestamp
-    @Column(name = "updated_at")
-    private Timestamp updatedAt;
+    Timestamp createdAt;
 }
