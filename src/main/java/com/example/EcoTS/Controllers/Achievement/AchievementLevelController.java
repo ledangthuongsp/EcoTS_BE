@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @CrossOrigin
-@RequestMapping("/user-achievement")
-@Tag(name = "User Achievement")
-public class UserAchievementController {
+@RequestMapping("/achievement")
+@Tag(name = "Achievement")
+public class AchievementLevelController {
 }

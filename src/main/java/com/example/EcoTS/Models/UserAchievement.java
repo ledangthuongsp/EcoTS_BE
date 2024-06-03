@@ -7,29 +7,28 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.sql.Timestamp;
-import java.util.Set;
+import java.util.List;
 
 @Data
 @Builder
 @Getter
 @Setter
 @Entity
-@Table(name = "user_achievement")
+@Table(name = "achievement")
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserAchievement {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @OneToOne
+    @JoinColumn(name = "user_id")
+    private Users users;
+    private List<String> badgeUrl;
 
-    private Long userId;
-
-    private Long achievementId;
-    private int currentProgress;
-    private boolean achieved;
-    //
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private Timestamp createdAt;
@@ -37,5 +36,4 @@ public class UserAchievement {
     @UpdateTimestamp
     @Column(name = "updated_at")
     private Timestamp updatedAt;
-
 }

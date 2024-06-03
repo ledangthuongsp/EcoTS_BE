@@ -10,6 +10,7 @@ import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -48,7 +49,6 @@ public class Users implements UserDetails {
     private String avatarUrl;
     private String gender;
     private String role;
-
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)

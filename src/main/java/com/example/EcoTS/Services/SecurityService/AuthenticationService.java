@@ -71,23 +71,9 @@ public class AuthenticationService {
         points.setSaveCo2(0L);
         points.setTotalTrashCollect(0L);
         pointRepository.save(points);
-
-        createInitialUserAchievements(user);
         return savedUser;
     }
 
-    private void createInitialUserAchievements(Users user) {
-        List<Achievement> achievements = achievementRepository.findAll();
-        for (Achievement achievement : achievements) {
-            UserAchievement userAchievement = UserAchievement.builder()
-                    .userId(user.getId())
-                    .achievementId(achievement.getId())
-                    .currentProgress(0)
-                    .achieved(false)
-                    .build();
-            userAchievementRepository.save(userAchievement);
-        }
-    }
     public Users authenticate(SignInDTO input) {
         try {
             Authentication authentication = authenticationManager.authenticate(

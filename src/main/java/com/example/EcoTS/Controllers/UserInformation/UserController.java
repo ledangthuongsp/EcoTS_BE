@@ -29,9 +29,6 @@ public class UserController {
     @Autowired
     private UserRepository userRepository;
 
-    @Autowired
-    private AchievementService achievementService;
-
     @GetMapping("/username") // Endpoint to get a user by username
     @Operation(summary = "Get user by username", description = "Retrieve a user profile by their username")
     public ResponseEntity<UserResponse> getUserByUsername(@RequestParam("username") String username) {

@@ -1,6 +1,5 @@
 package com.example.EcoTS.Models;
 
-import com.example.EcoTS.Enum.AchievementType;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -8,25 +7,30 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.sql.Timestamp;
-import java.util.List;
-import java.util.Set;
 
 @Data
 @Builder
 @Getter
 @Setter
 @Entity
-@Table(name = "achievement")
+@Table(name = "achievement_levels")
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @NoArgsConstructor
 @AllArgsConstructor
-public class Achievement {
+public class AchievementLevel {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Enumerated(EnumType.STRING)
-    private AchievementType type;
+    private String name;
+    private String description;
+    private String imgUrl;
+    private String iconUrl;
+    private Long maxIndex;
+
+    @ManyToOne
+    @JoinColumn(name = "achievement_id")
+    private Achievement achievement;
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
