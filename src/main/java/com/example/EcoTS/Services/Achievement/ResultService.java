@@ -87,28 +87,34 @@ public class ResultService {
 
         for (AchievementLevel achievementLevel : achievementLevels) {
             double progress = 0.0;
+            double currentIndex = 0.0;
             AchievementType achievementType = achievementLevel.getAchievement().getType();
             Long maxIndex = achievementLevel.getMaxIndex();
             switch (achievementType) {
                 case COUNT_DONATE:
                     progress = (double) results.getNumberOfTimeDonate() / maxIndex;
+                    currentIndex = (double) results.getNumberOfTimeDonate();
                     break;
                 case TOTAL_POINTS_DONATE:
                     progress = results.getPointDonate() / maxIndex;
+                    currentIndex = results.getPointDonate();
                     break;
                 case USER_MAX_POINT:
                     progress = results.getMaximumPoints() / maxIndex;
+                    currentIndex = results.getMaximumPoints();
                     break;
                 case SAVE_CO2:
                     progress = results.getSaveCo2() / maxIndex;
+                    currentIndex = results.getSaveCo2();
                     break;
                 case USE_CAMERA_DETECT:
                     progress = (double) results.getNumberOfTimeDetect() / maxIndex;
+                    currentIndex = (double) results.getNumberOfTimeDetect();
                     break;
                 default:
                     throw new IllegalArgumentException("Invalid AchievementType: " + achievementType);
             }
-            progressList.add(new AchievementAllProgressDTO(achievementLevel.getName(),achievementLevel.getId(), progress));
+            progressList.add(new AchievementAllProgressDTO(achievementLevel.getName(),achievementLevel.getId(), currentIndex, maxIndex, progress));
         }
         return progressList;
     }

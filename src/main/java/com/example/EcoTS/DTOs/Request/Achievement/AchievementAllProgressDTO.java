@@ -10,5 +10,7 @@ import lombok.NoArgsConstructor;
 public class AchievementAllProgressDTO {
     private String achievementLevelName;
     private Long achievementId;
+    private double currentIndex;
+    private double maxIndex;
     private double progress;
 }

@@ -27,8 +27,7 @@ public class AuthenticationService {
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final PointRepository pointRepository;
-    private final AchievementRepository achievementRepository;
-    private final UserAchievementRepository userAchievementRepository;
+    private final ResultRepository resultRepository;
     @Autowired
     private VerificationRepository verificationRepository;
     @Autowired
@@ -37,15 +36,12 @@ public class AuthenticationService {
             UserRepository userRepository,
             AuthenticationManager authenticationManager,
             PasswordEncoder passwordEncoder,
-            PointRepository pointRepository,
-            AchievementRepository achievementRepository,
-            UserAchievementRepository userAchievementRepository) {
+            PointRepository pointRepository, ResultRepository resultRepository) {
         this.authenticationManager = authenticationManager;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.pointRepository = pointRepository;
-        this.achievementRepository = achievementRepository;
-        this.userAchievementRepository = userAchievementRepository;
+        this.resultRepository = resultRepository;
     }
 
     public Users signup(SignUpDTO input) {
@@ -71,6 +67,16 @@ public class AuthenticationService {
         points.setSaveCo2(0L);
         points.setTotalTrashCollect(0L);
         pointRepository.save(points);
+
+        Results results = new Results();
+        results.setUsers(user);
+        results.setNumberOfTimeDonate(0);
+        results.setNumberOfTimeDetect(0);
+        results.setMaximumPoints(0.0);
+        results.setPointDonate(0.0);
+        results.setSaveCo2(0.0);
+        resultRepository.save(results);
+
         return savedUser;
     }
 
