@@ -114,6 +114,22 @@ public class CloudinaryService {
         }
         return urls;
     }
+    public String uploadFileAchievement(MultipartFile file) throws IOException {
+        Map response = cloudinary.uploader().upload(file.getBytes(),
+                ObjectUtils.asMap(
+                        "resource_type", "auto",
+                        "folder", "Achievement" // Thêm folder "Reviews"
+                ));
+        return (String) response.get("url");
+    }
+    public String uploadFileLogoAchievement( MultipartFile file) throws IOException {
+        Map response = cloudinary.uploader().upload(file.getBytes(),
+                ObjectUtils.asMap(
+                        "resource_type", "auto",
+                        "folder", "Logo Achievement" // Thêm folder "Reviews"
+                ));
+        return (String) response.get("url");
+    }
 }
 
 

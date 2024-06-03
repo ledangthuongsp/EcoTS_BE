@@ -30,6 +30,7 @@ public class UserService {
     private UserRepository userRepository;
     @Autowired
     private JwtService jwtService;
+
     public String uploadUserAvatar(String token, MultipartFile file) throws IOException {
         // Lấy thông tin người dùng từ UserRepository
         String username = jwtService.getUsername(token);

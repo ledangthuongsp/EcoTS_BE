@@ -103,7 +103,8 @@ public class UserController {
     }
 
     @PostMapping("/achievement/process")
-    public void processAchievement(@RequestParam Long userAchievementId, @RequestParam int increment, @RequestParam AchievementType type) {
+    public ResponseEntity<String> processAchievement(@RequestParam Long userAchievementId, @RequestParam int increment, @RequestParam AchievementType type) {
         achievementService.processAchievement(userAchievementId, increment, type);
+        return ResponseEntity.ok().body("Cap nhat achievement thanh cong");
     }
 }

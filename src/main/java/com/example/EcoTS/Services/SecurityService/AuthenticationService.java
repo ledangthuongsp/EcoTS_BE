@@ -22,10 +22,9 @@ import jakarta.mail.MessagingException;
 
 @Service
 public class AuthenticationService {
+
     private final UserRepository userRepository;
-
     private final PasswordEncoder passwordEncoder;
-
     private final AuthenticationManager authenticationManager;
     private final PointRepository pointRepository;
     private final AchievementRepository achievementRepository;
@@ -38,8 +37,9 @@ public class AuthenticationService {
             UserRepository userRepository,
             AuthenticationManager authenticationManager,
             PasswordEncoder passwordEncoder,
-            TokenRepository tokenRepository,
-            PointRepository pointRepository, AchievementRepository achievementRepository, UserAchievement userAchievement, UserAchievementRepository userAchievementRepository) {
+            PointRepository pointRepository,
+            AchievementRepository achievementRepository,
+            UserAchievementRepository userAchievementRepository) {
         this.authenticationManager = authenticationManager;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;

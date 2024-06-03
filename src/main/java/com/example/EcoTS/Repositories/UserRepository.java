@@ -14,7 +14,6 @@ import io.swagger.v3.oas.annotations.Hidden;
 @RepositoryRestResource
 @Hidden
 public interface UserRepository extends JpaRepository<Users, Long> {
-
     Optional<Users> findByUsername(String username);
     Optional<Users> findByEmail (String email);
 }

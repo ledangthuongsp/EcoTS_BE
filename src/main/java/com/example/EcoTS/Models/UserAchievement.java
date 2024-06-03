@@ -13,14 +13,14 @@ import java.sql.Timestamp;
 @Getter
 @Setter
 @Entity
-@Table(name = "user_achievement_progress")
+@Table(name = "user_achievement")
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserAchievement {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private String id;
+    private Long id;
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
