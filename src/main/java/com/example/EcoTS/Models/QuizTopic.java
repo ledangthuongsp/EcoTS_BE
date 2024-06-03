@@ -7,7 +7,7 @@ import lombok.experimental.FieldDefaults;
 import java.util.List;
 
 @Entity
-@Table(name = "questions")
+@Table(name = "quiz_topics")
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @NoArgsConstructor
@@ -15,21 +15,21 @@ import java.util.List;
 @Builder
 @Getter
 @Setter
-public class Question {
+public class QuizTopic {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
 
     @Column(nullable = false)
-    String questionText;
+    String name;
 
-    @Column(nullable = false)
-    String correctAnswer;
+    @Column
+    String image;
 
-    @ElementCollection
-    List<String> options;
+    @Column
+    Double progress; // Progress of the topic
 
-    @ManyToOne
-    @JoinColumn(name = "topic_id", nullable = false)
-    Topic topic;
+    @OneToMany(mappedBy = "topic", cascade = CascadeType.ALL, orphanRemoval = true)
+    List<QuizQuestion> questions;
 }
+

@@ -3,12 +3,11 @@ package com.example.EcoTS.Models;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-import org.aspectj.weaver.patterns.TypePatternQuestions;
 
 import java.util.List;
 
 @Entity
-@Table(name = "topics")
+@Table(name = "quiz_questions")
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @NoArgsConstructor
@@ -16,20 +15,21 @@ import java.util.List;
 @Builder
 @Getter
 @Setter
-public class Topic {
+public class QuizQuestion {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
 
     @Column(nullable = false)
-    String name;
+    String questionText;
 
-    @Column
-    String image;
+    @Column(nullable = false)
+    String correctAnswer;
 
-    @Column
-    Double progress; // Progress of the topic
+    @ElementCollection
+    List<String> options;
 
-    @OneToMany(mappedBy = "topic", cascade = CascadeType.ALL, orphanRemoval = true)
-    List<TypePatternQuestions.Question> questions;
+    @ManyToOne
+    @JoinColumn(name = "topic_id", nullable = false)
+    QuizTopic topic;
 }
