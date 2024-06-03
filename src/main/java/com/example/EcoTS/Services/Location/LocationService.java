@@ -24,15 +24,15 @@ public class LocationService {
     @Autowired
     private CloudinaryService cloudinaryService;
 
-    public Locations createNewLocation(LocationDTO locationDTO, MultipartFile backGroundImage, List<MultipartFile> imageDetails) throws IOException {
+    public Locations createNewLocation(String name, String des, String address, double i, double l, MultipartFile backGroundImage, List<MultipartFile> imageDetails) throws IOException {
         Locations newLocation = new Locations();
         String backGroundImgUrl = cloudinaryService.uploadFileLocation(backGroundImage);
         List<String> imgDetailsUrl = cloudinaryService.uploadMultipleFilesLocations(imageDetails);
-        newLocation.setLocationName(locationDTO.getLocationName());
-        newLocation.setDescription(locationDTO.getDescription());
-        newLocation.setTypeOfLocation(locationDTO.getTypeOfLocation());
-        newLocation.setLatitude(locationDTO.getLatitude());
-        newLocation.setLongitude(locationDTO.getLongitude());
+        newLocation.setLocationName(name);
+        newLocation.setDescription(des);
+        newLocation.setTypeOfLocation(address);
+        newLocation.setLatitude(i);
+        newLocation.setLongitude(l);
         newLocation.setBackGroundImgUrl(backGroundImgUrl);
         newLocation.setImgDetailsUrl(imgDetailsUrl);
         return locationRepository.save(newLocation);

@@ -6,9 +6,9 @@ import com.example.EcoTS.Models.UserAchievement;
 public class AccumulatedPointsAchievementStrategy implements AchievementStrategy {
 
     @Override
-    public void process(UserAchievement userAchievement, int increment) {
+    public void process(UserAchievement userAchievement, int progress) {
         // Logic để xử lý theo điểm
-        userAchievement.setCurrentProgress(userAchievement.getCurrentProgress() + increment);
+        userAchievement.setCurrentProgress(userAchievement.getCurrentProgress() + progress);
         if (userAchievement.getCurrentProgress() >= userAchievement.getAchievement().getMaxIndex()) {
             userAchievement.setAchieved(true);
         }

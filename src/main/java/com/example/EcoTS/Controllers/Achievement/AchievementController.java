@@ -1,5 +1,6 @@
 package com.example.EcoTS.Controllers.Achievement;
 
+import com.example.EcoTS.DTOs.Request.Achievement.AchievementUpdateRequest;
 import com.example.EcoTS.Enum.AchievementType;
 import com.example.EcoTS.Models.Achievement;
 import com.example.EcoTS.Services.Achievement.AchievementService;
@@ -42,6 +43,15 @@ public class AchievementController {
             return ResponseEntity.ok().body("Create successful");
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Error: " + e.getMessage(), e);
+        }
+    }
+    @PostMapping("/update")
+    public ResponseEntity<String> updateAchievementProgress(@RequestBody AchievementUpdateRequest request) {
+        try {
+            achievementService.updateAchievementProgress(request.getUserId(), request.getAchievementType(), request.getProgress());
+            return ResponseEntity.ok("Achievement updated successfully");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error updating achievement: " + e.getMessage());
         }
     }
 }

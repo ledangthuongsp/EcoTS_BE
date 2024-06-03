@@ -33,11 +33,15 @@ public class LocationController {
     }
 
     @PostMapping( value = "/create-new-location", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE})
-    public ResponseEntity<Locations> createNewLocation(@RequestBody LocationDTO locationDTO,
+    public ResponseEntity<Locations> createNewLocation(@RequestParam String locationName,
+                                                       @RequestParam String description,
+                                                       @RequestParam String address,
+                                                       @RequestParam double latitude,
+                                                       @RequestParam double longitude,
                                                        @RequestPart MultipartFile backGroundImage,
                                                        @RequestPart List<MultipartFile> imageDetails) {
         try {
-            Locations newLocation = locationService.createNewLocation(locationDTO, backGroundImage, imageDetails);
+            Locations newLocation = locationService.createNewLocation(locationName, description,address,latitude,longitude, backGroundImage, imageDetails);
             return ResponseEntity.ok(newLocation);
         } catch (RuntimeException e) {
             return ResponseEntity.status(404).body(null);

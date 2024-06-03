@@ -40,22 +40,6 @@ public class AchievementService {
         strategyMap.put(AchievementType.USE_CAMERA_DETECT, new CameraDetectAchievementStrategy());
     }
 
-    public void processAchievement(Long userAchievementId, int increment, AchievementType type) {
-        Optional<UserAchievement> optionalUserAchievement = userAchievementRepository.findById(userAchievementId);
-        if (optionalUserAchievement.isPresent()) {
-            UserAchievement userAchievement = optionalUserAchievement.get();
-            AchievementContext context = new AchievementContext();
-            AchievementStrategy strategy = strategyMap.get(type);
-            if (strategy != null) {
-                context.setStrategy(strategy);
-                context.executeStrategy(userAchievement, increment);
-                userAchievementRepository.save(userAchievement);
-            } else {
-                throw new RuntimeException("No strategy found f or type: " + type);
-            }
-        }
-    }
-
     public List<Achievement> getAllAchievements() {
         return achievementRepository.findAll();
     }
@@ -75,5 +59,13 @@ public class AchievementService {
         achievement = achievementRepository.save(achievement);
 
         return achievement;
+    }
+    public void updateAchievementProgress(Long userId, AchievementType type, int progress) {
+        List<UserAchievement> achievements = userAchievementRepository.findByUserIdAndAchievementType(userId, type);
+        for (UserAchievement ua : achievements) {
+            AchievementContext context = new AchievementContext(ua.getAchievement().getType());
+            context.executeStrategy(ua, progress);
+            userAchievementRepository.save(ua);
+        }
     }
 }

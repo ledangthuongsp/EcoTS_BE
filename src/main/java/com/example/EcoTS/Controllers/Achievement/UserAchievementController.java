@@ -1,5 +1,6 @@
 package com.example.EcoTS.Controllers.Achievement;
 
+import com.example.EcoTS.DTOs.Request.Achievement.AchievementUpdateRequest;
 import com.example.EcoTS.Enum.AchievementType;
 import com.example.EcoTS.Models.UserAchievement;
 import com.example.EcoTS.Services.Achievement.AchievementService;
@@ -7,6 +8,7 @@ import com.example.EcoTS.Services.Achievement.UserAchievementService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.persistence.Table;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -32,9 +34,4 @@ public class UserAchievementController {
         return userAchievementService.getUserAchievements(userId);
     }
 
-    @PostMapping("/achievement/process")
-    public ResponseEntity<String> processAchievement(@RequestParam Long userAchievementId, @RequestParam int increment, @RequestParam AchievementType type) {
-        achievementService.processAchievement(userAchievementId, increment, type);
-        return ResponseEntity.ok().body("Cap nhat achievement thanh cong");
-    }
 }
