@@ -1,5 +1,6 @@
 package com.example.EcoTS.Controllers.Achievement;
 
+import com.example.EcoTS.DTOs.Request.Achievement.AchievementAllProgressDTO;
 import com.example.EcoTS.DTOs.Request.Achievement.AchievementProgressDTO;
 import com.example.EcoTS.Enum.AchievementType;
 import com.example.EcoTS.Services.Achievement.ResultService;
@@ -26,5 +27,10 @@ public class ResultController {
     public ResponseEntity<AchievementProgressDTO> getAchievementProgress(@RequestParam Long userId, @RequestParam Long achievementLevelId) {
         AchievementProgressDTO progress = resultService.getAchievementProgress(userId, achievementLevelId);
         return ResponseEntity.ok().body(progress);
+    }
+    @GetMapping("/result/get-all-achievement-progress")
+    public ResponseEntity<List<AchievementAllProgressDTO>> getAllAchievementProgress(@RequestParam Long userId) {
+        List<AchievementAllProgressDTO> progressList = resultService.getAllAchievementProgress(userId);
+        return ResponseEntity.ok().body(progressList);
     }
 }

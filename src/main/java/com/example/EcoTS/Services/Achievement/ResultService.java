@@ -1,8 +1,8 @@
 package com.example.EcoTS.Services.Achievement;
 
+import com.example.EcoTS.DTOs.Request.Achievement.AchievementAllProgressDTO;
 import com.example.EcoTS.DTOs.Request.Achievement.AchievementProgressDTO;
 import com.example.EcoTS.Enum.AchievementType;
-import com.example.EcoTS.Models.Achievement;
 import com.example.EcoTS.Models.AchievementLevel;
 import com.example.EcoTS.Models.Results;
 import com.example.EcoTS.Models.Users;
@@ -16,8 +16,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static com.example.EcoTS.Enum.AchievementType.COUNT_DONATE;
 
 @Service
 public class ResultService {
@@ -77,5 +75,41 @@ public class ResultService {
         }
 
         return new AchievementProgressDTO(achievementType, progress);
+    }
+    @Transactional
+    public List<AchievementAllProgressDTO> getAllAchievementProgress(Long userId) {
+        Users users = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+        Results results = resultRepository.findByUsers(users)
+                .orElseThrow(() -> new RuntimeException("Results not found"));
+        List<AchievementLevel> achievementLevels = achievementLevelRepository.findAll();
+
+        List<AchievementAllProgressDTO> progressList = new ArrayList<>();
+
+        for (AchievementLevel achievementLevel : achievementLevels) {
+            double progress = 0.0;
+            AchievementType achievementType = achievementLevel.getAchievement().getType();
+            Long maxIndex = achievementLevel.getMaxIndex();
+            switch (achievementType) {
+                case COUNT_DONATE:
+                    progress = (double) results.getNumberOfTimeDonate() / maxIndex;
+                    break;
+                case TOTAL_POINTS_DONATE:
+                    progress = results.getPointDonate() / maxIndex;
+                    break;
+                case USER_MAX_POINT:
+                    progress = results.getMaximumPoints() / maxIndex;
+                    break;
+                case SAVE_CO2:
+                    progress = results.getSaveCo2() / maxIndex;
+                    break;
+                case USE_CAMERA_DETECT:
+                    progress = (double) results.getNumberOfTimeDetect() / maxIndex;
+                    break;
+                default:
+                    throw new IllegalArgumentException("Invalid AchievementType: " + achievementType);
+            }
+            progressList.add(new AchievementAllProgressDTO(achievementLevel.getName(),achievementLevel.getId(), progress));
+        }
+        return progressList;
     }
 }
