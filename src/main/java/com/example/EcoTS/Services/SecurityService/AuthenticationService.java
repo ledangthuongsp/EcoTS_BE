@@ -81,7 +81,7 @@ public class AuthenticationService {
         for (Achievement achievement : achievements) {
             UserAchievement userAchievement = UserAchievement.builder()
                     .userId(user.getId())
-                    .achievement(achievement)
+                    .achievementId(achievement.getId())
                     .currentProgress(0)
                     .achieved(false)
                     .build();

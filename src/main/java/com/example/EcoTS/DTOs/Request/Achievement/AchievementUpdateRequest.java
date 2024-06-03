@@ -8,6 +8,6 @@ import lombok.Setter;
 @Setter
 public class AchievementUpdateRequest {
     private Long userId;
-    private AchievementType achievementType;
+    private Long achievementId;
     private int progress;
 }

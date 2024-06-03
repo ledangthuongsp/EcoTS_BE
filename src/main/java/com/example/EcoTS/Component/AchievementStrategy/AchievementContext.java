@@ -29,7 +29,6 @@ public class AchievementContext {
                 break;
         }
     }
-
     public void executeStrategy(UserAchievement userAchievement, int progress) {
         this.strategy.process(userAchievement, progress);
     }

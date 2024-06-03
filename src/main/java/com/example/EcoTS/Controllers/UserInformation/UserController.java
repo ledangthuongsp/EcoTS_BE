@@ -1,12 +1,9 @@
 package com.example.EcoTS.Controllers.UserInformation;
 
 import com.example.EcoTS.DTOs.Response.User.UserResponse;
-import com.example.EcoTS.Enum.AchievementType;
-import com.example.EcoTS.Models.UserAchievement;
 import com.example.EcoTS.Models.Users;
 import com.example.EcoTS.Repositories.UserRepository;
 import com.example.EcoTS.Services.Achievement.AchievementService;
-import com.example.EcoTS.Services.Achievement.UserAchievementService;
 import com.example.EcoTS.Services.SecurityService.JwtService;
 import com.example.EcoTS.Services.UserService.UserService;
 
@@ -15,7 +12,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.sql.Timestamp;
 import java.util.List;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -36,8 +32,6 @@ public class UserController {
     @Autowired
     private AchievementService achievementService;
 
-    @Autowired
-    private UserAchievementService userAchievementService;
     @GetMapping("/username") // Endpoint to get a user by username
     @Operation(summary = "Get user by username", description = "Retrieve a user profile by their username")
     public ResponseEntity<UserResponse> getUserByUsername(@RequestParam("username") String username) {

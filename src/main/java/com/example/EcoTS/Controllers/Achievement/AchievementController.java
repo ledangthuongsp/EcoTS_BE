@@ -45,13 +45,17 @@ public class AchievementController {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Error: " + e.getMessage(), e);
         }
     }
+
+    // Endpoint to update user achievement progress
     @PostMapping("/update")
-    public ResponseEntity<String> updateAchievementProgress(@RequestBody AchievementUpdateRequest request) {
+    public ResponseEntity<?> updateProgress(@RequestBody AchievementUpdateRequest request) {
         try {
-            achievementService.updateAchievementProgress(request.getUserId(), request.getAchievementType(), request.getProgress());
-            return ResponseEntity.ok("Achievement updated successfully");
+            achievementService.updateAchievementProgress(request.getUserId(), request.getAchievementId(), request.getProgress());
+            return ResponseEntity.ok("Progress updated successfully");
+        } catch (IllegalStateException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error updating achievement: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error updating progress: " + e.getMessage());
         }
     }
 }

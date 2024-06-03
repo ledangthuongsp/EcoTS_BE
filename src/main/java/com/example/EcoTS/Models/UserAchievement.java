@@ -7,6 +7,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.sql.Timestamp;
+import java.util.Set;
 
 @Data
 @Builder
@@ -25,10 +26,7 @@ public class UserAchievement {
 
     private Long userId;
 
-    @ManyToOne
-    @JoinColumn(name ="achievement_id", updatable = false)
-    private Achievement achievement;
-
+    private Long achievementId;
     private int currentProgress;
     private boolean achieved;
     //

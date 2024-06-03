@@ -1,16 +1,27 @@
 package com.example.EcoTS.Component.AchievementStrategy.Implements;
 
 import com.example.EcoTS.Component.AchievementStrategy.AchievementStrategy;
+import com.example.EcoTS.Models.Achievement;
 import com.example.EcoTS.Models.UserAchievement;
+import com.example.EcoTS.Repositories.AchievementRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.Optional;
 
 public class AccumulatedPointsAchievementStrategy implements AchievementStrategy {
 
+    @Autowired
+    private AchievementRepository achievementRepository;
     @Override
     public void process(UserAchievement userAchievement, int progress) {
-        // Logic để xử lý theo điểm
-        userAchievement.setCurrentProgress(userAchievement.getCurrentProgress() + progress);
-        if (userAchievement.getCurrentProgress() >= userAchievement.getAchievement().getMaxIndex()) {
+        int newProgress = userAchievement.getCurrentProgress() + progress;
+        Achievement achievement = achievementRepository.findById(userAchievement.getAchievementId())
+                .orElseThrow(() -> new IllegalArgumentException("Achievement not found."));
+        if (newProgress >= achievement.getMaxIndex()) {
+            userAchievement.setCurrentProgress((int) achievement.getMaxIndex());
             userAchievement.setAchieved(true);
+        } else {
+            userAchievement.setCurrentProgress(newProgress);
         }
     }
 }
