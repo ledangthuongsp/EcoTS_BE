@@ -4,9 +4,11 @@ import com.example.EcoTS.Enum.AchievementType;
 import com.example.EcoTS.Models.AchievementLevel;
 import com.example.EcoTS.Models.Results;
 import com.example.EcoTS.Models.UserAchievement;
+import com.example.EcoTS.Models.Users;
 import com.example.EcoTS.Repositories.AchievementLevelRepository;
 import com.example.EcoTS.Repositories.ResultRepository;
 import com.example.EcoTS.Repositories.UserAchievementRepository;
+import com.example.EcoTS.Repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -21,16 +23,17 @@ public class UserAchievementService {
     private ResultRepository resultRepository;
     @Autowired
     private AchievementLevelRepository achievementLevelRepository;
+    @Autowired
+    private UserRepository userRepository;
     public void updateBadgeUrlIfAchieved(Long userId, Long achievementLevelId) {
         UserAchievement userAchievement = userAchievementRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
-        Results results = resultRepository.findByUserId(userId)
+        Users users = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+        Results results = resultRepository.findByUsers(users)
                 .orElseThrow(() -> new RuntimeException("Results not found"));
         AchievementLevel level = achievementLevelRepository.findById(achievementLevelId)
                 .orElseThrow(() -> new RuntimeException("Achievement Level not found"));
-
         double currentUserIndex = getCurrentUserIndexByType(results, level.getAchievement().getType());
-
         // Check if the user has reached the required index
         if (currentUserIndex >= level.getMaxIndex()) {
             if (!userAchievement.getBadgeUrl().contains(level.getIconUrl())) {

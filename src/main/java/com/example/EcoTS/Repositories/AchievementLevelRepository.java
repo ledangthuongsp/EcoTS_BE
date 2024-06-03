@@ -12,4 +12,5 @@ import java.util.List;
 @Hidden
 public interface AchievementLevelRepository extends JpaRepository<AchievementLevel, Long> {
     List<AchievementLevel> findByAchievementId(Long achievementId);
+    List<AchievementLevel>findByAchievement(Achievement achievement);
 }
