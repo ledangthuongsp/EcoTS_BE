@@ -25,7 +25,7 @@ public class UserAchievementService {
 
     public List<UserAchievement> getUserAchievements(Long userId) {
         Users user = userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("User not found"));
-        return userAchievementRepository.findByUser(user);
+        return userAchievementRepository.findByUserId(user.getId());
     }
 
     public void createInitialUserAchievements(Long userId) {
@@ -33,7 +33,7 @@ public class UserAchievementService {
         List<Achievement> achievements = achievementRepository.findAll();
         for (Achievement achievement : achievements) {
             UserAchievement userAchievement = UserAchievement.builder()
-                    .user(users)
+                    .userId(users.getId())
                     .achievement(achievement)
                     .currentProgress(0)
                     .achieved(false)

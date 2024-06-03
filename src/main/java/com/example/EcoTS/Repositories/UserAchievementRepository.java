@@ -11,5 +11,5 @@ import java.util.List;
 @Repository
 @Hidden
 public interface UserAchievementRepository extends JpaRepository<UserAchievement, Long> {
-    List<UserAchievement> findByUser(Users users);
+    List<UserAchievement> findByUserId(Long userId);
 }

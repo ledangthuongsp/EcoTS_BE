@@ -49,8 +49,6 @@ public class Users implements UserDetails {
     private String gender;
     private String role;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<UserAchievement> userAchievements;
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)

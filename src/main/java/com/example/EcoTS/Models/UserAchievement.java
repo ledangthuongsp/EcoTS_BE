@@ -22,12 +22,11 @@ public class UserAchievement {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
-    private Users user;
+
+    private Long userId;
 
     @ManyToOne
-    @JoinColumn(name = "achievement_id", nullable = false)
+    @JoinColumn(name ="achievement_id", updatable = false)
     private Achievement achievement;
 
     private int currentProgress;

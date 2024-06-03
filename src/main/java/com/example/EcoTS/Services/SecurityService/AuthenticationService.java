@@ -80,7 +80,7 @@ public class AuthenticationService {
         List<Achievement> achievements = achievementRepository.findAll();
         for (Achievement achievement : achievements) {
             UserAchievement userAchievement = UserAchievement.builder()
-                    .user(user)
+                    .userId(user.getId())
                     .achievement(achievement)
                     .currentProgress(0)
                     .achieved(false)

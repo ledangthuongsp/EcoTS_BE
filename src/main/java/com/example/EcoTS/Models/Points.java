@@ -40,14 +40,13 @@ public class Points {
     @Id
     @GeneratedValue (strategy = GenerationType.IDENTITY)
     private Long id;
+    private double point;
+    private double saveCo2;
+    private double totalTrashCollect;
 
     @OneToOne
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private Users user;
-
-    private double point;
-    private double saveCo2;
-    private double totalTrashCollect;
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)

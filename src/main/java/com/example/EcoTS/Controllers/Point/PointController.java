@@ -10,11 +10,7 @@ import com.example.EcoTS.Services.UserService.UserService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.awt.Point;
 import java.util.Optional;
@@ -26,6 +22,7 @@ import lombok.Data;
 @RestController
 @CrossOrigin
 @Tag(name ="Points CRUD", description = "this apis for changing and updating, adding points for users")
+@RequestMapping("/point")
 public class PointController {
     @Autowired
     private UserRepository userRepository;
@@ -38,22 +35,23 @@ public class PointController {
     @Autowired
     private PointService pointService;
 
-    @GetMapping("/point/get-user-point")
+    @GetMapping("/get-user-point")
     public ResponseEntity<Points> getUserPoints(@RequestParam String token)
     {
+
         String username = jwtService.getUsername(token);
         Users user = userRepository.findByUsername(username).orElseThrow(() -> new IllegalArgumentException("User not found"));
         Points userPoints = pointRepository.findByUserId(user.getId()).orElseThrow(() -> new IllegalArgumentException("Point with this user not found"));
         return ResponseEntity.ok(userPoints);
     }
-    @PutMapping("/admin/point/add-user-points")
+    @PutMapping("/admin/add-user-points")
     public ResponseEntity<String> putUserPoints(@RequestParam String username, @RequestBody String email,@RequestParam double points) {
         pointService.awardPointsByUsernameAndEmail(username, points);
         return ResponseEntity.ok("Points added successfully.");
     }
 //    @GetMapping("/admin/point/get-bar-code")
 //    public ResponseEntity<Points> getUsernameAndEmailByBarcode(@RequestParam )
-    @PutMapping("/admin/point/add-user-points-by-form")
+    @PutMapping("/admin/add-user-points-by-form")
     public ResponseEntity<Points> addUserPointsByForm(@RequestParam String username, @RequestParam String email,@RequestParam String material, @RequestParam double totalTrashCollect)
     {
         Points points = pointService.formAddPoints(username,email, material, totalTrashCollect);
