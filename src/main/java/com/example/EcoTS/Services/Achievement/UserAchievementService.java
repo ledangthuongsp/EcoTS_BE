@@ -25,6 +25,7 @@ public class UserAchievementService {
     private AchievementLevelRepository achievementLevelRepository;
     @Autowired
     private UserRepository userRepository;
+
     public void updateBadgeUrlIfAchieved(Long userId, Long achievementLevelId) {
         UserAchievement userAchievement = userAchievementRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));

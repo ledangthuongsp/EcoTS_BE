@@ -32,4 +32,5 @@ public class AchievementController {
     {
         return ResponseEntity.ok(achievementRepository.findAll());
     }
+
 }
