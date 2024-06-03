@@ -97,14 +97,4 @@ public class UserController {
         userRepository.deleteById(id);
         return ResponseEntity.ok().build();
     }
-    @GetMapping("/{userId}/achievements")
-    public List<UserAchievement> getUserAchievements(@PathVariable Long userId) {
-        return userAchievementService.getUserAchievements(userId);
-    }
-
-    @PostMapping("/achievement/process")
-    public ResponseEntity<String> processAchievement(@RequestParam Long userAchievementId, @RequestParam int increment, @RequestParam AchievementType type) {
-        achievementService.processAchievement(userAchievementId, increment, type);
-        return ResponseEntity.ok().body("Cap nhat achievement thanh cong");
-    }
 }
