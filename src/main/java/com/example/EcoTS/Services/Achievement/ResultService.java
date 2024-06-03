@@ -89,6 +89,8 @@ public class ResultService {
             double progress = 0.0;
             double currentIndex = 0.0;
             AchievementType achievementType = achievementLevel.getAchievement().getType();
+            String imgUrl = achievementLevel.getImgUrl();
+            String iconUrl = achievementLevel.getIconUrl();
             Long maxIndex = achievementLevel.getMaxIndex();
             switch (achievementType) {
                 case COUNT_DONATE:
@@ -114,7 +116,8 @@ public class ResultService {
                 default:
                     throw new IllegalArgumentException("Invalid AchievementType: " + achievementType);
             }
-            progressList.add(new AchievementAllProgressDTO(achievementLevel.getName(),achievementLevel.getId(), currentIndex, maxIndex, progress));
+            progressList.add(new AchievementAllProgressDTO(achievementLevel.getName(),achievementLevel.getId(), achievementLevel.getAchievement().getId()
+                    , currentIndex, maxIndex, progress, imgUrl,iconUrl));
         }
         return progressList;
     }

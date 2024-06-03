@@ -9,8 +9,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class AchievementAllProgressDTO {
     private String achievementLevelName;
+    private Long achievementLevelId;
     private Long achievementId;
     private double currentIndex;
     private double maxIndex;
     private double progress;
+    private String imgUrl;
+    private String iconUrl;
 }
