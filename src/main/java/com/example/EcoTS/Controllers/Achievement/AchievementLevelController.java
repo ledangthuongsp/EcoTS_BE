@@ -29,9 +29,9 @@ public class AchievementLevelController {
     private AchievementLevelRepository achievementLevelRepository;
 
     @GetMapping("/get-all-achievement-level")
-    public ResponseEntity<List<Achievement>> getAll()
+    public ResponseEntity<List<AchievementLevel>> getAll()
     {
-        return ResponseEntity.ok().body(achievementRepository.findAll());
+        return ResponseEntity.ok().body(achievementLevelRepository.findAll());
     }
     @GetMapping("/get-achievement-level-by-achievement-id")
     public ResponseEntity<List<AchievementLevel>> getAchievementLevelByAchievementId(@RequestParam Long achievementId)
