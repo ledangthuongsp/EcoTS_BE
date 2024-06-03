@@ -1,22 +1,19 @@
 package com.example.EcoTS.Controllers.UserInformation;
 
 import com.example.EcoTS.DTOs.Response.User.UserResponse;
+import com.example.EcoTS.Enum.AchievementType;
+import com.example.EcoTS.Models.UserAchievement;
 import com.example.EcoTS.Models.Users;
 import com.example.EcoTS.Repositories.UserRepository;
+import com.example.EcoTS.Services.Achievement.AchievementService;
+import com.example.EcoTS.Services.Achievement.UserAchievementService;
 import com.example.EcoTS.Services.SecurityService.JwtService;
 import com.example.EcoTS.Services.UserService.UserService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.sql.Timestamp;
 import java.util.List;
@@ -35,6 +32,12 @@ public class UserController {
     private JwtService jwtService;
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private AchievementService achievementService;
+
+    @Autowired
+    private UserAchievementService userAchievementService;
     @GetMapping("/username") // Endpoint to get a user by username
     @Operation(summary = "Get user by username", description = "Retrieve a user profile by their username")
     public ResponseEntity<UserResponse> getUserByUsername(@RequestParam("username") String username) {
@@ -93,5 +96,14 @@ public class UserController {
         }
         userRepository.deleteById(id);
         return ResponseEntity.ok().build();
+    }
+    @GetMapping("/{userId}/achievements")
+    public List<UserAchievement> getUserAchievements(@PathVariable Long userId) {
+        return userAchievementService.getUserAchievements(userId);
+    }
+
+    @PostMapping("/achievement/process")
+    public void processAchievement(@RequestParam Long userAchievementId, @RequestParam int increment, @RequestParam AchievementType type) {
+        achievementService.processAchievement(userAchievementId, increment, type);
     }
 }

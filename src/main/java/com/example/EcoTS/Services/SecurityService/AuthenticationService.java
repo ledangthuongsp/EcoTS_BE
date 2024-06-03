@@ -3,13 +3,8 @@ package com.example.EcoTS.Services.SecurityService;
 import com.example.EcoTS.DTOs.Request.Auth.SignInDTO;
 import com.example.EcoTS.DTOs.Request.Auth.SignUpDTO;
 import com.example.EcoTS.Enum.Roles;
-import com.example.EcoTS.Models.Points;
-import com.example.EcoTS.Models.Users;
-import com.example.EcoTS.Models.Verifications;
-import com.example.EcoTS.Repositories.PointRepository;
-import com.example.EcoTS.Repositories.TokenRepository;
-import com.example.EcoTS.Repositories.UserRepository;
-import com.example.EcoTS.Repositories.VerificationRepository;
+import com.example.EcoTS.Models.*;
+import com.example.EcoTS.Repositories.*;
 import com.example.EcoTS.Utils.EmailUtils;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +15,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 import jakarta.mail.MessagingException;
@@ -32,7 +28,8 @@ public class AuthenticationService {
 
     private final AuthenticationManager authenticationManager;
     private final PointRepository pointRepository;
-
+    private final AchievementRepository achievementRepository;
+    private final UserAchievementRepository userAchievementRepository;
     @Autowired
     private VerificationRepository verificationRepository;
     @Autowired
@@ -42,11 +39,13 @@ public class AuthenticationService {
             AuthenticationManager authenticationManager,
             PasswordEncoder passwordEncoder,
             TokenRepository tokenRepository,
-            PointRepository pointRepository) {
+            PointRepository pointRepository, AchievementRepository achievementRepository, UserAchievement userAchievement, UserAchievementRepository userAchievementRepository) {
         this.authenticationManager = authenticationManager;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.pointRepository = pointRepository;
+        this.achievementRepository = achievementRepository;
+        this.userAchievementRepository = userAchievementRepository;
     }
 
     public Users signup(SignUpDTO input) {
@@ -73,10 +72,22 @@ public class AuthenticationService {
         points.setTotalTrashCollect(0L);
         pointRepository.save(points);
 
+        createInitialUserAchievements(user);
         return savedUser;
     }
 
-
+    private void createInitialUserAchievements(Users user) {
+        List<Achievement> achievements = achievementRepository.findAll();
+        for (Achievement achievement : achievements) {
+            UserAchievement userAchievement = UserAchievement.builder()
+                    .user(user)
+                    .achievement(achievement)
+                    .currentProgress(0)
+                    .achieved(false)
+                    .build();
+            userAchievementRepository.save(userAchievement);
+        }
+    }
     public Users authenticate(SignInDTO input) {
         try {
             Authentication authentication = authenticationManager.authenticate(

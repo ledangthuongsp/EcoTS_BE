@@ -1,5 +1,6 @@
 package com.example.EcoTS.Models;
 
+import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.security.core.GrantedAuthority;
@@ -10,15 +11,6 @@ import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.PostPersist;
-import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -56,7 +48,8 @@ public class Users implements UserDetails {
     private String avatarUrl;
     private String gender;
     private String role;
-
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Achievement> achievements;
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)

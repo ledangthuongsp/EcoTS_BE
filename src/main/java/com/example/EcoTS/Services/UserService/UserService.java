@@ -59,4 +59,5 @@ public class UserService {
                 .orElseThrow(()
                 -> new IllegalArgumentException("User not found. Please check your username."));
     }
+
 }
