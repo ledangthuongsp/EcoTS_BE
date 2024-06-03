@@ -5,17 +5,17 @@ import com.example.EcoTS.DTOs.Request.Achievement.AchievementProgressDTO;
 import com.example.EcoTS.Enum.AchievementType;
 import com.example.EcoTS.Models.AchievementLevel;
 import com.example.EcoTS.Models.Results;
+import com.example.EcoTS.Models.UserAchievement;
 import com.example.EcoTS.Models.Users;
-import com.example.EcoTS.Repositories.AchievementLevelRepository;
-import com.example.EcoTS.Repositories.AchievementRepository;
-import com.example.EcoTS.Repositories.ResultRepository;
-import com.example.EcoTS.Repositories.UserRepository;
+import com.example.EcoTS.Repositories.*;
 import jakarta.transaction.Transactional;
+import org.apache.catalina.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class ResultService {
@@ -28,6 +28,10 @@ public class ResultService {
     private AchievementLevelRepository achievementLevelRepository;
     @Autowired
     private AchievementRepository achievementRepository;
+    @Autowired
+    private UserAchievementRepository userAchievementRepository;
+    @Autowired
+    private UserAchievementService userAchievementService;
     @Transactional
     public void createResultsForAllUsers() {
         List<Users> users = userRepository.findAll();
@@ -95,22 +99,132 @@ public class ResultService {
             switch (achievementType) {
                 case COUNT_DONATE:
                     progress = (double) results.getNumberOfTimeDonate() / maxIndex;
+                    if(progress >= 1)
+                    {
+                        Optional<UserAchievement> userAchievement = userAchievementRepository.findByUsers(users);
+                        if(userAchievement.isPresent())
+                        {
+                            UserAchievement currentUserAchievement = userAchievement.get();
+                            List<String> badgeUrl = currentUserAchievement.getBadgeUrl();
+                            // Kiểm tra xem URL của huy hiệu đã tồn tại trong danh sách huy hiệu của người dùng chưa
+                            if(!badgeUrl.contains(iconUrl)) {
+                                badgeUrl.add(iconUrl);
+                                currentUserAchievement.setBadgeUrl(badgeUrl);
+                                userAchievementRepository.save(currentUserAchievement);
+                            }
+                        }
+                        else
+                        {
+                            List<String> badgeUrl = new ArrayList<>();
+                            badgeUrl.add(iconUrl);
+                            UserAchievement newUserAchievement = userAchievementService.createNew(userId, badgeUrl);
+                            userAchievementRepository.save(newUserAchievement); // Lưu mới UserAchievement
+                        }
+                    }
                     currentIndex = (double) results.getNumberOfTimeDonate();
                     break;
                 case TOTAL_POINTS_DONATE:
                     progress = results.getPointDonate() / maxIndex;
+                    if(progress >= 1)
+                    {
+                        Optional<UserAchievement> userAchievement = userAchievementRepository.findByUsers(users);
+                        if(userAchievement.isPresent())
+                        {
+                            UserAchievement currentUserAchievement = userAchievement.get();
+                            List<String> badgeUrl = currentUserAchievement.getBadgeUrl();
+                            // Kiểm tra xem URL của huy hiệu đã tồn tại trong danh sách huy hiệu của người dùng chưa
+                            if(!badgeUrl.contains(iconUrl)) {
+                                badgeUrl.add(iconUrl);
+                                currentUserAchievement.setBadgeUrl(badgeUrl);
+                                userAchievementRepository.save(currentUserAchievement);
+                            }
+                        }
+                        else
+                        {
+                            List<String> badgeUrl = new ArrayList<>();
+                            badgeUrl.add(iconUrl);
+                            UserAchievement newUserAchievement = userAchievementService.createNew(userId, badgeUrl);
+                            userAchievementRepository.save(newUserAchievement); // Lưu mới UserAchievement
+                        }
+                    }
                     currentIndex = results.getPointDonate();
                     break;
                 case USER_MAX_POINT:
                     progress = results.getMaximumPoints() / maxIndex;
+                    if(progress >= 1)
+                    {
+                        Optional<UserAchievement> userAchievement = userAchievementRepository.findByUsers(users);
+                        if(userAchievement.isPresent())
+                        {
+                            UserAchievement currentUserAchievement = userAchievement.get();
+                            List<String> badgeUrl = currentUserAchievement.getBadgeUrl();
+                            // Kiểm tra xem URL của huy hiệu đã tồn tại trong danh sách huy hiệu của người dùng chưa
+                            if(!badgeUrl.contains(iconUrl)) {
+                                badgeUrl.add(iconUrl);
+                                currentUserAchievement.setBadgeUrl(badgeUrl);
+                                userAchievementRepository.save(currentUserAchievement);
+                            }
+                        }
+                        else
+                        {
+                            List<String> badgeUrl = new ArrayList<>();
+                            badgeUrl.add(iconUrl);
+                            UserAchievement newUserAchievement = userAchievementService.createNew(userId, badgeUrl);
+                            userAchievementRepository.save(newUserAchievement); // Lưu mới UserAchievement
+                        }
+                    }
                     currentIndex = results.getMaximumPoints();
                     break;
                 case SAVE_CO2:
                     progress = results.getSaveCo2() / maxIndex;
+                    if(progress >= 1)
+                    {
+                        Optional<UserAchievement> userAchievement = userAchievementRepository.findByUsers(users);
+                        if(userAchievement.isPresent())
+                        {
+                            UserAchievement currentUserAchievement = userAchievement.get();
+                            List<String> badgeUrl = currentUserAchievement.getBadgeUrl();
+                            // Kiểm tra xem URL của huy hiệu đã tồn tại trong danh sách huy hiệu của người dùng chưa
+                            if(!badgeUrl.contains(iconUrl)) {
+                                badgeUrl.add(iconUrl);
+                                currentUserAchievement.setBadgeUrl(badgeUrl);
+                                userAchievementRepository.save(currentUserAchievement);
+                            }
+                        }
+                        else
+                        {
+                            List<String> badgeUrl = new ArrayList<>();
+                            badgeUrl.add(iconUrl);
+                            UserAchievement newUserAchievement = userAchievementService.createNew(userId, badgeUrl);
+                            userAchievementRepository.save(newUserAchievement); // Lưu mới UserAchievement
+                        }
+                    }
                     currentIndex = results.getSaveCo2();
                     break;
                 case USE_CAMERA_DETECT:
                     progress = (double) results.getNumberOfTimeDetect() / maxIndex;
+                    if(progress >= 1)
+                    {
+                        Optional<UserAchievement> userAchievement = userAchievementRepository.findByUsers(users);
+                        if(userAchievement.isPresent())
+                        {
+                            UserAchievement currentUserAchievement = userAchievement.get();
+                            List<String> badgeUrl = currentUserAchievement.getBadgeUrl();
+                            // Kiểm tra xem URL của huy hiệu đã tồn tại trong danh sách huy hiệu của người dùng chưa
+                            if(!badgeUrl.contains(iconUrl)) {
+                                badgeUrl.add(iconUrl);
+                                currentUserAchievement.setBadgeUrl(badgeUrl);
+                                userAchievementRepository.save(currentUserAchievement);
+                            }
+                        }
+                        else
+                        {
+                            List<String> badgeUrl = new ArrayList<>();
+                            badgeUrl.add(iconUrl);
+                            UserAchievement newUserAchievement = userAchievementService.createNew(userId, badgeUrl);
+                            userAchievementRepository.save(newUserAchievement); // Lưu mới UserAchievement
+                        }
+                    }
                     currentIndex = (double) results.getNumberOfTimeDetect();
                     break;
                 default:

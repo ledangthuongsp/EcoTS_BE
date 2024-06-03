@@ -15,6 +15,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -28,6 +29,7 @@ public class AuthenticationService {
     private final AuthenticationManager authenticationManager;
     private final PointRepository pointRepository;
     private final ResultRepository resultRepository;
+    private final UserAchievementRepository userAchievementRepository;
     @Autowired
     private VerificationRepository verificationRepository;
     @Autowired
@@ -36,12 +38,13 @@ public class AuthenticationService {
             UserRepository userRepository,
             AuthenticationManager authenticationManager,
             PasswordEncoder passwordEncoder,
-            PointRepository pointRepository, ResultRepository resultRepository) {
+            PointRepository pointRepository, ResultRepository resultRepository, UserAchievementRepository userAchievementRepository) {
         this.authenticationManager = authenticationManager;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.pointRepository = pointRepository;
         this.resultRepository = resultRepository;
+        this.userAchievementRepository = userAchievementRepository;
     }
 
     public Users signup(SignUpDTO input) {
@@ -76,6 +79,11 @@ public class AuthenticationService {
         results.setPointDonate(0.0);
         results.setSaveCo2(0.0);
         resultRepository.save(results);
+
+        UserAchievement userAchievement = new UserAchievement();
+        userAchievement.setUsers(user);
+        userAchievement.setBadgeUrl(new ArrayList<>());
+        userAchievementRepository.save(userAchievement);
 
         return savedUser;
     }
