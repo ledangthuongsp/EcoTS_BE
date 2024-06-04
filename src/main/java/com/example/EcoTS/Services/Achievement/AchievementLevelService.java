@@ -40,4 +40,16 @@ public class AchievementLevelService {
         level.setMaxIndex(maxIndex);
         return achievementLevelRepository.save(level);
     }
+    @Transactional
+    public AchievementLevel updateAchievementLevel(Long achievementLevelId, String name, String description, MultipartFile imgUrl, MultipartFile iconUrl, Long maxIndex) throws IOException {
+        String imgUrlCloud = cloudinaryService.uploadFileAchievement(imgUrl);
+        String iconUrlCloud = cloudinaryService.uploadFileLogoAchievement(iconUrl);
+        AchievementLevel level = achievementLevelRepository.findById(achievementLevelId).orElseThrow(() -> new RuntimeException("Achievement not found"));
+        level.setName(name);
+        level.setDescription(description);
+        level.setImgUrl(imgUrlCloud);
+        level.setIconUrl(iconUrlCloud);
+        level.setMaxIndex(maxIndex);
+        return achievementLevelRepository.save(level);
+    }
 }

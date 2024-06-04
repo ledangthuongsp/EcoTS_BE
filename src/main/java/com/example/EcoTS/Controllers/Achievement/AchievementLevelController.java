@@ -51,5 +51,11 @@ public class AchievementLevelController {
         Achievement achievement = achievementRepository.findByType(achievementType);
         return ResponseEntity.ok().body(achievementLevelService.createAchievementLevel(achievement.getId(),name, description,imgUrl,iconUrl,maxIndex));
     }
+    @PutMapping("/update-achievement-level")
+    public ResponseEntity<?> updateAchievementLevel(@RequestParam String name, @RequestParam String description,
+                                                    @RequestParam Long maxIndex, @RequestParam Long achievementLevelId,
+                                                    @RequestPart MultipartFile imgUrl, @RequestPart MultipartFile iconUrl) throws IOException {
+        return ResponseEntity.ok().body(achievementLevelService.updateAchievementLevel(achievementLevelId, name, description,imgUrl,iconUrl,maxIndex));
+    }
 
 }
