@@ -10,5 +10,4 @@ import java.util.List;
 @Repository
 @Hidden
 public interface QuizQuestionRepository extends JpaRepository<QuizQuestion, Long> {
-    List<QuizQuestion> findByTopicId(Long topicId);
 }

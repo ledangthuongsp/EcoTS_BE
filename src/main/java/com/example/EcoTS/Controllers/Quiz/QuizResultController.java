@@ -2,9 +2,14 @@ package com.example.EcoTS.Controllers.Quiz;
 
 
 import com.example.EcoTS.Models.QuizResult;
+import com.example.EcoTS.Models.QuizTopic;
+import com.example.EcoTS.Repositories.QuizResultRepository;
 import com.example.EcoTS.Services.Quiz.QuizResultService;
+import com.example.EcoTS.Services.Quiz.QuizTopicService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.rest.webmvc.ResourceNotFoundException;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -15,15 +20,31 @@ import java.util.List;
 @RequestMapping("/api/quiz-results")
 public class QuizResultController {
     @Autowired
-    QuizResultService quizResultService;
+    private QuizResultService quizResultService;
+    @Autowired
+    private QuizResultRepository quizResultRepository;
 
-    @GetMapping("/user/{userId}/quiz/{quizId}")
-    public List<QuizResult> getQuizResultsByUserAndQuiz(@PathVariable Long userId, @PathVariable Long quizId) {
-        return quizResultService.getQuizResultsByUserAndQuiz(userId, quizId);
+    @Autowired
+    private QuizTopicService quizTopicService;
+
+    @GetMapping
+    public List<QuizResult> getAllResults() {
+        return quizResultRepository.findAll();
     }
 
-    @PostMapping
-    public QuizResult saveQuizResult(@RequestBody QuizResult quizResult) {
-        return quizResultService.saveQuizResult(quizResult);
+    @GetMapping("/{id}")
+    public QuizResult getResultById(@PathVariable Long id) {
+        return quizResultRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Quiz Result not found"));
+    }
+
+    @PostMapping("/result")
+    public ResponseEntity<QuizResult> saveResult(@RequestParam Long userId, @RequestParam Long topicId,
+                                                 @RequestParam int correctAnswers, @RequestParam int totalQuestions) {
+        return ResponseEntity.ok(quizResultService.saveResult(userId, topicId, correctAnswers, totalQuestions));
+    }
+
+    @PutMapping("/topic/{topicId}/progress")
+    public ResponseEntity<QuizTopic> updateProgress(@PathVariable Long topicId) {
+        return ResponseEntity.ok(quizTopicService.updateProgress(topicId));
     }
 }

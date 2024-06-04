@@ -3,7 +3,11 @@ package com.example.EcoTS.Models;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
+import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -18,18 +22,21 @@ import java.util.List;
 public class QuizTopic {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long id;
+    private Long id;
+    private String topicName;
+    private String imgUrl;
+    private double progress;
+    private String description;
 
-    @Column(nullable = false)
-    String name;
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "quizTopic")
+    private List<QuizQuestion> questions;
 
-    @Column
-    String image;
+    @CreationTimestamp
+    @Column(name = "created_at", updatable = false)
+    private Timestamp createdAt;
 
-    @Column
-    Double progress; // Progress of the topic
-
-    @OneToMany(mappedBy = "topic", cascade = CascadeType.ALL, orphanRemoval = true)
-    List<QuizQuestion> questions;
+    @UpdateTimestamp
+    @Column(name = "updated_at")
+    private Timestamp updatedAt;
 }
 

@@ -3,7 +3,10 @@ package com.example.EcoTS.Models;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
+import java.sql.Timestamp;
 import java.util.List;
 
 @Entity
@@ -18,18 +21,22 @@ import java.util.List;
 public class QuizQuestion {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long id;
+    private Long id;
+    private String questionText;
 
-    @Column(nullable = false)
-    String questionText;
-
-    @Column(nullable = false)
-    String correctAnswer;
-
-    @ElementCollection
-    List<String> options;
+    private String correctAnswer;
+    private String incorrectAnswer1;
+    private String incorrectAnswer2;
 
     @ManyToOne
-    @JoinColumn(name = "topic_id", nullable = false)
-    QuizTopic topic;
+    @JoinColumn(name = "topic_id")
+    private QuizTopic quizTopic;
+
+    @CreationTimestamp
+    @Column(name = "created_at", updatable = false)
+    private Timestamp createdAt;
+
+    @UpdateTimestamp
+    @Column(name = "updated_at")
+    private Timestamp updatedAt;
 }

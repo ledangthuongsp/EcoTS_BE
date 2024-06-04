@@ -19,19 +19,18 @@ import java.sql.Timestamp;
 public class QuizResult {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long id;
+    private Long id;
 
-    @Column(nullable = false)
-    Long userId;
+    @OneToOne
+    @JoinColumn(name = "user_id")
+    private Users users;
 
-    @Column(nullable = false)
-    Long quizId;
+    @ManyToOne
+    @JoinColumn(name = "topic_id")
+    private QuizTopic quizTopic;
 
-    @Column(nullable = false)
-    int score;
+    private Integer correctAnswers;
+    private Integer totalQuestions;
 
-    @CreationTimestamp
-    @Column(name = "created_at", updatable = false)
-    Timestamp createdAt;
 }
 

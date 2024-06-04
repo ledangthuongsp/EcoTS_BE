@@ -2,9 +2,12 @@ package com.example.EcoTS.Services.Quiz;
 
 import com.example.EcoTS.Models.QuizResult;
 import com.example.EcoTS.Models.QuizTopic;
+import com.example.EcoTS.Models.Users;
 import com.example.EcoTS.Repositories.QuizResultRepository;
 import com.example.EcoTS.Repositories.QuizTopicRepository;
+import com.example.EcoTS.Repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -12,28 +15,28 @@ import java.util.List;
 @Service
 public class QuizResultService {
     @Autowired
-    QuizResultRepository quizResultRepository;
+    private QuizResultRepository quizResultRepository;
 
     @Autowired
-    QuizTopicService quizTopicService;
+    private UserRepository userRepository;
 
-    public List<QuizResult> getQuizResultsByUserAndQuiz(Long userId, Long quizId) {
-        return quizResultRepository.findByUserIdAndQuizId(userId, quizId);
-    }
+    @Autowired
+    private QuizTopicService quizTopicService;
 
-    public QuizResult saveQuizResult(QuizResult quizResult) {
-        QuizResult savedQuizResult = quizResultRepository.save(quizResult);
-        updateQuizTopicProgress(quizResult);
-        return savedQuizResult;
-    }
+    public QuizResult saveResult(Long userId, Long topicId, int correctAnswers, int totalQuestions) {
+        Users user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
-    private void updateQuizTopicProgress(QuizResult quizResult) {
-        List<QuizResult> results = getQuizResultsByUserAndQuiz(quizResult.getUserId(), quizResult.getQuizId());
-        int maxScore = results.stream().mapToInt(QuizResult::getScore).max().orElse(0);
+        QuizTopic topic = quizTopicService.getTopicById(topicId);
 
-        // Assume we have a way to get total questions for the quiz
-        int totalQuestions = 10; // Example value, replace with actual logic
-        quizTopicService.updateProgress(quizResult.getQuizId(), maxScore, totalQuestions);
+        QuizResult result = QuizResult.builder()
+                .users(user)
+                .quizTopic(topic)
+                .correctAnswers(correctAnswers)
+                .totalQuestions(totalQuestions)
+                .build();
+
+        return quizResultRepository.save(result);
     }
 }
 

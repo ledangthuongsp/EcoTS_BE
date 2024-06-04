@@ -1,44 +1,59 @@
 package com.example.EcoTS.Services.Quiz;
 
+import com.example.EcoTS.DTOs.Request.Quiz.QuizQuestionDTO;
+import com.example.EcoTS.DTOs.Request.Quiz.QuizTopicDTO;
+import com.example.EcoTS.Models.QuizQuestion;
 import com.example.EcoTS.Models.QuizTopic;
 import com.example.EcoTS.Repositories.QuizTopicRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import com.example.EcoTS.Services.CloudinaryService.CloudinaryService;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.rest.webmvc.ResourceNotFoundException;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class QuizTopicService {
     @Autowired
-    QuizTopicRepository quizTopicRepository;
+    private QuizTopicRepository quizTopicRepository;
+    @Autowired
+    private CloudinaryService cloudinaryService;
 
-    public List<QuizTopic> getAllQuizTopics() {
-        return quizTopicRepository.findAll();
+    public QuizTopic addTopic(QuizTopicDTO quizTopicDTO, MultipartFile file) throws IOException {
+        String imgUrl = cloudinaryService.uploadFileQuizTopic(file);
+        QuizTopic topic = new QuizTopic();
+        topic.setTopicName(quizTopicDTO.getName());
+        topic.setDescription(quizTopicDTO.getDescription());
+        topic.setProgress(0.0);
+        topic.setImgUrl(imgUrl);
+        topic.setQuestions(new ArrayList<>());
+        return quizTopicRepository.save(topic);
     }
 
-    public QuizTopic getQuizTopicById(Long id) {
-        return quizTopicRepository.findById(id).orElse(null);
+    public QuizTopic getTopicById(Long id) {
+        return quizTopicRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Topic not found"));
     }
 
-    public QuizTopic createQuizTopic(QuizTopic quizTopic) {
-        quizTopic.setProgress(0.0); // Initialize progress
-        return quizTopicRepository.save(quizTopic);
+    public QuizTopic updateProgress(Long topicId) {
+        QuizTopic topic = getTopicById(topicId);
+        List<QuizQuestion> questions = topic.getQuestions();
+        int totalQuestions = questions.size();
+        int correctAnswers = calculateCorrectAnswers(topic);
+
+        topic.setProgress((correctAnswers / (double) totalQuestions) * 100);
+        return quizTopicRepository.save(topic);
     }
 
-    public QuizTopic updateQuizTopic(QuizTopic quizTopic) {
-        return quizTopicRepository.save(quizTopic);
+    private int calculateCorrectAnswers(QuizTopic topic) {
+        // Implement logic to calculate correct answers
+        return 0; // Placeholder
     }
 
-    public void deleteQuizTopic(Long id) {
-        quizTopicRepository.deleteById(id);
-    }
-
-    public void updateProgress(Long topicId, int correctAnswers, int totalQuestions) {
-        QuizTopic quizTopic = getQuizTopicById(topicId);
-        if (quizTopic != null) {
-            double progress = ((double) correctAnswers / totalQuestions) * 100;
-            quizTopic.setProgress(progress);
-            updateQuizTopic(quizTopic);
-        }
-    }
 }

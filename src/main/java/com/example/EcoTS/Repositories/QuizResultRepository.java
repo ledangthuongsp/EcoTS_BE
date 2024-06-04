@@ -9,5 +9,5 @@ import java.util.List;
 @Hidden
 @Repository
 public interface QuizResultRepository extends JpaRepository<QuizResult, Long> {
-    List<QuizResult> findByUserIdAndQuizId(Long userId, Long quizId);
+    List<QuizResult> findByTopicId(Long topicId);
 }
