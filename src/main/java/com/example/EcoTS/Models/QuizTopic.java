@@ -28,9 +28,6 @@ public class QuizTopic {
     private double progress;
     private String description;
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "quizTopic")
-    private List<QuizQuestion> questions;
-
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private Timestamp createdAt;

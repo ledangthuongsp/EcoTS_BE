@@ -2,7 +2,9 @@ package com.example.EcoTS.Controllers.Quiz;
 
 import com.example.EcoTS.DTOs.Request.Quiz.QuizQuestionDTO;
 import com.example.EcoTS.Models.QuizQuestion;
+import com.example.EcoTS.Models.QuizTopic;
 import com.example.EcoTS.Repositories.QuizQuestionRepository;
+import com.example.EcoTS.Repositories.QuizTopicRepository;
 import com.example.EcoTS.Services.Quiz.QuizQuestionService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +21,8 @@ import java.util.List;
 public class QuizQuestionController {
     @Autowired
     private QuizQuestionService quizQuestionService;
+    @Autowired
+    private QuizTopicRepository quizTopicRepository;
 
     @Autowired
     private QuizQuestionRepository quizQuestionRepository;
@@ -30,6 +34,12 @@ public class QuizQuestionController {
     @GetMapping("/{id}")
     public QuizQuestion getQuestionById(@RequestParam Long id) {
         return quizQuestionRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Question not found"));
+    }
+    @GetMapping("/get-all-question-by-topic")
+    public List<QuizQuestion> getAllQuestionByQuizTopic(@RequestParam Long id)
+    {
+        QuizTopic quizTopic = quizTopicRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Topic not found"));
+        return quizQuestionRepository.findByQuizTopic(quizTopic);
     }
 
     @PostMapping("/add-new-question-to-topic")

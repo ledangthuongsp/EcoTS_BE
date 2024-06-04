@@ -4,6 +4,7 @@ import com.example.EcoTS.DTOs.Request.Quiz.QuizQuestionDTO;
 import com.example.EcoTS.DTOs.Request.Quiz.QuizTopicDTO;
 import com.example.EcoTS.Models.QuizQuestion;
 import com.example.EcoTS.Models.QuizTopic;
+import com.example.EcoTS.Repositories.QuizQuestionRepository;
 import com.example.EcoTS.Repositories.QuizTopicRepository;
 import com.example.EcoTS.Services.CloudinaryService.CloudinaryService;
 
@@ -24,6 +25,8 @@ public class QuizTopicService {
     private QuizTopicRepository quizTopicRepository;
     @Autowired
     private CloudinaryService cloudinaryService;
+    @Autowired
+    private QuizQuestionRepository quizQuestionRepository;
 
     public QuizTopic addTopic(String topicName, String description, MultipartFile file) throws IOException {
         String imgUrl = cloudinaryService.uploadFileQuizTopic(file);
@@ -32,7 +35,6 @@ public class QuizTopicService {
         topic.setDescription(description);
         topic.setProgress(0.0);
         topic.setImgUrl(imgUrl);
-        topic.setQuestions(new ArrayList<>());
         return quizTopicRepository.save(topic);
     }
 
@@ -43,14 +45,12 @@ public class QuizTopicService {
 
     public QuizTopic updateProgress(Long topicId) {
         QuizTopic topic = getTopicById(topicId);
-        List<QuizQuestion> questions = topic.getQuestions();
+        List<QuizQuestion> questions = quizQuestionRepository.findByQuizTopic(topic);
         int totalQuestions = questions.size();
         int correctAnswers = calculateCorrectAnswers(topic);
-
         topic.setProgress((correctAnswers / (double) totalQuestions) * 100);
         return quizTopicRepository.save(topic);
     }
-
     private int calculateCorrectAnswers(QuizTopic topic) {
         // Implement logic to calculate correct answers
         return 0; // Placeholder
