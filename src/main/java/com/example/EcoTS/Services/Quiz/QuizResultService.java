@@ -1,14 +1,17 @@
 package com.example.EcoTS.Services.Quiz;
 
+import com.example.EcoTS.Models.QuizQuestion;
 import com.example.EcoTS.Models.QuizResult;
 import com.example.EcoTS.Models.QuizTopic;
 import com.example.EcoTS.Models.Users;
+import com.example.EcoTS.Repositories.QuizQuestionRepository;
 import com.example.EcoTS.Repositories.QuizResultRepository;
 import com.example.EcoTS.Repositories.QuizTopicRepository;
 import com.example.EcoTS.Repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -16,27 +19,38 @@ import java.util.List;
 public class QuizResultService {
     @Autowired
     private QuizResultRepository quizResultRepository;
+    @Autowired
+    private QuizQuestionRepository quizQuestionRepository;
+    @Autowired
+    private QuizTopicRepository quizTopicRepository;
 
     @Autowired
     private UserRepository userRepository;
-
     @Autowired
-    private QuizTopicService quizTopicService;
+    private QuizTopicService  quizTopicService;
 
-    public QuizResult saveResult(Long userId, Long topicId, int correctAnswers, int totalQuestions) {
-        Users user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+    @Transactional
+    public void saveQuizResult(Long userId, Long topicId, int correctAnswers, int incorrectAnswers) {
+        Users users = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+        QuizTopic quizTopic = quizTopicService.getTopicById(topicId);
+        List<QuizQuestion> questions = quizQuestionRepository.findByQuizTopic(quizTopic);
+        double progress = (double) correctAnswers / questions.size();
 
-        QuizTopic topic = quizTopicService.getTopicById(topicId);
-
-        QuizResult result = QuizResult.builder()
-                .users(user)
-                .quizTopic(topic)
+        QuizResult quizResult = QuizResult.builder()
+                .users(users)
+                .quizTopic(quizTopic)
                 .correctAnswers(correctAnswers)
-                .totalQuestions(totalQuestions)
+                .incorrectAnswers(incorrectAnswers)
+                .progress(progress)
                 .build();
 
-        return quizResultRepository.save(result);
+        quizResultRepository.save(quizResult);
+
+        // Update the quiz topic progress if the new progress is higher
+        if (progress > quizTopic.getProgress()) {
+            quizTopic.setProgress(progress);
+            quizTopicRepository.save(quizTopic);
+        }
     }
 }
 

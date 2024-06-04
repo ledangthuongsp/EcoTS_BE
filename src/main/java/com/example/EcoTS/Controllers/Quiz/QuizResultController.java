@@ -46,14 +46,9 @@ public class QuizResultController {
         return quizResultRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Quiz Result not found"));
     }
 
-    @PostMapping("/result")
-    public ResponseEntity<QuizResult> saveResult(@RequestParam Long userId, @RequestParam Long topicId,
-                                                 @RequestParam int correctAnswers, @RequestParam int totalQuestions) {
-        return ResponseEntity.ok(quizResultService.saveResult(userId, topicId, correctAnswers, totalQuestions));
-    }
-
-    @PutMapping("/topic/{topicId}/progress")
-    public ResponseEntity<QuizTopic> updateProgress(@PathVariable Long topicId) {
-        return ResponseEntity.ok(quizTopicService.updateProgress(topicId));
+    @PostMapping("/update-result-after-answer-all-question")
+    public void updateResult(@RequestParam Long userId, @RequestParam Long topicId, @RequestParam int correct, @RequestParam int incorrect)
+    {
+        quizResultService.saveQuizResult(userId, topicId,correct,incorrect);
     }
 }

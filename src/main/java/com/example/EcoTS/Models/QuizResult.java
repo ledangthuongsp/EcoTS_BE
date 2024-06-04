@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.sql.Timestamp;
 
@@ -29,8 +30,15 @@ public class QuizResult {
     @JoinColumn(name = "topic_id")
     private QuizTopic quizTopic;
 
-    private Integer correctAnswers;
-    private Integer totalQuestions;
+    private int correctAnswers;
+    private int incorrectAnswers;
+    private double progress;
+    @CreationTimestamp
+    @Column(name = "created_at", updatable = false)
+    private Timestamp createdAt;
 
+    @UpdateTimestamp
+    @Column(name = "updated_at")
+    private Timestamp updatedAt;
 }
 

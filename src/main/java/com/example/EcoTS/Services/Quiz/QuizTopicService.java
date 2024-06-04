@@ -43,17 +43,5 @@ public class QuizTopicService {
                 .orElseThrow(() -> new ResourceNotFoundException("Topic not found"));
     }
 
-    public QuizTopic updateProgress(Long topicId) {
-        QuizTopic topic = getTopicById(topicId);
-        List<QuizQuestion> questions = quizQuestionRepository.findByQuizTopic(topic);
-        int totalQuestions = questions.size();
-        int correctAnswers = calculateCorrectAnswers(topic);
-        topic.setProgress((correctAnswers / (double) totalQuestions) * 100);
-        return quizTopicRepository.save(topic);
-    }
-    private int calculateCorrectAnswers(QuizTopic topic) {
-        // Implement logic to calculate correct answers
-        return 0; // Placeholder
-    }
 
 }
