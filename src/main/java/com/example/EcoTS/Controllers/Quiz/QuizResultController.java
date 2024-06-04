@@ -3,7 +3,9 @@ package com.example.EcoTS.Controllers.Quiz;
 
 import com.example.EcoTS.Models.QuizResult;
 import com.example.EcoTS.Models.QuizTopic;
+import com.example.EcoTS.Models.Users;
 import com.example.EcoTS.Repositories.QuizResultRepository;
+import com.example.EcoTS.Repositories.UserRepository;
 import com.example.EcoTS.Services.Quiz.QuizResultService;
 import com.example.EcoTS.Services.Quiz.QuizTopicService;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -26,10 +28,17 @@ public class QuizResultController {
 
     @Autowired
     private QuizTopicService quizTopicService;
-
+    @Autowired
+    private UserRepository userRepository;
     @GetMapping
     public List<QuizResult> getAllResults() {
         return quizResultRepository.findAll();
+    }
+    @GetMapping("/get-by-user-id")
+    public List<QuizResult> getByUserId(@RequestParam Long id)
+    {
+        Users users = userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        return quizResultRepository.findByUsers(users);
     }
 
     @GetMapping("/{id}")

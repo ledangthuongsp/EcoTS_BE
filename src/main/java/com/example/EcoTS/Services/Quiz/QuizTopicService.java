@@ -25,11 +25,11 @@ public class QuizTopicService {
     @Autowired
     private CloudinaryService cloudinaryService;
 
-    public QuizTopic addTopic(QuizTopicDTO quizTopicDTO, MultipartFile file) throws IOException {
+    public QuizTopic addTopic(String topicName, String description, MultipartFile file) throws IOException {
         String imgUrl = cloudinaryService.uploadFileQuizTopic(file);
         QuizTopic topic = new QuizTopic();
-        topic.setTopicName(quizTopicDTO.getName());
-        topic.setDescription(quizTopicDTO.getDescription());
+        topic.setTopicName(topicName);
+        topic.setDescription(description);
         topic.setProgress(0.0);
         topic.setImgUrl(imgUrl);
         topic.setQuestions(new ArrayList<>());

@@ -39,8 +39,8 @@ public class QuizTopicController {
     }
 
     @PostMapping(value = "/add-new", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE})
-    public QuizTopic addTopic(@RequestParam QuizTopicDTO quizTopicDTO, @RequestPart MultipartFile multipartFile) throws IOException {
-        return quizTopicService.addTopic(quizTopicDTO, multipartFile);
+    public QuizTopic addTopic(@RequestParam String topicName, @RequestParam String description, @RequestPart MultipartFile multipartFile) throws IOException {
+        return quizTopicService.addTopic(topicName, description, multipartFile);
     }
 }
 

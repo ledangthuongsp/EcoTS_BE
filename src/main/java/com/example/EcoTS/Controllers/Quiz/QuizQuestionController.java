@@ -33,7 +33,7 @@ public class QuizQuestionController {
     }
 
     @PostMapping("/add-new-question-to-topic")
-    public QuizQuestion saveQuestion(@RequestParam Long topicId ,@RequestParam QuizQuestionDTO quizQuestionDTO) {
+    public QuizQuestion saveQuestion(@RequestParam Long topicId ,@RequestBody QuizQuestionDTO quizQuestionDTO) {
         return quizQuestionService.addQuestion(topicId, quizQuestionDTO);
     }
     @DeleteMapping("/delete-question-from-topic")
