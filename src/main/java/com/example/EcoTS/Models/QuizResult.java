@@ -22,14 +22,8 @@ public class QuizResult {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToOne
-    @JoinColumn(name = "user_id")
-    private Users users;
-
-    @ManyToOne
-    @JoinColumn(name = "topic_id")
-    private QuizTopic quizTopic;
-
+    private Long userId;
+    private Long topicId;
     private int correctAnswers;
     private int incorrectAnswers;
     private double progress;

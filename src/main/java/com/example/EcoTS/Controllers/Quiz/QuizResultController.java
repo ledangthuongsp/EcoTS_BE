@@ -37,8 +37,7 @@ public class QuizResultController {
     @GetMapping("/get-by-user-id")
     public List<QuizResult> getByUserId(@RequestParam Long id)
     {
-        Users users = userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("User not found"));
-        return quizResultRepository.findByUsers(users);
+        return quizResultRepository.findByUserId(id);
     }
 
     @GetMapping("/{id}")

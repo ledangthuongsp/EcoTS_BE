@@ -31,19 +31,21 @@ public class QuizResultService {
 
     @Transactional
     public void saveQuizResult(Long userId, Long topicId, int correctAnswers, int incorrectAnswers) {
-        Users users = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+
         QuizTopic quizTopic = quizTopicService.getTopicById(topicId);
         List<QuizQuestion> questions = quizQuestionRepository.findByQuizTopic(quizTopic);
+        // Check if total questions match the sum of correct and incorrect answers
+        if (correctAnswers + incorrectAnswers != questions.size()) {
+            throw new IllegalArgumentException("Total questions must equal the sum of correct and incorrect answers");
+        }
         double progress = (double) correctAnswers / questions.size();
 
-        QuizResult quizResult = QuizResult.builder()
-                .users(users)
-                .quizTopic(quizTopic)
-                .correctAnswers(correctAnswers)
-                .incorrectAnswers(incorrectAnswers)
-                .progress(progress)
-                .build();
-
+        QuizResult quizResult = new QuizResult();
+        quizResult.setTopicId(topicId);
+        quizResult.setProgress(progress);
+        quizResult.setUserId(userId);
+        quizResult.setCorrectAnswers(correctAnswers);
+        quizResult.setIncorrectAnswers(incorrectAnswers);
         quizResultRepository.save(quizResult);
 
         // Update the quiz topic progress if the new progress is higher
