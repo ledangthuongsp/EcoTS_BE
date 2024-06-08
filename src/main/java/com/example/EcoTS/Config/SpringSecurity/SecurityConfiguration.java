@@ -55,7 +55,7 @@ public class SecurityConfiguration {
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration().applyPermitDefaultValues();
-        configuration.setAllowedOrigins(List.of("http://localhost:7050", "https://ecots-be.onrender.com", "http://localhost:5173")); // Specify your server's origin
+        configuration.setAllowedOrigins(List.of("http://localhost:7050", "https://ecots-be.onrender.com", "https://ecotsbe-production.up.railway.app", "http://localhost:5173")); // Specify your server's origin
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("Authorization", "Cache-Control", "Content-Type", "Accept", "Access-Control-Allow-Origin"));
         configuration.setAllowCredentials(true);
