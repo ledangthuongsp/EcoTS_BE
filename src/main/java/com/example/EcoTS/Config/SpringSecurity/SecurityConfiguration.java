@@ -40,7 +40,8 @@ public class SecurityConfiguration {
                                 .policyDirectives("upgrade-insecure-requests;")))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/test/**","/donate/**", "/generate/**", "/point/**", "/materials/**", "/review/**", "/api/**").permitAll()
-                        .requestMatchers("/auth/**", "/user/**", "/admin/**", "/location/**", "/detect/**", "/achievement/**", "/user-achievement/**").permitAll()
+                        .requestMatchers("/auth/**", "/user/**", "/admin/**", "/location/**", "/detect/**", "/detect-response/**",
+                                "/achievement/**", "/user-achievement/**").permitAll()
                         .requestMatchers("/v3/api-docs", "/v3/api-docs/**", "/swagger-resources",
                                 "/swagger-resources/**", "configuration/ui", "configuration/security",
                                 "/swagger-ui.html", "/swagger-ui/**", "/webjars/**", "/swagger.json")
