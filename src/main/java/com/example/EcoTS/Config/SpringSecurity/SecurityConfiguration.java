@@ -40,7 +40,8 @@ public class SecurityConfiguration {
                                 .policyDirectives("upgrade-insecure-requests;")))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/test/**","/donate/**", "/generate/**", "/point/**", "/materials/**", "/review/**", "/api/**").permitAll()
-                        .requestMatchers("/auth/**", "/user/**", "/admin/**", "/location/**", "/detect/**", "/achievement/**", "/user-achievement/**").permitAll()
+                        .requestMatchers("/auth/**", "/user/**", "/admin/**", "/location/**", "/detect/**", "/detect-response/**",
+                                "/achievement/**", "/user-achievement/**").permitAll()
                         .requestMatchers("/v3/api-docs", "/v3/api-docs/**", "/swagger-resources",
                                 "/swagger-resources/**", "configuration/ui", "configuration/security",
                                 "/swagger-ui.html", "/swagger-ui/**", "/webjars/**", "/swagger.json")
@@ -55,7 +56,7 @@ public class SecurityConfiguration {
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration().applyPermitDefaultValues();
-        configuration.setAllowedOrigins(List.of("http://localhost:7050", "https://ecots-be.onrender.com", "http://localhost:5173")); // Specify your server's origin
+        configuration.setAllowedOrigins(List.of("http://localhost:7050", "https://ecots-be.onrender.com", "https://ecotsbe-production.up.railway.app", "http://localhost:5173")); // Specify your server's origin
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("Authorization", "Cache-Control", "Content-Type", "Accept", "Access-Control-Allow-Origin"));
         configuration.setAllowCredentials(true);

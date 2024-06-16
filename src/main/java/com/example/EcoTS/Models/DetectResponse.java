@@ -7,30 +7,24 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.sql.Timestamp;
-import java.util.List;
 
-@Entity
-@Table(name = "quiz_questions")
 @Data
-@FieldDefaults(level = AccessLevel.PRIVATE)
-@NoArgsConstructor
-@AllArgsConstructor
 @Builder
 @Getter
 @Setter
-public class QuizQuestion {
+@Entity
+@Table(name = "detect_response")
+@FieldDefaults(level = AccessLevel.PRIVATE)
+@NoArgsConstructor
+@AllArgsConstructor
+public class DetectResponse {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String questionText;
+    private String imgUrl;
+    private String description;
 
-    private String correctAnswer;
-    private String incorrectAnswer1;
-    private String incorrectAnswer2;
-
-    @ManyToOne
-    @JoinColumn(name = "quiz_topic_id")
-    private QuizTopic quizTopic;
+    private Long userId;
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)

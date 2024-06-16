@@ -25,8 +25,8 @@ public class QuizTopic {
     private Long id;
     private String topicName;
     private String imgUrl;
-    private double progress;
     private String description;
+    private Long numberQuestion;
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)

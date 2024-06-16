@@ -12,4 +12,5 @@ import java.util.List;
 @Hidden
 public interface QuizQuestionRepository extends JpaRepository<QuizQuestion, Long> {
     List<QuizQuestion> findByQuizTopic(QuizTopic quizTopic);
+    long countByQuizTopic_Id(Long topicId);
 }
