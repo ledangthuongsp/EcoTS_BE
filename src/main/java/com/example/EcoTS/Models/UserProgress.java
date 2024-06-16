@@ -7,10 +7,9 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.sql.Timestamp;
-import java.util.List;
 
 @Entity
-@Table(name = "quiz_questions")
+@Table(name = "user_progress")
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @NoArgsConstructor
@@ -18,20 +17,16 @@ import java.util.List;
 @Builder
 @Getter
 @Setter
-public class QuizQuestion {
+public class UserProgress {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String questionText;
 
-    private String correctAnswer;
-    private String incorrectAnswer1;
-    private String incorrectAnswer2;
-
-    @ManyToOne
-    @JoinColumn(name = "quiz_topic_id")
-    private QuizTopic quizTopic;
-
+    private Long userId;
+    private Long topicId;
+    private Long quizIndex;  // This corresponds to current_index in Firebase
+    private Long topicIndex; // This corresponds to simple_index in Firebase
+    private double progress;
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private Timestamp createdAt;
@@ -39,4 +34,8 @@ public class QuizQuestion {
     @UpdateTimestamp
     @Column(name = "updated_at")
     private Timestamp updatedAt;
+
+    @ManyToOne
+    @JoinColumn(name = "quiz_topic_id", insertable = false, updatable = false)
+    private QuizTopic quizTopic;
 }

@@ -4,12 +4,11 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 
 import java.sql.Timestamp;
 
 @Entity
-@Table(name = "quiz_results")
+@Table(name = "user_answers")
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @NoArgsConstructor
@@ -17,22 +16,20 @@ import java.sql.Timestamp;
 @Builder
 @Getter
 @Setter
-public class QuizResult {
+public class UserAnswer {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private Long userId;
-    private Long topicId;
-    private int correctAnswers;
-    private int incorrectAnswers;
-    private double progress;
+    private Long questionId;
+    private boolean isCorrect;
+
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private Timestamp createdAt;
 
-    @UpdateTimestamp
-    @Column(name = "updated_at")
-    private Timestamp updatedAt;
+    @ManyToOne
+    @JoinColumn(name = "quiz_question_id", insertable = false, updatable = false)
+    private QuizQuestion quizQuestion;
 }
-

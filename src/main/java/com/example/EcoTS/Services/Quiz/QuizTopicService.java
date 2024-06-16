@@ -28,16 +28,16 @@ public class QuizTopicService {
     @Autowired
     private QuizQuestionRepository quizQuestionRepository;
 
+    @Transactional
     public QuizTopic addTopic(String topicName, String description, MultipartFile file) throws IOException {
         String imgUrl = cloudinaryService.uploadFileQuizTopic(file);
         QuizTopic topic = new QuizTopic();
         topic.setTopicName(topicName);
         topic.setDescription(description);
-        topic.setProgress(0.0);
         topic.setImgUrl(imgUrl);
         return quizTopicRepository.save(topic);
     }
-
+    @Transactional
     public QuizTopic getTopicById(Long id) {
         return quizTopicRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Topic not found"));
