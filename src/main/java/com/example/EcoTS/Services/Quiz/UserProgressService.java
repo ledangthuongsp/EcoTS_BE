@@ -25,7 +25,12 @@ public class UserProgressService {
     public Optional<UserProgress> getUserProgress(Long userId, Long topicId) {
         return userProgressRepository.findByUserIdAndTopicId(userId, topicId);
     }
-
+    public UserProgress updateProgress(Long userId, Long topicId, double progress) {
+        UserProgress userProgress = userProgressRepository.findByUserIdAndTopicId(userId, topicId)
+                .orElseThrow();
+        userProgress.setProgress(progress);
+        return userProgressRepository.save(userProgress);
+    }
     public void deleteUserProgress(Long id) {
         userProgressRepository.deleteById(id);
     }

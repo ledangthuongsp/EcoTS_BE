@@ -23,7 +23,12 @@ public class UserProgressController {
     @GetMapping("/user/{userId}/topic/{topicId}")
     public ResponseEntity<UserProgress> getUserProgress(@PathVariable Long userId, @PathVariable Long topicId) {
         UserProgress userProgress = userProgressRepository.findByUserIdAndTopicId(userId, topicId)
-                .orElse(userProgressService.creatNew(userId, topicId, 0.0));
+                .orElseThrow();
+        return ResponseEntity.ok(userProgress);
+    }
+    @PutMapping("/user/{userId}/topic/{topicId}")
+    public ResponseEntity<UserProgress> updateUserProgress(@PathVariable Long userId, @PathVariable Long topicId, @RequestParam double progress) {
+        UserProgress userProgress = userProgressService.updateProgress(userId, topicId, progress);
         return ResponseEntity.ok(userProgress);
     }
 }

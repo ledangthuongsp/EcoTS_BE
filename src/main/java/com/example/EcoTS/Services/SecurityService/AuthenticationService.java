@@ -31,6 +31,10 @@ public class AuthenticationService {
     private final ResultRepository resultRepository;
     private final UserAchievementRepository userAchievementRepository;
     @Autowired
+    private QuizTopicRepository quizTopicRepository;
+    @Autowired
+    private UserProgressRepository userProgressRepository;
+    @Autowired
     private VerificationRepository verificationRepository;
     @Autowired
     private EmailUtils emailUtil;
@@ -85,6 +89,15 @@ public class AuthenticationService {
         userAchievement.setBadgeUrl(new ArrayList<>());
         userAchievementRepository.save(userAchievement);
 
+        List<QuizTopic> quizTopics = quizTopicRepository.findAll();
+        for(QuizTopic quizTopic : quizTopics)
+        {
+            UserProgress userProgress = new UserProgress();
+            userProgress.setTopicId(quizTopic.getId());
+            userProgress.setUserId(user.getId());
+            userProgress.setProgress(0.0);
+            userProgressRepository.save(userProgress);
+        }
         return savedUser;
     }
 

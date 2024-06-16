@@ -28,12 +28,7 @@ public class UserProgress {
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private Timestamp createdAt;
-    public UserProgress (Long userId, Long topicId, double progress)
-    {
-        this.userId = userId;
-        this.topicId = topicId;
-        this.progress = progress;
-    }
+
     @UpdateTimestamp
     @Column(name = "updated_at")
     private Timestamp updatedAt;
