@@ -40,7 +40,7 @@ public class Locations {
     private String backGroundImgUrl;
     private List<String> imgDetailsUrl;
 
-    @ElementCollection
+    @ElementCollection (fetch = FetchType.EAGER)
     private List<Long> employeeId;
 
     @CreationTimestamp

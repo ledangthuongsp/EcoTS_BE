@@ -66,12 +66,11 @@ public class PointController {
         Users user = userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("User not found"));
         Points userPoints = pointRepository.findByUserId(user.getId()).orElseThrow(() -> new IllegalArgumentException("Point with this user not found"));
         Results results = resultRepository.findByUsers(user).orElseThrow(() -> new IllegalArgumentException("Point with this user not found"));
-        userPoints.setPoint(userPoints.getPoint()+points);
+        userPoints.setPoint(userPoints.getPoint() + points);
         pointRepository.save(userPoints);
         results.setMaximumPoints(results.getMaximumPoints()+points);
         resultRepository.save(results);
         return ResponseEntity.ok("Points added successfully.");
     }
-
 }
 

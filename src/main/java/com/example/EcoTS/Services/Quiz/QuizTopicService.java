@@ -51,6 +51,8 @@ public class QuizTopicService {
             userProgress.setTopicId(savedTopic.getId());
             userProgress.setUserId(user.getId());
             userProgress.setProgress(0.0);
+            userProgress.setCollection(true);
+            userProgress.setReachMax(false);
             userProgressRepository.save(userProgress);
         }
         return savedTopic;

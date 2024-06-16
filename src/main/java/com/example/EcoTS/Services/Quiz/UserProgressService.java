@@ -19,6 +19,8 @@ public class UserProgressService {
         userProgress.setProgress(progress);
         userProgress.setUserId(userId);
         userProgress.setTopicId(topicId);
+        userProgress.setReachMax(false);
+        userProgress.setCollection(true);
         return  userProgressRepository.save(userProgress);
     }
 
@@ -26,9 +28,15 @@ public class UserProgressService {
         return userProgressRepository.findByUserIdAndTopicId(userId, topicId);
     }
     public UserProgress updateProgress(Long userId, Long topicId, double progress) {
-        UserProgress userProgress = userProgressRepository.findByUserIdAndTopicId(userId, topicId)
-                .orElseThrow();
+        Optional<UserProgress> optionalUserProgress = userProgressRepository.findByUserIdAndTopicId(userId, topicId);
+        UserProgress userProgress = optionalUserProgress.orElseThrow();
+
         userProgress.setProgress(progress);
+
+        if (progress >= 100 && userProgress.isCollection()) {
+            userProgress.setReachMax(true);
+            userProgress.setCollection(false);
+        }
         return userProgressRepository.save(userProgress);
     }
     public void deleteUserProgress(Long id) {
