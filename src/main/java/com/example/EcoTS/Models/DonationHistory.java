@@ -1,26 +1,14 @@
 package com.example.EcoTS.Models;
 
+import jakarta.persistence.*;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.sql.Timestamp;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.experimental.FieldDefaults;
-
-@Table(name = "notifications")
+@Table(name = "donation_history")
 @Data
 @Entity
 @FieldDefaults(level = AccessLevel.PRIVATE)
@@ -29,12 +17,14 @@ import lombok.experimental.FieldDefaults;
 @Builder
 @Getter
 @Setter
-public class Notifications {
+public class DonationHistory {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String title;
-    private String description;
+
+    private Long userId;
+    private double points;
+    private String donationLocation;
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)

@@ -20,7 +20,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.FieldDefaults;
 
-@Table(name = "histories")
+@Table(name = "receive_history")
 @Data
 @Entity
 @FieldDefaults(level = AccessLevel.PRIVATE)
@@ -29,12 +29,14 @@ import lombok.experimental.FieldDefaults;
 @Builder
 @Getter
 @Setter
-public class Histories {
+public class ReceiveHistory {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-
+    private double points;
+    private String exchangePointLocation;
+    private Long userId;
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private Timestamp createdAt;
