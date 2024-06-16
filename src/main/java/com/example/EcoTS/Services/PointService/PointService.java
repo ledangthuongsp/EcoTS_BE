@@ -1,15 +1,12 @@
 package com.example.EcoTS.Services.PointService;
 
-import com.example.EcoTS.Models.Materials;
-import com.example.EcoTS.Models.Points;
-import com.example.EcoTS.Models.Users;
-import com.example.EcoTS.Repositories.MaterialRepository;
-import com.example.EcoTS.Repositories.PointRepository;
-import com.example.EcoTS.Repositories.UserRepository;
+import com.example.EcoTS.Models.*;
+import com.example.EcoTS.Repositories.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.xml.transform.Result;
 import java.util.Optional;
 @Service
 public class PointService {
@@ -19,6 +16,8 @@ public class PointService {
     private PointRepository pointRepository;
     @Autowired
     private MaterialRepository materialRepository;
+    @Autowired
+    private ResultRepository resultRepository;
     public void awardPoints(String barcodeData, double points) {
         String[] data = barcodeData.split(":");
         String username = data[0];
@@ -38,19 +37,58 @@ public class PointService {
         point.setPoint(point.getPoint() + points);
         pointRepository.save(point);
     }
-    public Points formAddPoints(String username, String email, String materialName, double totalTrashCollect) {
+    public Points formAddPoints(String username, String email, String materialName, Double plasticKg, Double metalKg, Double clothKg,
+                                Double glassKg, Double paperKg, Double cardboardKg ) {
         Users users = userRepository.findByUsername(username)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
         Points points = pointRepository.findByUserId(users.getId())
                 .orElseThrow(() -> new IllegalArgumentException("Point not found"));
-        Materials materials = materialRepository.findByName(materialName).orElseThrow(() -> new IllegalArgumentException("Material not found"));
-        materialName = materialName.toUpperCase();
-        double pointsToAdd = materials.getPointsPerKg() * totalTrashCollect;
-        double co2Saved = materials.getCo2SavedPerKg() * totalTrashCollect;
-        points.setPoint(points.getPoint() + pointsToAdd);
-        points.setTotalTrashCollect(points.getTotalTrashCollect() + totalTrashCollect);
-        points.setSaveCo2(points.getSaveCo2() + co2Saved);
+        Results results = resultRepository.findByUsers(users).orElseThrow(() -> new IllegalArgumentException("User not found"));
+        double totalPoints = 0;
+        double totalCo2Saved = 0;
+        if (plasticKg != null && plasticKg > 0) {
+            Materials material = materialRepository.findByName("plastic").orElseThrow(() -> new IllegalArgumentException("Material not found"));
+            totalPoints += material.getPointsPerKg() * plasticKg;
+            totalCo2Saved += material.getCo2SavedPerKg() * plasticKg;
+        }
+
+        if (metalKg != null && metalKg > 0) {
+            Materials material = materialRepository.findByName("metal").orElseThrow(() -> new IllegalArgumentException("Material not found"));
+            totalPoints += material.getPointsPerKg() * metalKg;
+            totalCo2Saved += material.getCo2SavedPerKg() * metalKg;
+        }
+
+        if (clothKg != null && clothKg > 0) {
+            Materials material = materialRepository.findByName("cloth").orElseThrow(() -> new IllegalArgumentException("Material not found"));
+            totalPoints += material.getPointsPerKg() * clothKg;
+            totalCo2Saved += material.getCo2SavedPerKg() * clothKg;
+        }
+
+        if (glassKg != null && glassKg > 0) {
+            Materials material = materialRepository.findByName("glass").orElseThrow(() -> new IllegalArgumentException("Material not found"));
+            totalPoints += material.getPointsPerKg() * glassKg;
+            totalCo2Saved += material.getCo2SavedPerKg() * glassKg;
+        }
+
+        if (paperKg != null && paperKg > 0) {
+            Materials material = materialRepository.findByName("paper").orElseThrow(() -> new IllegalArgumentException("Material not found"));
+            totalPoints += material.getPointsPerKg() * paperKg;
+            totalCo2Saved += material.getCo2SavedPerKg() * paperKg;
+        }
+
+        if (cardboardKg != null && cardboardKg > 0) {
+            Materials material = materialRepository.findByName("cardboard").orElseThrow(() -> new IllegalArgumentException("Material not found"));
+            totalPoints += material.getPointsPerKg() * cardboardKg;
+            totalCo2Saved += material.getCo2SavedPerKg() * cardboardKg;
+        }
+
+        points.setPoint(points.getPoint() + totalPoints);
+        points.setTotalTrashCollect(points.getTotalTrashCollect() + plasticKg + metalKg + clothKg + glassKg + paperKg + cardboardKg);
+        points.setSaveCo2(points.getSaveCo2() + totalCo2Saved);
+        results.setMaximumPoints(totalPoints+results.getMaximumPoints());
+        results.setSaveCo2(totalCo2Saved + results.getSaveCo2());
         pointRepository.save(points);
+
         return points;
     }
 }

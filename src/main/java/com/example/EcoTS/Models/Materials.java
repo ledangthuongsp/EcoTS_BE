@@ -28,7 +28,6 @@ public class Materials {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     private String name;
     private double pointsPerKg;
     private double co2SavedPerKg;

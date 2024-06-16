@@ -24,18 +24,17 @@ public class UserProgress {
 
     private Long userId;
     private Long topicId;
-    private Long quizIndex;  // This corresponds to current_index in Firebase
-    private Long topicIndex; // This corresponds to simple_index in Firebase
     private double progress;
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private Timestamp createdAt;
-
+    public UserProgress (Long userId, Long topicId, double progress)
+    {
+        this.userId = userId;
+        this.topicId = topicId;
+        this.progress = progress;
+    }
     @UpdateTimestamp
     @Column(name = "updated_at")
     private Timestamp updatedAt;
-
-    @ManyToOne
-    @JoinColumn(name = "quiz_topic_id", insertable = false, updatable = false)
-    private QuizTopic quizTopic;
 }

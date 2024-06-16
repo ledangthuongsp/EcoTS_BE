@@ -52,9 +52,25 @@ public class PointController {
 //    @GetMapping("/admin/point/get-bar-code")
 //    public ResponseEntity<Points> getUsernameAndEmailByBarcode(@RequestParam )
     @PutMapping("/admin/add-user-points-by-form")
-    public ResponseEntity<Points> addUserPointsByForm(@RequestParam String username, @RequestParam String email,@RequestParam String material, @RequestParam double totalTrashCollect)
-    {
-        Points points = pointService.formAddPoints(username,email, material, totalTrashCollect);
+    public ResponseEntity<Points> addUserPointsByForm(@RequestParam String username, @RequestParam String email,
+                                                      @RequestParam(required = false) Double plasticKg,
+                                                      @RequestParam(required = false) Double metalKg,
+                                                      @RequestParam(required = false) Double clothKg,
+                                                      @RequestParam(required = false) Double glassKg,
+                                                      @RequestParam(required = false) Double paperKg,
+                                                      @RequestParam(required = false) Double cardboardKg) {
+        Points points = pointService.formAddPoints(username, email, null, plasticKg, metalKg, clothKg, glassKg, paperKg, cardboardKg);
         return ResponseEntity.ok(points);
     }
+    @PutMapping("/complete-quiz-add-points")
+    public ResponseEntity<String> addPointsByQuiz(@RequestParam Long userId, @RequestParam double points)
+    {
+        Users user = userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("User not found"));
+        Points userPoints = pointRepository.findByUserId(user.getId()).orElseThrow(() -> new IllegalArgumentException("Point with this user not found"));
+        userPoints.setPoint(userPoints.getPoint()+points);
+        pointRepository.save(userPoints);
+        return ResponseEntity.ok("Points added successfully.");
+    }
+
 }
+

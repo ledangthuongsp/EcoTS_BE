@@ -13,8 +13,13 @@ public class UserProgressService {
     @Autowired
     private UserProgressRepository userProgressRepository;
 
-    public UserProgress saveUserProgress(UserProgress userProgress) {
-        return userProgressRepository.save(userProgress);
+    public UserProgress creatNew (Long userId, Long topicId, double progress)
+    {
+        UserProgress userProgress= new UserProgress();
+        userProgress.setProgress(progress);
+        userProgress.setUserId(userId);
+        userProgress.setTopicId(topicId);
+        return  userProgressRepository.save(userProgress);
     }
 
     public Optional<UserProgress> getUserProgress(Long userId, Long topicId) {
