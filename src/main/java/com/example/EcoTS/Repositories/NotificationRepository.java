@@ -1,14 +1,11 @@
 package com.example.EcoTS.Repositories;
 
-import com.example.EcoTS.Models.DonationHistory;
+import com.example.EcoTS.Models.Notifications;
 import io.swagger.v3.oas.annotations.Hidden;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
-
 @Repository
 @Hidden
-public interface DonationHistoryRepository extends JpaRepository<DonationHistory, Long> {
-    List<DonationHistory> findByUserId(Long userId);
+public interface NotificationRepository extends JpaRepository<Notifications, Long> {
 }

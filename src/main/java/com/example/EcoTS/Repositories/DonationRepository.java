@@ -1,5 +1,6 @@
 package com.example.EcoTS.Repositories;
 
+import com.example.EcoTS.Models.DonationHistory;
 import com.example.EcoTS.Models.Donations;
 import com.example.EcoTS.Models.Verifications;
 
@@ -16,4 +17,5 @@ import io.swagger.v3.oas.annotations.Hidden;
 @Hidden
 public interface DonationRepository extends JpaRepository<Donations, Long> {
     Optional<Donations> findById(Long id);
+
 }
