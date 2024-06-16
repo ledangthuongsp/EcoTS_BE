@@ -1,13 +1,7 @@
 package com.example.EcoTS.Services.DonationService;
 
-import com.example.EcoTS.Models.DonationHistory;
-import com.example.EcoTS.Models.Donations;
-import com.example.EcoTS.Models.Points;
-import com.example.EcoTS.Models.Users;
-import com.example.EcoTS.Repositories.DonationHistoryRepository;
-import com.example.EcoTS.Repositories.DonationRepository;
-import com.example.EcoTS.Repositories.PointRepository;
-import com.example.EcoTS.Repositories.UserRepository;
+import com.example.EcoTS.Models.*;
+import com.example.EcoTS.Repositories.*;
 import com.example.EcoTS.Services.CloudinaryService.CloudinaryService;
 
 import com.example.EcoTS.Services.Notification.NotificationService;
@@ -36,6 +30,8 @@ public class DonationService {
     private DonationHistoryRepository donationHistoryRepository;
     @Autowired
     private NotificationService notificationService;
+    @Autowired
+    private NotificationRepository notificationRepository;
 
     public Donations createVolunteer(String title, String name, String description, List<MultipartFile> coverImage, List<MultipartFile> sponsorImages, LocalDate startDate, LocalDate endDate, double totalDonations) throws IOException {
         List<String> coverImageUrl = cloudinaryService.uploadMultipleFilesDonations(coverImage);
@@ -54,8 +50,14 @@ public class DonationService {
         Donations savedVolunteer = donationRepository.save(volunteer);
 
         // Send notification
-        String message = "A new donation has been created: " + title;
-        notificationService.notifyAllUsers(message);
+        // Create and save notification
+        Notifications notification = Notifications.builder()
+                .title("New Donation Created")
+                .description("A new donation has been created: " + title)
+                .build();
+        notificationRepository.save(notification);
+        // Notify all users
+        notificationService.notifyAllUsers(notification.getTitle(), notification.getDescription());
 
         return savedVolunteer;
     }
