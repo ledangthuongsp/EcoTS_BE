@@ -47,37 +47,37 @@ public class PointService {
         double totalPoints = 0;
         double totalCo2Saved = 0;
         if (plasticKg != null && plasticKg > 0) {
-            Materials material = materialRepository.findByName("plastic").orElseThrow(() -> new IllegalArgumentException("Material not found"));
+            Materials material = materialRepository.findByName("PLASTIC").orElseThrow(() -> new IllegalArgumentException("Material not found"));
             totalPoints += material.getPointsPerKg() * plasticKg;
             totalCo2Saved += material.getCo2SavedPerKg() * plasticKg;
         }
 
         if (metalKg != null && metalKg > 0) {
-            Materials material = materialRepository.findByName("metal").orElseThrow(() -> new IllegalArgumentException("Material not found"));
+            Materials material = materialRepository.findByName("METAL").orElseThrow(() -> new IllegalArgumentException("Material not found"));
             totalPoints += material.getPointsPerKg() * metalKg;
             totalCo2Saved += material.getCo2SavedPerKg() * metalKg;
         }
 
         if (clothKg != null && clothKg > 0) {
-            Materials material = materialRepository.findByName("cloth").orElseThrow(() -> new IllegalArgumentException("Material not found"));
+            Materials material = materialRepository.findByName("CLOTH").orElseThrow(() -> new IllegalArgumentException("Material not found"));
             totalPoints += material.getPointsPerKg() * clothKg;
             totalCo2Saved += material.getCo2SavedPerKg() * clothKg;
         }
 
         if (glassKg != null && glassKg > 0) {
-            Materials material = materialRepository.findByName("glass").orElseThrow(() -> new IllegalArgumentException("Material not found"));
+            Materials material = materialRepository.findByName("GLASS").orElseThrow(() -> new IllegalArgumentException("Material not found"));
             totalPoints += material.getPointsPerKg() * glassKg;
             totalCo2Saved += material.getCo2SavedPerKg() * glassKg;
         }
 
         if (paperKg != null && paperKg > 0) {
-            Materials material = materialRepository.findByName("paper").orElseThrow(() -> new IllegalArgumentException("Material not found"));
+            Materials material = materialRepository.findByName("PAPER").orElseThrow(() -> new IllegalArgumentException("Material not found"));
             totalPoints += material.getPointsPerKg() * paperKg;
             totalCo2Saved += material.getCo2SavedPerKg() * paperKg;
         }
 
         if (cardboardKg != null && cardboardKg > 0) {
-            Materials material = materialRepository.findByName("cardboard").orElseThrow(() -> new IllegalArgumentException("Material not found"));
+            Materials material = materialRepository.findByName("CARDBOARD").orElseThrow(() -> new IllegalArgumentException("Material not found"));
             totalPoints += material.getPointsPerKg() * cardboardKg;
             totalCo2Saved += material.getCo2SavedPerKg() * cardboardKg;
         }
