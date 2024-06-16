@@ -41,7 +41,7 @@ public class Locations {
     private List<String> imgDetailsUrl;
 
     @ElementCollection
-    private List<Long> userId;
+    private List<Long> employeeId;
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)

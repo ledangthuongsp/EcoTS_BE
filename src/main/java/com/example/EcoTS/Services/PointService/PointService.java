@@ -7,6 +7,7 @@ import com.example.EcoTS.Services.Notification.NotificationService;
 import com.example.EcoTS.Services.Statistic.StatisticService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.xml.transform.Result;
 import java.util.Optional;
@@ -43,6 +44,7 @@ public class PointService {
         point.setPoint(point.getPoint() + points);
         pointRepository.save(point);
     }
+    @Transactional
     public Points formAddPoints(String username, String email, Long employeeId, Double plasticKg, Double metalKg, Double clothKg,
                                 Double glassKg, Double paperKg, Double cardboardKg ) {
         Users users = userRepository.findByUsername(username)

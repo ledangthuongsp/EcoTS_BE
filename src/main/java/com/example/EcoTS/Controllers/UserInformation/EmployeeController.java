@@ -20,8 +20,8 @@ public class EmployeeController {
     private EmployeeService employeeService;
 
     @PostMapping("/add-to-location")
-    public Locations addEmployeeToLocation (@RequestParam Long userId, @RequestParam Long locationId)
+    public Locations addEmployeeToLocation (@RequestParam Long employeeId, @RequestParam Long locationId)
     {
-        return employeeService.addEmployeeToLocation(userId, locationId);
+        return employeeService.addEmployeeToLocation(employeeId, locationId);
     }
 }

@@ -15,5 +15,5 @@ import java.util.Optional;
 @Hidden
 public interface LocationRepository extends JpaRepository<Locations, Long> {
     List<Locations> findByTypeOfLocation(String type);
-    Optional<Locations> findByUserId(Long userId);
+    Optional<Locations> findByEmployeeId(Long employeeId);
 }

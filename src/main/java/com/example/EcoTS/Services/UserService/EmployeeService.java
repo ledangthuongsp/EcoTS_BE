@@ -5,6 +5,7 @@ import com.example.EcoTS.Repositories.LocationRepository;
 import com.example.EcoTS.Repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.text.ParsePosition;
 import java.util.ArrayList;
@@ -17,20 +18,21 @@ public class EmployeeService {
     @Autowired
     private LocationRepository locationRepository;
 
-    public Locations addEmployeeToLocation (Long userId, Long locationId)
+    @Transactional
+    public Locations addEmployeeToLocation (Long employeeId, Long locationId)
     {
         Locations locations = locationRepository.findById(locationId).orElseThrow();
         List<Long> employeeList;
-        if(locations.getUserId() == null)
+        if(locations.getEmployeeId() == null)
         {
             employeeList = new ArrayList<>();
         }
         else
         {
-            employeeList = locations.getUserId();
+            employeeList = locations.getEmployeeId();
         }
-        employeeList.add(userId);
-        locations.setUserId(employeeList);
+        employeeList.add(employeeId);
+        locations.setEmployeeId(employeeList);
         return locationRepository.save(locations);
     }
 }
