@@ -10,6 +10,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.sql.Time;
+import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -33,7 +35,7 @@ public class DonationService {
     @Autowired
     private NotificationRepository notificationRepository;
 
-    public Donations createVolunteer(String title, String name, String description, List<MultipartFile> coverImage, List<MultipartFile> sponsorImages, LocalDate startDate, LocalDate endDate, double totalDonations) throws IOException {
+    public Donations createVolunteer(String title, String name, String description, List<MultipartFile> coverImage, List<MultipartFile> sponsorImages, Timestamp startDate, Timestamp endDate, double totalDonations) throws IOException {
         List<String> coverImageUrl = cloudinaryService.uploadMultipleFilesDonations(coverImage);
         List<String> sponsorImageUrls = cloudinaryService.uploadMultipleFilesDonations(sponsorImages);
 
