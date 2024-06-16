@@ -12,7 +12,9 @@ import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 
 @RestController
 @RequestMapping("/api/quiz-questions")
@@ -51,5 +53,13 @@ public class QuizQuestionController {
     {
         quizQuestionService.deleteQuestion(questionId);
     }
+//    @GetMapping("/get-all-question-by-topic")
+//    public List<QuizQuestion> getAllQuestionByQuizTopic(@RequestParam Long id, @RequestParam Long questionId) {
+//        QuizTopic quizTopic = quizTopicRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Topic not found"));
+//        List<QuizQuestion> questions = quizQuestionRepository.findByQuizTopic(quizTopic);
+//        Collections.shuffle(questions, new Random(quizTopic.getId())); // Shuffle questions based on user ID
+//        return questions;
+//    }
+
 }
 

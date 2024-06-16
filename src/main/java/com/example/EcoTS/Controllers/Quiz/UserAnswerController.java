@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/user-answer")
+@RequestMapping("/api/user-answers")
 @CrossOrigin
 @Tag(name = "Quiz")
 public class UserAnswerController {
