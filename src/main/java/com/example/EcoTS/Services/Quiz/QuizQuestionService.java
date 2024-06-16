@@ -33,6 +33,7 @@ public class QuizQuestionService {
         quizQuestion.setIncorrectAnswer1(quizQuestionDTO.getIncorrectAnswer1());
         quizQuestion.setIncorrectAnswer2(quizQuestionDTO.getIncorrectAnswer2());
         quizQuestion.setQuizTopic(topic);
+        topic.setNumberQuestion(topic.getNumberQuestion()+1);
         return quizQuestionRepository.save(quizQuestion);
     }
 

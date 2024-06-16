@@ -42,6 +42,7 @@ public class QuizTopicService {
         topic.setTopicName(topicName);
         topic.setDescription(description);
         topic.setImgUrl(imgUrl);
+        topic.setNumberQuestion(0L);
         QuizTopic savedTopic = quizTopicRepository.save(topic);
         // Add progress for all users
         List<Users> users = userRepository.findAll();
