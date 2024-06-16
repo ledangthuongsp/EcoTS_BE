@@ -40,6 +40,9 @@ public class Locations {
     private String backGroundImgUrl;
     private List<String> imgDetailsUrl;
 
+    @ElementCollection
+    private List<Long> userId;
+
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private Timestamp createdAt;

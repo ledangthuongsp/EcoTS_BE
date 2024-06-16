@@ -50,13 +50,14 @@ public class PointController {
     }
     @PutMapping("/admin/add-user-points-by-form")
     public ResponseEntity<Points> addUserPointsByForm(@RequestParam String username, @RequestParam String email,
+                                                      @RequestParam Long employeeId,
                                                       @RequestParam(required = false) Double plasticKg,
                                                       @RequestParam(required = false) Double metalKg,
                                                       @RequestParam(required = false) Double clothKg,
                                                       @RequestParam(required = false) Double glassKg,
                                                       @RequestParam(required = false) Double paperKg,
                                                       @RequestParam(required = false) Double cardboardKg) {
-        Points points = pointService.formAddPoints(username, email, null, plasticKg, metalKg, clothKg, glassKg, paperKg, cardboardKg);
+        Points points = pointService.formAddPoints(username, email, employeeId, plasticKg, metalKg, clothKg, glassKg, paperKg, cardboardKg);
         return ResponseEntity.ok(points);
     }
     @PutMapping("/complete-quiz-add-points")

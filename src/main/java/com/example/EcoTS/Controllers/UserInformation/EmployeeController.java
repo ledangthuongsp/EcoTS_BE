@@ -1,0 +1,27 @@
+package com.example.EcoTS.Controllers.UserInformation;
+
+import com.example.EcoTS.Models.Locations;
+import com.example.EcoTS.Services.UserService.EmployeeService;
+import io.swagger.v3.oas.annotations.Hidden;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import org.hibernate.validator.constraints.pl.REGON;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Locale;
+
+@RestController
+@CrossOrigin
+@RequestMapping("/employee")
+@Tag(name = "Everything about Employee")
+public class EmployeeController {
+
+    @Autowired
+    private EmployeeService employeeService;
+
+    @PostMapping("/add-to-location")
+    public Locations addEmployeeToLocation (@RequestParam Long userId, @RequestParam Long locationId)
+    {
+        return employeeService.addEmployeeToLocation(userId, locationId);
+    }
+}

@@ -3,6 +3,8 @@ package com.example.EcoTS.Services.PointService;
 import com.example.EcoTS.Models.*;
 import com.example.EcoTS.Repositories.*;
 
+import com.example.EcoTS.Services.Notification.NotificationService;
+import com.example.EcoTS.Services.Statistic.StatisticService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -18,6 +20,10 @@ public class PointService {
     private MaterialRepository materialRepository;
     @Autowired
     private ResultRepository resultRepository;
+    @Autowired
+    private NotificationService notificationService;
+    @Autowired
+    private StatisticService statisticService;
     public void awardPoints(String barcodeData, double points) {
         String[] data = barcodeData.split(":");
         String username = data[0];
@@ -37,7 +43,7 @@ public class PointService {
         point.setPoint(point.getPoint() + points);
         pointRepository.save(point);
     }
-    public Points formAddPoints(String username, String email, String materialName, Double plasticKg, Double metalKg, Double clothKg,
+    public Points formAddPoints(String username, String email, Long employeeId, Double plasticKg, Double metalKg, Double clothKg,
                                 Double glassKg, Double paperKg, Double cardboardKg ) {
         Users users = userRepository.findByUsername(username)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
@@ -89,6 +95,8 @@ public class PointService {
         results.setSaveCo2(totalCo2Saved + results.getSaveCo2());
         pointRepository.save(points);
 
+        notificationService.createNotification(users.getId(), totalPoints, employeeId);
+        statisticService.saveStatistic(paperKg, cardboardKg, plasticKg, glassKg, clothKg, metalKg, employeeId);
         return points;
     }
 }
