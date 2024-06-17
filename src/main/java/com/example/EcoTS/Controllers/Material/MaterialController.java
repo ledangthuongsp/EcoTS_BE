@@ -48,13 +48,12 @@ public class MaterialController {
     public ResponseEntity<String> updateMaterial(@PathVariable Long id, @RequestBody Materials updatedMaterial) {
         Materials existingMaterial = materialRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Material not found"));
-
-        existingMaterial.setName(updatedMaterial.getName());
         existingMaterial.setPointsPerKg(updatedMaterial.getPointsPerKg());
         existingMaterial.setCo2SavedPerKg(updatedMaterial.getCo2SavedPerKg());
 
         materialRepository.save(existingMaterial);
         return new ResponseEntity<>("Material updated successfully", HttpStatus.OK);
+
     }
 }
 
