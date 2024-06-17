@@ -15,4 +15,5 @@ import io.swagger.v3.oas.annotations.Hidden;
 @Hidden
 public interface MaterialRepository extends JpaRepository<Materials, Long> {
     Optional<Materials> findByName (String name);
+    Materials findByType(String type);
 }

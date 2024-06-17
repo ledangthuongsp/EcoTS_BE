@@ -14,6 +14,7 @@ import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/statistics")
@@ -31,24 +32,9 @@ public class StatisticController {
         return ResponseEntity.ok(statistics);
     }
     @GetMapping("/by-period")
-    public ResponseEntity<StatisticResponse> getStatisticsByPeriod(@RequestParam("period") String period) {
-        Statistic statistics = statisticService.getStatisticsByPeriod(period);
-        double totalCO2Saved = statisticService.calculateTotalCO2Saved(statistics);
-        StatisticResponse response = new StatisticResponse(statistics, totalCO2Saved);
-        return ResponseEntity.ok(response);
-    }
-
-    @Getter
-    @Setter
-    public static class StatisticResponse {
-        private Statistic statistics;
-        private double totalCO2Saved;
-
-        public StatisticResponse(Statistic statistics, double totalCO2Saved) {
-            this.statistics = statistics;
-            this.totalCO2Saved = totalCO2Saved;
-        }
-
+    public ResponseEntity<Map<String, Object>> getStatisticsByPeriod(@RequestParam("period") String period) {
+        Map<String, Object> statistics = statisticService.getStatisticsByPeriod(period);
+        return ResponseEntity.ok(statistics);
     }
 
 }
