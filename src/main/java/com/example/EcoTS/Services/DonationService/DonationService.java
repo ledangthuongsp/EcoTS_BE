@@ -38,6 +38,8 @@ public class DonationService {
     private NotificationService notificationService;
     @Autowired
     private NotificationRepository notificationRepository;
+    @Autowired
+    private ResultRepository resultRepository;
 
     @Transactional
     public Donations createVolunteer(String title, String name, String description, List<MultipartFile> coverImage, List<MultipartFile> sponsorImages, Timestamp startDate, Timestamp endDate, double totalDonations, String username) throws IOException {
@@ -92,6 +94,13 @@ public class DonationService {
         // Update user's points
         userPoints.setPoint(userPoints.getPoint() - donationPoints);
         pointRepository.save(userPoints);
+
+        // Update result achievement
+        Results results = resultRepository.findByUser(user).orElseThrow(() -> new IllegalArgumentException("User not found"));
+        //so lan donate
+        results.setNumberOfTimeDonate(results.getNumberOfTimeDonate() + 1);
+        //so diem da donate
+        results.setPointDonate(results.getPointDonate() + donationPoints);
 
         // Find donation to update total points
         Donations donation = donationRepository.findById(donationId).orElseThrow(() -> new IllegalArgumentException("Donation not found"));
