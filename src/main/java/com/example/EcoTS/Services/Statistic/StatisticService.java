@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 
 @Service
 public class StatisticService {
@@ -29,20 +30,59 @@ public class StatisticService {
     }
 
     public Statistic getStatisticsByPeriod(String period) {
-        LocalDate now = LocalDate.now();
-        LocalDate startDate;
+        LocalDateTime endTime = LocalDateTime.now();
+        LocalDateTime startTime;
+
         switch (period.toLowerCase()) {
             case "month":
-                startDate = now.minus(1, ChronoUnit.MONTHS);
+                startTime = endTime.minus(1, ChronoUnit.MONTHS);
                 break;
             case "year":
-                startDate = now.minus(1, ChronoUnit.YEARS);
+                startTime = endTime.minus(1, ChronoUnit.YEARS);
                 break;
             case "week":
             default:
-                startDate = now.minus(1, ChronoUnit.WEEKS);
+                startTime = endTime.minus(1, ChronoUnit.WEEKS);
                 break;
         }
-        return statisticRepository.findStatisticsBetween(startDate, now);
+
+        List<Statistic> statistics = statisticRepository.findAll();
+
+        double totalPaperKg = 0.0;
+        double totalCardboardKg = 0.0;
+        double totalPlasticKg = 0.0;
+        double totalGlassKg = 0.0;
+        double totalClothKg = 0.0;
+        double totalMetalKg = 0.0;
+
+        for (Statistic stat : statistics) {
+            if (stat.getCreatedAt().toLocalDateTime().isAfter(startTime) && stat.getCreatedAt().toLocalDateTime().isBefore(endTime)) {
+                totalPaperKg += stat.getPaperKg();
+                totalCardboardKg += stat.getCardBoardKg();
+                totalPlasticKg += stat.getPlasticKg();
+                totalGlassKg += stat.getGlassKg();
+                totalClothKg += stat.getClothKg();
+                totalMetalKg += stat.getMetalKg();
+            }
+        }
+
+        Statistic result = new Statistic();
+        result.setPaperKg(totalPaperKg);
+        result.setCardBoardKg(totalCardboardKg);
+        result.setPlasticKg(totalPlasticKg);
+        result.setGlassKg(totalGlassKg);
+        result.setClothKg(totalClothKg);
+        result.setMetalKg(totalMetalKg);
+
+        return result;
+    }
+
+    public double calculateTotalCO2Saved(Statistic statistics) {
+        return (statistics.getPaperKg() * 0.46) +
+                (statistics.getCardBoardKg() * 0.34) +
+                (statistics.getPlasticKg() * 0.76) +
+                (statistics.getGlassKg() * 0.38) +
+                (statistics.getClothKg() * 0.3) +
+                (statistics.getMetalKg() * 2.5);
     }
 }

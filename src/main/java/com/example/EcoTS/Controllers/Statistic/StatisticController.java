@@ -4,6 +4,8 @@ import com.example.EcoTS.Models.Statistic;
 import com.example.EcoTS.Repositories.StatisticRepository;
 import com.example.EcoTS.Services.Statistic.StatisticService;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -29,9 +31,24 @@ public class StatisticController {
         return ResponseEntity.ok(statistics);
     }
     @GetMapping("/by-period")
-    public ResponseEntity<Statistic> getStatisticsByPeriod(@RequestParam("period") String period) {
+    public ResponseEntity<StatisticResponse> getStatisticsByPeriod(@RequestParam("period") String period) {
         Statistic statistics = statisticService.getStatisticsByPeriod(period);
-        return ResponseEntity.ok(statistics);
+        double totalCO2Saved = statisticService.calculateTotalCO2Saved(statistics);
+        StatisticResponse response = new StatisticResponse(statistics, totalCO2Saved);
+        return ResponseEntity.ok(response);
+    }
+
+    @Getter
+    @Setter
+    public static class StatisticResponse {
+        private Statistic statistics;
+        private double totalCO2Saved;
+
+        public StatisticResponse(Statistic statistics, double totalCO2Saved) {
+            this.statistics = statistics;
+            this.totalCO2Saved = totalCO2Saved;
+        }
+
     }
 
 }
