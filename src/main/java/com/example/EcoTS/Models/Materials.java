@@ -31,4 +31,5 @@ public class Materials {
     private String name;
     private double pointsPerKg;
     private double co2SavedPerKg;
+    private String type;
 }
