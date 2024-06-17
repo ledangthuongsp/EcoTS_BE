@@ -7,6 +7,7 @@ import com.example.EcoTS.Services.CloudinaryService.CloudinaryService;
 
 import com.example.EcoTS.Services.Notification.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -75,6 +76,46 @@ public class DonationService {
         notificationService.notifyAllUsers(notification.getTitle(), notification.getDescription(), username);
 
         return savedVolunteer;
+    }
+    @Transactional
+    public Donations updateDonation(Long id, String title, String name, String description, List<MultipartFile> coverImage,
+                                    List<MultipartFile> sponsorImages, Timestamp startDate, Timestamp endDate,
+                                    double totalDonations) throws IOException {
+        Donations donation = donationRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Donation not found"));
+
+        if (coverImage != null && !coverImage.isEmpty()) {
+            List<String> coverImageUrl = cloudinaryService.uploadMultipleFilesDonations(coverImage);
+            donation.setCoverImageUrl(coverImageUrl);
+        }
+
+        if (sponsorImages != null && !sponsorImages.isEmpty()) {
+            List<String> sponsorImageUrls = cloudinaryService.uploadMultipleFilesDonations(sponsorImages);
+            donation.setSponsorImages(sponsorImageUrls);
+        }
+
+        if (title != null && !title.isEmpty()) {
+            donation.setTitle(title);
+        }
+
+        if (name != null && !name.isEmpty()) {
+            donation.setName(name);
+        }
+
+        if (description != null && !description.isEmpty()) {
+            donation.setDescription(description);
+        }
+
+        if (startDate != null) {
+            donation.setStartDate(startDate);
+        }
+
+        if (endDate != null) {
+            donation.setEndDate(endDate);
+        }
+
+        donation.setTotalDonations(totalDonations);
+
+        return donationRepository.save(donation);
     }
 
     @Transactional

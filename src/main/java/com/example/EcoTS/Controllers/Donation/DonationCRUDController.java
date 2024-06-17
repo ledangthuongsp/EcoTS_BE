@@ -57,6 +57,22 @@ public class DonationCRUDController {
         Donations volunteer = donationService.createVolunteer(title, name, description, coverImage, sponsorImages, startDate, endDate, totalDonations, username);
         return ResponseEntity.ok(volunteer);
     }
+
+    @PutMapping(value = "/admin/donate/update-donation/{id}", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
+    public ResponseEntity<Donations> updateDonation(
+            @PathVariable Long id,
+            @RequestParam(value = "title", required = false) String title,
+            @RequestParam(value = "name", required = false) String name,
+            @RequestParam(value = "description", required = false) String description,
+            @RequestPart(value = "coverImage", required = false) List<MultipartFile> coverImage,
+            @RequestPart(value = "sponsorImages", required = false) List<MultipartFile> sponsorImages,
+            @RequestParam(value = "startDate", required = false) Timestamp startDate,
+            @RequestParam(value = "endDate", required = false) Timestamp endDate,
+            @RequestParam(value = "totalDonations", required = false) Double totalDonations) throws IOException {
+        Donations updatedDonation = donationService.updateDonation(id, title, name, description, coverImage, sponsorImages, startDate, endDate, totalDonations != null ? totalDonations : 0.0);
+        return ResponseEntity.ok(updatedDonation);
+    }
+
     @DeleteMapping("/detele-donation-by-id")
     public void deleteDonation(@RequestParam Long donationId)
     {
