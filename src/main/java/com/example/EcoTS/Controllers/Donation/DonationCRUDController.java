@@ -9,7 +9,10 @@ import com.example.EcoTS.Services.DonationService.DonationService;
 
 import net.bytebuddy.asm.Advice;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -35,7 +38,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @Tag(name ="Donations", description = "this api for CRUD donations")
 public class DonationCRUDController {
-
+    private static final Logger logger = LoggerFactory.getLogger(DonationController.class);
     @Autowired
     private DonationService donationService;
     @Autowired
@@ -73,9 +76,14 @@ public class DonationCRUDController {
         return ResponseEntity.ok(updatedDonation);
     }
 
-    @DeleteMapping("/detele-donation-by-id")
-    public void deleteDonation(@RequestParam Long donationId)
-    {
-        donationRepository.deleteById(donationId);
+    @DeleteMapping("/admin/donate/delete-donation-by-id")
+    public ResponseEntity<String> deleteDonation(@RequestParam Long donationId) {
+        try {
+            donationRepository.deleteById(donationId);
+            return ResponseEntity.ok("Donation deleted successfully");
+        } catch (Exception e) {
+            logger.error("Error deleting donation with id {}: {}", donationId, e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to delete donation: " + e.getMessage());
+        }
     }
 }
