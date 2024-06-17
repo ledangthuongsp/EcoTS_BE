@@ -2,7 +2,7 @@ package com.example.EcoTS.Services.UserService;
 
 import com.example.EcoTS.DTOs.Request.User.ChangeInfoRequest;
 import com.example.EcoTS.Models.Users;
-import com.example.EcoTS.Repositories.UserRepository;
+import com.example.EcoTS.Repositories.*;
 import com.example.EcoTS.Services.CloudinaryService.CloudinaryService;
 import com.example.EcoTS.Services.SecurityService.JwtService;
 
@@ -30,6 +30,16 @@ public class UserService {
     private UserRepository userRepository;
     @Autowired
     private JwtService jwtService;
+    @Autowired
+    private PointRepository pointRepository;
+    @Autowired
+    private ResultRepository resultRepository;
+    @Autowired
+    private UserAchievementRepository userAchievementRepository;
+    @Autowired
+    private UserProgressRepository userProgressRepository;
+    @Autowired
+    private LocationRepository locationRepository;
 
     public String uploadUserAvatar(String token, MultipartFile file) throws IOException {
         // Lấy thông tin người dùng từ UserRepository
@@ -51,6 +61,21 @@ public class UserService {
 
         return newAvatarUrl;
     }
+    public String uploadEmployeeAvatar(Long employeeId, MultipartFile file) throws IOException {
+        // Lấy thông tin người dùng từ UserRepository
+
+        Users user = userRepository.findById(employeeId).orElseThrow();
+
+        // Lấy URL avatar hiện tại của người dùng
+        String currentAvatarUrl = user.getAvatarUrl();
+
+        // Tải lên avatar mới và cập nhật URL avatar cho người dùng
+        String newAvatarUrl = cloudinaryService.userUploadAvatar(file, currentAvatarUrl);
+        user.setAvatarUrl(newAvatarUrl);
+        userRepository.save(user);
+
+        return newAvatarUrl;
+    }
     public List<Users> getAllUsers() {
         return userRepository.findAll();
     }
@@ -59,6 +84,23 @@ public class UserService {
         return userRepository.findByUsername(username)
                 .orElseThrow(()
                 -> new IllegalArgumentException("User not found. Please check your username."));
+    }
+    @Transactional
+    public void deleteUser(Users user) {
+        // Xóa các thực thể liên quan đến người dùng
+        pointRepository.deleteByUser(user);
+        resultRepository.deleteByUser(user);
+        userAchievementRepository.deleteByUser(user);
+        userProgressRepository.deleteByUser(user);
+
+        // Xóa employee khỏi danh sách employeeId trong bảng locations
+        locationRepository.findAll().forEach(location -> {
+            location.getEmployeeId().remove(user.getId());
+            locationRepository.save(location);
+        });
+
+        // Xóa người dùng
+        userRepository.delete(user);
     }
 
 }

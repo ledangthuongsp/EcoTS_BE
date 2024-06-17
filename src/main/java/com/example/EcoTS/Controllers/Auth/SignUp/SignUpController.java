@@ -1,21 +1,28 @@
 package com.example.EcoTS.Controllers.Auth.SignUp;
 
 import com.example.EcoTS.DTOs.Request.Auth.SignUpDTO;
+import com.example.EcoTS.Enum.Roles;
+import com.example.EcoTS.Models.Locations;
 import com.example.EcoTS.Models.Users;
+import com.example.EcoTS.Repositories.LocationRepository;
+import com.example.EcoTS.Repositories.UserRepository;
 import com.example.EcoTS.Services.SecurityService.AuthenticationService;
 import com.example.EcoTS.Services.SecurityService.JwtService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+
+import javax.management.relation.Role;
+import javax.xml.stream.Location;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 @Controller
 @RestController
@@ -25,9 +32,22 @@ public class SignUpController {
 
     @Autowired
     private AuthenticationService authenticationService;
+    @Autowired
+    private LocationRepository locationRepository;
+
     @PostMapping("/auth/signup")
-    public ResponseEntity<Users> register(@RequestBody SignUpDTO registerUserDto) {
-        Users registeredUser = authenticationService.signup(registerUserDto);
+    public ResponseEntity<Users> register(@RequestBody SignUpDTO registerUserDto, @RequestParam (required = false) Roles roles,
+                                          @RequestParam (required = false) Long locationId) {
+        Users registeredUser = authenticationService.signup(registerUserDto, roles);
+        if (roles != null && roles == Roles.EMPLOYEE && locationId != null) {
+            Locations location = locationRepository.findById(locationId).orElseThrow();
+            List<Long> employeeList = location.getEmployeeId() != null ? location.getEmployeeId() : new ArrayList<>();
+            employeeList.add(registeredUser.getId());
+            location.setEmployeeId(employeeList);
+            registeredUser.setRole(Roles.EMPLOYEE.name());
+        } else {
+            registeredUser.setRole(Roles.CUSTOMER.name());
+        }
         return ResponseEntity.ok().body(registeredUser);
     }
 }

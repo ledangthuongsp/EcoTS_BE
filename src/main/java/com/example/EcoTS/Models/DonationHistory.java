@@ -4,32 +4,33 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.sql.Timestamp;
 
-@Entity
-@Table(name = "user_answers")
+@Table(name = "donation_history")
 @Data
+@Entity
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 @Getter
 @Setter
-public class UserAnswer {
+public class DonationHistory {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private Long userId;
-    private Long questionId;
-    private boolean isCorrect;
+    private double points;
+    private String donationLocation;
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private Timestamp createdAt;
 
-    @ManyToOne
-    @JoinColumn(name = "quiz_question_id", insertable = false, updatable = false)
-    private QuizQuestion quizQuestion;
+    @UpdateTimestamp
+    @Column(name = "updated_at")
+    private Timestamp updatedAt;
 }

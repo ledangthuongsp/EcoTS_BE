@@ -1,5 +1,6 @@
 package com.example.EcoTS.Models;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -22,11 +23,15 @@ public class UserProgress {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Long userId;
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    @JsonBackReference
+    private Users user;
+
     private Long topicId;
-    private Long quizIndex;  // This corresponds to current_index in Firebase
-    private Long topicIndex; // This corresponds to simple_index in Firebase
     private double progress;
+    private boolean reachMax;
+    private boolean collection;
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private Timestamp createdAt;
@@ -34,8 +39,4 @@ public class UserProgress {
     @UpdateTimestamp
     @Column(name = "updated_at")
     private Timestamp updatedAt;
-
-    @ManyToOne
-    @JoinColumn(name = "quiz_topic_id", insertable = false, updatable = false)
-    private QuizTopic quizTopic;
 }

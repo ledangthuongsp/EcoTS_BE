@@ -8,11 +8,13 @@ import com.example.EcoTS.Services.SecurityService.JwtService;
 import com.example.EcoTS.Services.UserService.UserService;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -80,12 +82,22 @@ public class UserController {
         return new ResponseEntity<>(users, HttpStatus.OK);
     }
     @DeleteMapping("/delete-user-by-id")
-    public ResponseEntity <Users> deleteUserById(@RequestParam Long id)
-    {
-        if (!userRepository.existsById(id)) {
-            return ResponseEntity.notFound().build();
+    public ResponseEntity<?> deleteUserById(@RequestParam Long id, @RequestParam String username) {
+        Optional<Users> optionalUser = userRepository.findById(id);
+        if (!optionalUser.isPresent()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found.");
         }
-        userRepository.deleteById(id);
-        return ResponseEntity.ok().build();
+
+        Users user = optionalUser.get();
+        if (!user.getUsername().equals(username)) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Username does not match the provided ID.");
+        }
+
+        try {
+            userService.deleteUser(user);
+            return ResponseEntity.ok().body("User deleted successfully.");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to delete user.");
+        }
     }
 }

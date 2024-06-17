@@ -46,7 +46,7 @@ public class ResultController {
     public void addMaximunPoint(@RequestParam double points, @RequestParam Long userId)
     {
         Users users = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
-        Results results = resultRepository.findByUsers(users)
+        Results results = resultRepository.findByUser(users)
                 .orElseThrow(() -> new RuntimeException("Results not found"));
         results.setMaximumPoints(results.getMaximumPoints()+ points);
         resultRepository.save(results);
@@ -55,7 +55,7 @@ public class ResultController {
     public void addPointDonation(@RequestParam double points, @RequestParam Long userId)
     {
         Users users = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
-        Results results = resultRepository.findByUsers(users)
+        Results results = resultRepository.findByUser(users)
                 .orElseThrow(() -> new RuntimeException("Results not found"));
         results.setPointDonate(results.getPointDonate()+ points);
         resultRepository.save(results);
@@ -64,7 +64,7 @@ public class ResultController {
     public void addSaveCo2(@RequestParam double points, @RequestParam Long userId)
     {
         Users users = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
-        Results results = resultRepository.findByUsers(users)
+        Results results = resultRepository.findByUser(users)
                 .orElseThrow(() -> new RuntimeException("Results not found"));
         results.setSaveCo2(results.getSaveCo2()+ points);
         resultRepository.save(results);
@@ -73,7 +73,7 @@ public class ResultController {
     public void addNumberTimeOfDonate(@RequestParam Long time, @RequestParam Long userId)
     {
         Users users = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
-        Results results = resultRepository.findByUsers(users)
+        Results results = resultRepository.findByUser(users)
                 .orElseThrow(() -> new RuntimeException("Results not found"));
         results.setNumberOfTimeDonate((int) (results.getNumberOfTimeDonate() + time));
         resultRepository.save(results);
@@ -82,7 +82,7 @@ public class ResultController {
     public void addNumberTimeOfDetect(@RequestParam Long time, @RequestParam Long userId)
     {
         Users users = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
-        Results results = resultRepository.findByUsers(users)
+        Results results = resultRepository.findByUser(users)
                 .orElseThrow(() -> new RuntimeException("Results not found"));
         results.setNumberOfTimeDetect((int) (results.getNumberOfTimeDetect() + time));
         resultRepository.save(results);

@@ -1,39 +1,33 @@
 package com.example.EcoTS.Models;
 
+import jakarta.persistence.*;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.sql.Timestamp;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.experimental.FieldDefaults;
-
-@Table(name = "histories")
 @Data
-@Entity
-@FieldDefaults(level = AccessLevel.PRIVATE)
-@NoArgsConstructor
-@AllArgsConstructor
 @Builder
 @Getter
 @Setter
-public class Histories {
+@Entity
+@Table(name = "statistic")
+@FieldDefaults(level = AccessLevel.PRIVATE)
+@NoArgsConstructor
+@AllArgsConstructor
+public class Statistic {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
+    private Double paperKg;
+    private Double cardBoardKg;
+    private Double plasticKg;
+    private Double glassKg;
+    private Double clothKg;
+    private Double metalKg;
+    private Long employeeId;
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)

@@ -36,7 +36,7 @@ public class ResultService {
         List<Users> users = userRepository.findAll();
         for (Users user : users) {
             Results results = new Results();
-            results.setUsers(user);
+            results.setUser(user);
             results.setNumberOfTimeDonate(0);
             results.setNumberOfTimeDetect(0);
             results.setMaximumPoints(0.0);
@@ -48,7 +48,7 @@ public class ResultService {
     @Transactional
     public AchievementProgressDTO getAchievementProgress(Long userId, Long achievementLevelId) {
         Users users = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
-        Results results = resultRepository.findByUsers(users)
+        Results results = resultRepository.findByUser(users)
                 .orElseThrow(() -> new RuntimeException("Results not found"));
         AchievementLevel achievementLevel = achievementLevelRepository.findById(achievementLevelId)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid AchievementLevel ID"));
@@ -82,7 +82,7 @@ public class ResultService {
     @Transactional
     public List<AchievementAllProgressDTO> getAllAchievementProgress(Long userId) {
         Users users = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
-        Results results = resultRepository.findByUsers(users)
+        Results results = resultRepository.findByUser(users)
                 .orElseThrow(() -> new RuntimeException("Results not found"));
         List<AchievementLevel> achievementLevels = achievementLevelRepository.findAll();
 
@@ -100,7 +100,7 @@ public class ResultService {
                     progress = (double) results.getNumberOfTimeDonate() / maxIndex;
                     if(progress >= 1)
                     {
-                        Optional<UserAchievement> userAchievement = userAchievementRepository.findByUsers(users);
+                        Optional<UserAchievement> userAchievement = userAchievementRepository.findByUser(users);
                         if(userAchievement.isPresent())
                         {
                             UserAchievement currentUserAchievement = userAchievement.get();
@@ -126,7 +126,7 @@ public class ResultService {
                     progress = results.getPointDonate() / maxIndex;
                     if(progress >= 1)
                     {
-                        Optional<UserAchievement> userAchievement = userAchievementRepository.findByUsers(users);
+                        Optional<UserAchievement> userAchievement = userAchievementRepository.findByUser(users);
                         if(userAchievement.isPresent())
                         {
                             UserAchievement currentUserAchievement = userAchievement.get();
@@ -152,7 +152,7 @@ public class ResultService {
                     progress = results.getMaximumPoints() / maxIndex;
                     if(progress >= 1)
                     {
-                        Optional<UserAchievement> userAchievement = userAchievementRepository.findByUsers(users);
+                        Optional<UserAchievement> userAchievement = userAchievementRepository.findByUser(users);
                         if(userAchievement.isPresent())
                         {
                             UserAchievement currentUserAchievement = userAchievement.get();
@@ -178,7 +178,7 @@ public class ResultService {
                     progress = results.getSaveCo2() / maxIndex;
                     if(progress >= 1)
                     {
-                        Optional<UserAchievement> userAchievement = userAchievementRepository.findByUsers(users);
+                        Optional<UserAchievement> userAchievement = userAchievementRepository.findByUser(users);
                         if(userAchievement.isPresent())
                         {
                             UserAchievement currentUserAchievement = userAchievement.get();
@@ -204,7 +204,7 @@ public class ResultService {
                     progress = (double) results.getNumberOfTimeDetect() / maxIndex;
                     if(progress >= 1)
                     {
-                        Optional<UserAchievement> userAchievement = userAchievementRepository.findByUsers(users);
+                        Optional<UserAchievement> userAchievement = userAchievementRepository.findByUser(users);
                         if(userAchievement.isPresent())
                         {
                             UserAchievement currentUserAchievement = userAchievement.get();

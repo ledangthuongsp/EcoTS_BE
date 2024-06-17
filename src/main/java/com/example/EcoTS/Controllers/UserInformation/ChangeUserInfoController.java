@@ -1,6 +1,7 @@
 package com.example.EcoTS.Controllers.UserInformation;
 
 import com.example.EcoTS.DTOs.Request.User.ChangeInfoRequest;
+import com.example.EcoTS.DTOs.Request.User.EmployeeRequest;
 import com.example.EcoTS.Models.Users;
 import com.example.EcoTS.Repositories.UserRepository;
 import com.example.EcoTS.Services.SecurityService.JwtService;
@@ -60,6 +61,36 @@ public class ChangeUserInfoController {
         }
         if (changeInfoRequest.getPersonalId() != null) {
             user.setPersonalId(changeInfoRequest.getPersonalId());
+        }
+
+        // Lưu thông tin người dùng đã được cập nhật
+        userRepository.save(user);
+        return ResponseEntity.status(HttpStatus.OK).body("Your information has been updated successfully !");
+    }
+    @PutMapping("/employee/change-info")
+    public ResponseEntity<?> updateEmployeeInfo(@RequestBody EmployeeRequest employeeRequest, @RequestParam Long employeeId) throws Exception {
+
+
+        Users user = userRepository.findById(employeeId).orElseThrow();
+
+        // Cập nhật thông tin người dùng nếu các trường trong request được cung cấp
+        if (employeeRequest.getFullName() != null) {
+            user.setFullName(employeeRequest.getFullName());
+        }
+        if (employeeRequest.getDayOfBirth() != null) {
+            user.setDayOfBirth(employeeRequest.getDayOfBirth());
+        }
+        if (employeeRequest.getGender() != null) {
+            user.setGender(employeeRequest.getGender());
+        }
+        if (employeeRequest.getAddress() != null) {
+            user.setAddress(employeeRequest.getAddress());
+        }
+        if (employeeRequest.getPhoneNumber() != null) {
+            user.setPhoneNumber(employeeRequest.getPhoneNumber());
+        }
+        if (employeeRequest.getPersonalId() != null) {
+            user.setPersonalId(employeeRequest.getPersonalId());
         }
 
         // Lưu thông tin người dùng đã được cập nhật

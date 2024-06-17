@@ -1,8 +1,10 @@
 package com.example.EcoTS.Controllers.Point;
 
 import com.example.EcoTS.Models.Points;
+import com.example.EcoTS.Models.Results;
 import com.example.EcoTS.Models.Users;
 import com.example.EcoTS.Repositories.PointRepository;
+import com.example.EcoTS.Repositories.ResultRepository;
 import com.example.EcoTS.Repositories.UserRepository;
 import com.example.EcoTS.Services.PointService.PointService;
 import com.example.EcoTS.Services.SecurityService.JwtService;
@@ -34,6 +36,8 @@ public class PointController {
     private JwtService jwtService;
     @Autowired
     private PointService pointService;
+    @Autowired
+    private ResultRepository resultRepository;
 
     @GetMapping("/get-user-point")
     public ResponseEntity<Points> getUserPoints(@RequestParam String token)
@@ -41,20 +45,32 @@ public class PointController {
 
         String username = jwtService.getUsername(token);
         Users user = userRepository.findByUsername(username).orElseThrow(() -> new IllegalArgumentException("User not found"));
-        Points userPoints = pointRepository.findByUserId(user.getId()).orElseThrow(() -> new IllegalArgumentException("Point with this user not found"));
+        Points userPoints = pointRepository.findByUser(user).orElseThrow(() -> new IllegalArgumentException("Point with this user not found"));
         return ResponseEntity.ok(userPoints);
     }
-    @PutMapping("/admin/add-user-points")
-    public ResponseEntity<String> putUserPoints(@RequestParam String username, @RequestBody String email,@RequestParam double points) {
-        pointService.awardPointsByUsernameAndEmail(username, points);
-        return ResponseEntity.ok("Points added successfully.");
-    }
-//    @GetMapping("/admin/point/get-bar-code")
-//    public ResponseEntity<Points> getUsernameAndEmailByBarcode(@RequestParam )
     @PutMapping("/admin/add-user-points-by-form")
-    public ResponseEntity<Points> addUserPointsByForm(@RequestParam String username, @RequestParam String email,@RequestParam String material, @RequestParam double totalTrashCollect)
-    {
-        Points points = pointService.formAddPoints(username,email, material, totalTrashCollect);
+    public ResponseEntity<Points> addUserPointsByForm(@RequestParam String username, @RequestParam String email,
+                                                      @RequestParam Long employeeId,
+                                                      @RequestParam(required = false) Double plasticKg,
+                                                      @RequestParam(required = false) Double metalKg,
+                                                      @RequestParam(required = false) Double clothKg,
+                                                      @RequestParam(required = false) Double glassKg,
+                                                      @RequestParam(required = false) Double paperKg,
+                                                      @RequestParam(required = false) Double cardboardKg) {
+        Points points = pointService.formAddPoints(username, email, employeeId, plasticKg, metalKg, clothKg, glassKg, paperKg, cardboardKg);
         return ResponseEntity.ok(points);
     }
+    @PutMapping("/complete-quiz-add-points")
+    public ResponseEntity<String> addPointsByQuiz(@RequestParam Long userId, @RequestParam double points)
+    {
+        Users user = userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("User not found"));
+        Points userPoints = pointRepository.findByUser(user).orElseThrow(() -> new IllegalArgumentException("Point with this user not found"));
+        Results results = resultRepository.findByUser(user).orElseThrow(() -> new IllegalArgumentException("Point with this user not found"));
+        userPoints.setPoint(userPoints.getPoint() + points);
+        pointRepository.save(userPoints);
+        results.setMaximumPoints(results.getMaximumPoints()+points);
+        resultRepository.save(results);
+        return ResponseEntity.ok("Points added successfully.");
+    }
 }
+

@@ -44,8 +44,8 @@ public class Donations {
     private String description;
     private List<String> sponsorImages;
     private List<String> coverImageUrl;
-    private LocalDate startDate;
-    private LocalDate endDate;
+    private Timestamp startDate;
+    private Timestamp endDate;
     private double totalDonations;
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)

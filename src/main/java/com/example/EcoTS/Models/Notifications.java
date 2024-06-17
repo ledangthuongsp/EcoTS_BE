@@ -33,9 +33,9 @@ public class Notifications {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    private String title;
     private String description;
-    private String notificationUrl;
-    private String notificationStatus;
+
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private Timestamp createdAt;
