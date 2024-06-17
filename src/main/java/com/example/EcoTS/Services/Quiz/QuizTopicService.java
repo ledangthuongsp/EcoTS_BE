@@ -83,10 +83,15 @@ public class QuizTopicService {
     @Transactional
     public QuizTopic updateTopic(Long id, String topicName, String description, MultipartFile file) throws IOException {
         QuizTopic topic = quizTopicRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Topic not found"));
-        String imgUrl = cloudinaryService.uploadFileQuizTopic(file);
         topic.setTopicName(topicName);
         topic.setDescription(description);
-        topic.setImgUrl(imgUrl);
+
+        // Chỉ upload file và cập nhật URL nếu file không null
+        if (file != null && !file.isEmpty()) {
+            String imgUrl = cloudinaryService.uploadFileQuizTopic(file);
+            topic.setImgUrl(imgUrl);
+        }
+
         return quizTopicRepository.save(topic);
     }
 }
