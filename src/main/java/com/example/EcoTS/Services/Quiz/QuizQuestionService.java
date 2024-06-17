@@ -40,8 +40,12 @@ public class QuizQuestionService {
         return quizQuestionRepository.save(quizQuestion);
     }
 
+    @Transactional
     public void deleteQuestion(Long questionId) {
-        quizQuestionRepository.deleteById(questionId);
+        QuizQuestion quizQuestion = quizQuestionRepository.findById(questionId).orElseThrow(() -> new ResourceNotFoundException("Question not found"));
+        QuizTopic topic = quizQuestion.getQuizTopic();
+        topic.setNumberQuestion(topic.getNumberQuestion() - 1);
+        quizQuestionRepository.delete(quizQuestion);
     }
 
     public Optional<QuizQuestion> getQuizQuestionById(Long id) {

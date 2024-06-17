@@ -65,4 +65,19 @@ public class QuizTopicService {
         return quizTopicRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Topic not found"));
     }
+    @Transactional
+    public void deleteTopic(Long topicId) {
+        QuizTopic topic = quizTopicRepository.findById(topicId).orElseThrow(() -> new ResourceNotFoundException("Topic not found"));
+
+        // Delete all questions related to the topic
+        List<QuizQuestion> questions = quizQuestionRepository.findByQuizTopic(topic);
+        quizQuestionRepository.deleteAll(questions);
+
+        // Delete all user progress related to the topic
+        List<UserProgress> progressList = userProgressRepository.findByTopicId(topicId);
+        userProgressRepository.deleteAll(progressList);
+
+        // Delete the topic
+        quizTopicRepository.delete(topic);
+    }
 }

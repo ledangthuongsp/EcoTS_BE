@@ -45,5 +45,10 @@ public class QuizTopicController {
         // Gọi service để thêm chủ đề
         return quizTopicService.addTopic(topicName, description, multipartFile);
     }
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<String> deleteTopic(@PathVariable Long id) {
+        quizTopicService.deleteTopic(id);
+        return ResponseEntity.ok("Topic and related data deleted successfully");
+    }
 }
 
