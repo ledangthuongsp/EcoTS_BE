@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 
@@ -27,10 +28,9 @@ public class StatisticService {
         statisticRepository.save(statistic);
     }
 
-    public Statistic calculateStatistics(String period) {
-        LocalDateTime now = LocalDateTime.now();
-        LocalDateTime startDate;
-
+    public Statistic getStatisticsByPeriod(String period) {
+        LocalDate now = LocalDate.now();
+        LocalDate startDate;
         switch (period.toLowerCase()) {
             case "month":
                 startDate = now.minus(1, ChronoUnit.MONTHS);
@@ -43,7 +43,6 @@ public class StatisticService {
                 startDate = now.minus(1, ChronoUnit.WEEKS);
                 break;
         }
-
-        return statisticRepository.calculateStatistics(startDate, now);
+        return statisticRepository.findStatisticsBetween(startDate, now);
     }
 }

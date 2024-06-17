@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.sql.Timestamp;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -20,4 +21,8 @@ public interface StatisticRepository extends JpaRepository<Statistic, Long> {
     Statistic calculateStatistics(LocalDateTime startDate, LocalDateTime endDate);
     @Query("SELECT s FROM Statistic s WHERE s.createdAt >= :startDate AND s.createdAt <= :endDate")
     List<Statistic> findAllByDateRange(Timestamp startDate, Timestamp endDate);
+    @Query("SELECT SUM(s.paperKg) as paperKg, SUM(s.cardBoardKg) as cardBoardKg, SUM(s.plasticKg) as plasticKg, " +
+            "SUM(s.glassKg) as glassKg, SUM(s.clothKg) as clothKg, SUM(s.metalKg) as metalKg " +
+            "FROM Statistic s WHERE s.createdAt >= :startDate AND s.createdAt <= :endDate")
+    Statistic findStatisticsBetween(LocalDate startDate, LocalDate endDate);
 }
