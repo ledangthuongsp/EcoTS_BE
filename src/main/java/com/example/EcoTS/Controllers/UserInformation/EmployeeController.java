@@ -1,5 +1,6 @@
 package com.example.EcoTS.Controllers.UserInformation;
 
+import com.example.EcoTS.DTOs.Response.User.UsersDTO;
 import com.example.EcoTS.Models.Locations;
 import com.example.EcoTS.Models.Users;
 import com.example.EcoTS.Services.UserService.EmployeeService;
@@ -28,9 +29,9 @@ public class EmployeeController {
         return employeeService.addEmployeeToLocation(employeeId, locationId);
     }
     @GetMapping("/get-all-employee")
-    public List<Users> getAllEmployee()
+    public List<UsersDTO> getAllEmployee()
     {
-        return employeeService.getAllEmployee();
+        return employeeService.getAllEmployees();
     }
     @GetMapping("/get-location-by-employee-id")
     public Locations getLocationByEmployeeId(@RequestParam Long employeeId)

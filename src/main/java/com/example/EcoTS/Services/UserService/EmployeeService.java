@@ -1,5 +1,7 @@
 package com.example.EcoTS.Services.UserService;
 
+import com.example.EcoTS.DTOs.Response.User.UsersDTO;
+import com.example.EcoTS.DTOs.Response.User.UsersMapper;
 import com.example.EcoTS.Enum.Roles;
 import com.example.EcoTS.Models.Locations;
 import com.example.EcoTS.Models.Users;
@@ -13,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.text.ParsePosition;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class EmployeeService {
@@ -20,8 +23,9 @@ public class EmployeeService {
     private UserRepository userRepository;
     @Autowired
     private LocationRepository locationRepository;
-
-    @Transactional
+    @Autowired
+    private UsersMapper usersMapper;
+    @Transactional(readOnly = true)
     public Locations addEmployeeToLocation (Long employeeId, Long locationId)
     {
         Locations locations = locationRepository.findById(locationId).orElseThrow();
@@ -38,7 +42,7 @@ public class EmployeeService {
         locations.setEmployeeId(employeeList);
         return locationRepository.save(locations);
     }
-    @Transactional
+    @Transactional(readOnly = true)
     public Locations getLocationByEmployeeId(Long employeeId)
     {
         Locations location = locationRepository.findByEmployeeId(employeeId).orElseThrow();
@@ -49,9 +53,10 @@ public class EmployeeService {
         return location;
 
     }
-    @Transactional
-    public List<Users> getAllEmployee()
-    {
-        return userRepository.findByRole(Roles.EMPLOYEE.toString());
+    @Transactional(readOnly = true)
+    public List<UsersDTO> getAllEmployees() {
+        return userRepository.findByRole(Roles.EMPLOYEE.toString()).stream()
+                .map(usersMapper::toDTO)
+                .collect(Collectors.toList());
     }
 }
