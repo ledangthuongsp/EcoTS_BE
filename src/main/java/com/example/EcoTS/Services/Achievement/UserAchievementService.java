@@ -27,7 +27,6 @@ public class UserAchievementService {
     private UserRepository userRepository;
 
     public UserAchievement createNew (Long userId, List<String> badgeUrl) {
-
         // Xuất
         Users user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
         UserAchievement userAchievement = new UserAchievement();

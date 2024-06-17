@@ -23,7 +23,8 @@ public class QuizQuestionService {
 
     @Autowired
     private QuizTopicRepository quizTopicRepository;
-
+    @Autowired
+    private UserProgressService userProgressService;  // Service để xử lý tiến độ người dùng
     @Transactional
     public QuizQuestion addQuestion(Long topicId, QuizQuestionDTO quizQuestionDTO) {
         QuizQuestion quizQuestion = new QuizQuestion();
@@ -34,6 +35,8 @@ public class QuizQuestionService {
         quizQuestion.setIncorrectAnswer2(quizQuestionDTO.getIncorrectAnswer2());
         quizQuestion.setQuizTopic(topic);
         topic.setNumberQuestion(topic.getNumberQuestion()+1);
+
+        userProgressService.resetProgressForTopic(topicId);  // Reset progress của tất cả người dùng cho topic này
         return quizQuestionRepository.save(quizQuestion);
     }
 
