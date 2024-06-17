@@ -38,6 +38,8 @@ public class UserService {
     private UserAchievementRepository userAchievementRepository;
     @Autowired
     private UserProgressRepository userProgressRepository;
+    @Autowired
+    private LocationRepository locationRepository;
 
     public String uploadUserAvatar(String token, MultipartFile file) throws IOException {
         // Lấy thông tin người dùng từ UserRepository
@@ -84,15 +86,21 @@ public class UserService {
                 -> new IllegalArgumentException("User not found. Please check your username."));
     }
     @Transactional
-    public void deleteUserById(Long userId) {
-        // Xóa tất cả các thực thể liên quan đến người dùng trước khi xóa người dùng
-        pointRepository.deleteByUserId(userId);
-        resultRepository.deleteByUserId(userId);
-        userAchievementRepository.deleteByUserId(userId);
-        userProgressRepository.deleteByUserId(userId);
+    public void deleteUser(Users user) {
+        // Xóa các thực thể liên quan đến người dùng
+        pointRepository.deleteByUser(user);
+        resultRepository.deleteByUser(user);
+        userAchievementRepository.deleteByUser(user);
+        userProgressRepository.deleteByUser(user);
+
+        // Xóa employee khỏi danh sách employeeId trong bảng locations
+        locationRepository.findAll().forEach(location -> {
+            location.getEmployeeId().remove(user.getId());
+            locationRepository.save(location);
+        });
 
         // Xóa người dùng
-        userRepository.deleteById(userId);
+        userRepository.delete(user);
     }
 
 }

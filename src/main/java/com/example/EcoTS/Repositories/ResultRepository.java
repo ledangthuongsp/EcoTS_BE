@@ -14,4 +14,5 @@ import java.util.Optional;
 public interface ResultRepository extends JpaRepository<Results, Long> {
     Optional<Results> findByUser(Users user);
     void deleteByUserId(Long userId);
+    Optional<Results> deleteByUser(Users user);
 }

@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -80,23 +81,23 @@ public class UserController {
         }
         return new ResponseEntity<>(users, HttpStatus.OK);
     }
-    @DeleteMapping("/delete-user")
-    public ResponseEntity<?> deleteUserByUsername(@RequestParam Long id, @RequestParam String username) {
-        if (!userRepository.existsById(id)) {
-            return ResponseEntity.notFound().build();
+    @DeleteMapping("/delete-user-by-id")
+    public ResponseEntity<?> deleteUserById(@RequestParam Long id, @RequestParam String username) {
+        Optional<Users> optionalUser = userRepository.findById(id);
+        if (!optionalUser.isPresent()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found.");
         }
 
-        Users user = userRepository.findById(id).orElse(null);
-
-        if (user == null || !user.getUsername().equals(username)) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Username does not match with the user ID.");
+        Users user = optionalUser.get();
+        if (!user.getUsername().equals(username)) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Username does not match the provided ID.");
         }
 
         try {
-            userService.deleteUserById(id);
-            return ResponseEntity.ok().build();
-        } catch (DataIntegrityViolationException e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body("Cannot delete user due to foreign key constraints.");
+            userService.deleteUser(user);
+            return ResponseEntity.ok().body("User deleted successfully.");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to delete user.");
         }
     }
 }
