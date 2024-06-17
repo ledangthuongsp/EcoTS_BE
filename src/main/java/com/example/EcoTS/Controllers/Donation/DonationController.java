@@ -40,4 +40,21 @@ public class DonationController {
     {
         return new ResponseEntity<>(donationService.getDonationById(id), HttpStatus.OK);
     }
+    @GetMapping("/ended")
+    public ResponseEntity<List<Donations>> getPastDonations() {
+        List<Donations> donations = donationService.getPastDonations();
+        return ResponseEntity.ok().body(donations);
+    }
+
+    @GetMapping("/ongoing")
+    public ResponseEntity<List<Donations>> getOngoingDonations() {
+        List<Donations> donations = donationService.getOngoingDonations();
+        return ResponseEntity.ok().body(donations);
+    }
+
+    @GetMapping("/upcoming")
+    public ResponseEntity<List<Donations>> getUpcomingDonations() {
+        List<Donations> donations = donationService.getUpcomingDonations();
+        return ResponseEntity.ok().body(donations);
+    }
 }

@@ -13,8 +13,10 @@ import java.io.IOException;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -103,5 +105,28 @@ public class DonationService {
 
     public Donations getDonationById(Long id) {
         return donationRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Donation not found"));
+    }
+    public List<Donations> getPastDonations() {
+        Timestamp now = Timestamp.valueOf(LocalDateTime.now());
+        return donationRepository.findAll()
+                .stream()
+                .filter(donation -> donation.getEndDate().before(now))
+                .collect(Collectors.toList());
+    }
+
+    public List<Donations> getOngoingDonations() {
+        Timestamp now = Timestamp.valueOf(LocalDateTime.now());
+        return donationRepository.findAll()
+                .stream()
+                .filter(donation -> donation.getStartDate().before(now) && donation.getEndDate().after(now))
+                .collect(Collectors.toList());
+    }
+
+    public List<Donations> getUpcomingDonations() {
+        Timestamp now = Timestamp.valueOf(LocalDateTime.now());
+        return donationRepository.findAll()
+                .stream()
+                .filter(donation -> donation.getStartDate().after(now))
+                .collect(Collectors.toList());
     }
 }
