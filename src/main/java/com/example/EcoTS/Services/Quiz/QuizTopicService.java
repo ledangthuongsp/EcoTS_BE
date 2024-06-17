@@ -2,6 +2,7 @@ package com.example.EcoTS.Services.Quiz;
 
 import com.example.EcoTS.DTOs.Request.Quiz.QuizQuestionDTO;
 import com.example.EcoTS.DTOs.Request.Quiz.QuizTopicDTO;
+import com.example.EcoTS.Enum.Roles;
 import com.example.EcoTS.Models.QuizQuestion;
 import com.example.EcoTS.Models.QuizTopic;
 import com.example.EcoTS.Models.UserProgress;
@@ -36,7 +37,13 @@ public class QuizTopicService {
     @Autowired
     private UserRepository userRepository;
     @Transactional
-    public QuizTopic addTopic(String topicName, String description, MultipartFile file) throws IOException {
+    public QuizTopic addTopic(String topicName, String description, MultipartFile file, String username) throws IOException {
+        Users user = userRepository.findByUsername(username).orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        if (!Roles.EMPLOYEE.name().equals(user.getRole())) {
+            throw new IllegalArgumentException("Only employees can add topics");
+        }
+
         String imgUrl = cloudinaryService.uploadFileQuizTopic(file);
         QuizTopic topic = new QuizTopic();
         topic.setTopicName(topicName);
@@ -44,12 +51,13 @@ public class QuizTopicService {
         topic.setImgUrl(imgUrl);
         topic.setNumberQuestion(0L);
         QuizTopic savedTopic = quizTopicRepository.save(topic);
+
         // Add progress for all users
         List<Users> users = userRepository.findAll();
-        for (Users user : users) {
+        for (Users u : users) {
             UserProgress userProgress = new UserProgress();
             userProgress.setTopicId(savedTopic.getId());
-            userProgress.setUserId(user.getId());
+            userProgress.setUser(u);
             userProgress.setProgress(0.0);
             userProgress.setCollection(true);
             userProgress.setReachMax(false);
@@ -57,6 +65,7 @@ public class QuizTopicService {
         }
         return savedTopic;
     }
+
     @Transactional
     public QuizTopic getTopicById(Long id) {
         return quizTopicRepository.findById(id)

@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Optional;
 
 import jakarta.mail.MessagingException;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class AuthenticationService {
@@ -51,6 +52,7 @@ public class AuthenticationService {
         this.userAchievementRepository = userAchievementRepository;
     }
 
+    @Transactional
     public Users signup(SignUpDTO input, Roles roles) {
         Optional<Users> existingUser = userRepository.findByUsername(input.getUsername());
 
@@ -68,36 +70,38 @@ public class AuthenticationService {
 
         Users savedUser = userRepository.save(user);
 
-        Points points = new Points();
-        points.setPoint(0.0);
-        points.setUser(savedUser);
-        points.setSaveCo2(0L);
-        points.setTotalTrashCollect(0L);
-        pointRepository.save(points);
+        if (Roles.CUSTOMER.equals(roles)) {
+            Points points = new Points();
+            points.setPoint(0.0);
+            points.setUser(savedUser);
+            points.setSaveCo2(0L);
+            points.setTotalTrashCollect(0L);
+            pointRepository.save(points);
 
-        Results results = new Results();
-        results.setUsers(user);
-        results.setNumberOfTimeDonate(0);
-        results.setNumberOfTimeDetect(0);
-        results.setMaximumPoints(0.0);
-        results.setPointDonate(0.0);
-        results.setSaveCo2(0.0);
-        resultRepository.save(results);
+            Results results = new Results();
+            results.setUser(user);
+            results.setNumberOfTimeDonate(0);
+            results.setNumberOfTimeDetect(0);
+            results.setMaximumPoints(0.0);
+            results.setPointDonate(0.0);
+            results.setSaveCo2(0.0);
+            resultRepository.save(results);
 
-        UserAchievement userAchievement = new UserAchievement();
-        userAchievement.setUsers(user);
-        userAchievement.setBadgeUrl(new ArrayList<>());
-        userAchievementRepository.save(userAchievement);
+            UserAchievement userAchievement = new UserAchievement();
+            userAchievement.setUser(user);
+            userAchievement.setBadgeUrl(new ArrayList<>());
+            userAchievementRepository.save(userAchievement);
 
-        List<QuizTopic> quizTopics = quizTopicRepository.findAll();
-        for(QuizTopic quizTopic : quizTopics)
-        {
-            UserProgress userProgress = new UserProgress();
-            userProgress.setTopicId(quizTopic.getId());
-            userProgress.setUserId(user.getId());
-            userProgress.setProgress(0.0);
-            userProgressRepository.save(userProgress);
+            List<QuizTopic> quizTopics = quizTopicRepository.findAll();
+            for (QuizTopic quizTopic : quizTopics) {
+                UserProgress userProgress = new UserProgress();
+                userProgress.setTopicId(quizTopic.getId());
+                userProgress.setUser(user);
+                userProgress.setProgress(0.0);
+                userProgressRepository.save(userProgress);
+            }
         }
+
         return savedUser;
     }
 

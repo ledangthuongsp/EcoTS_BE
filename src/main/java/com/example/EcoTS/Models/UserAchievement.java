@@ -25,8 +25,8 @@ public class UserAchievement {
     private Long id;
 
     @OneToOne
-    @JoinColumn(name = "user_id")
-    private Users users;
+    @JoinColumn(name = "user_id", nullable = false)
+    private Users user;
     private List<String> badgeUrl;
 
     @CreationTimestamp

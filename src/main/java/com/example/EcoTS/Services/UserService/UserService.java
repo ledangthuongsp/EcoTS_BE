@@ -2,7 +2,7 @@ package com.example.EcoTS.Services.UserService;
 
 import com.example.EcoTS.DTOs.Request.User.ChangeInfoRequest;
 import com.example.EcoTS.Models.Users;
-import com.example.EcoTS.Repositories.UserRepository;
+import com.example.EcoTS.Repositories.*;
 import com.example.EcoTS.Services.CloudinaryService.CloudinaryService;
 import com.example.EcoTS.Services.SecurityService.JwtService;
 
@@ -30,6 +30,14 @@ public class UserService {
     private UserRepository userRepository;
     @Autowired
     private JwtService jwtService;
+    @Autowired
+    private PointRepository pointRepository;
+    @Autowired
+    private ResultRepository resultRepository;
+    @Autowired
+    private UserAchievementRepository userAchievementRepository;
+    @Autowired
+    private UserProgressRepository userProgressRepository;
 
     public String uploadUserAvatar(String token, MultipartFile file) throws IOException {
         // Lấy thông tin người dùng từ UserRepository
@@ -59,6 +67,17 @@ public class UserService {
         return userRepository.findByUsername(username)
                 .orElseThrow(()
                 -> new IllegalArgumentException("User not found. Please check your username."));
+    }
+    @Transactional
+    public void deleteUserById(Long userId) {
+        // Xóa tất cả các thực thể liên quan đến người dùng trước khi xóa người dùng
+        pointRepository.deleteByUserId(userId);
+        resultRepository.deleteByUserId(userId);
+        userAchievementRepository.deleteByUserId(userId);
+        userProgressRepository.deleteByUserId(userId);
+
+        // Xóa người dùng
+        userRepository.deleteById(userId);
     }
 
 }

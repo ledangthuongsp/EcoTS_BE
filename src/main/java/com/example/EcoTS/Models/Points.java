@@ -45,7 +45,7 @@ public class Points {
     private double totalTrashCollect;
 
     @OneToOne
-    @JoinColumn(name = "user_id", referencedColumnName = "id")
+    @JoinColumn(name = "user_id", nullable = false)
     private Users user;
 
     @CreationTimestamp

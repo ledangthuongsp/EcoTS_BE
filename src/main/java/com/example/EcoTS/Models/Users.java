@@ -58,6 +58,18 @@ public class Users implements UserDetails {
     @Column(name = "updated_at")
     private Timestamp updatedAt;
 
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Points points;
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Results results;
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private UserAchievement userAchievement;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserProgress> userProgresses;
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of();

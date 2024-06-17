@@ -1,5 +1,6 @@
 package com.example.EcoTS.Services.DonationService;
 
+import com.example.EcoTS.Enum.Roles;
 import com.example.EcoTS.Models.*;
 import com.example.EcoTS.Repositories.*;
 import com.example.EcoTS.Services.CloudinaryService.CloudinaryService;
@@ -7,6 +8,7 @@ import com.example.EcoTS.Services.CloudinaryService.CloudinaryService;
 import com.example.EcoTS.Services.Notification.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -37,7 +39,14 @@ public class DonationService {
     @Autowired
     private NotificationRepository notificationRepository;
 
-    public Donations createVolunteer(String title, String name, String description, List<MultipartFile> coverImage, List<MultipartFile> sponsorImages, Timestamp startDate, Timestamp endDate, double totalDonations) throws IOException {
+    @Transactional
+    public Donations createVolunteer(String title, String name, String description, List<MultipartFile> coverImage, List<MultipartFile> sponsorImages, Timestamp startDate, Timestamp endDate, double totalDonations, String username) throws IOException {
+        Users user = userRepository.findByUsername(username).orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        if (!Roles.EMPLOYEE.name().equals(user.getRole())) {
+            throw new IllegalArgumentException("Only employees can create donations");
+        }
+
         List<String> coverImageUrl = cloudinaryService.uploadMultipleFilesDonations(coverImage);
         List<String> sponsorImageUrls = cloudinaryService.uploadMultipleFilesDonations(sponsorImages);
 
@@ -54,24 +63,25 @@ public class DonationService {
         Donations savedVolunteer = donationRepository.save(volunteer);
 
         // Send notification
-        // Create and save notification
         Notifications notification = Notifications.builder()
                 .title("New Donation Created")
                 .description("A new donation has been created: " + title)
                 .build();
         notificationRepository.save(notification);
+
         // Notify all users
-        notificationService.notifyAllUsers(notification.getTitle(), notification.getDescription());
+        notificationService.notifyAllUsers(notification.getTitle(), notification.getDescription(), username);
 
         return savedVolunteer;
     }
 
+    @Transactional
     public void donatePoints(String username, Long donationId, double donationPoints) {
         // Find user by username
         Users user = userRepository.findByUsername(username).orElseThrow(() -> new IllegalArgumentException("User not found"));
 
         // Find user points by userId
-        Points userPoints = pointRepository.findByUserId(user.getId())
+        Points userPoints = pointRepository.findByUser(user)
                 .orElseThrow(() -> new IllegalArgumentException("User points not found"));
 
         // Check if the user has enough points to donate
@@ -98,6 +108,7 @@ public class DonationService {
                 .build();
         donationHistoryRepository.save(donationHistory);
     }
+
 
     public List<Donations> getAllDonation() {
         return donationRepository.findAll();

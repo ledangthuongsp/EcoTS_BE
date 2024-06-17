@@ -29,7 +29,7 @@ public class PointService {
         String[] data = barcodeData.split(":");
         String username = data[0];
         Users user = userRepository.findByUsername(username).orElseThrow(() -> new IllegalArgumentException("User not found"));
-        Optional<Points> userPoints = pointRepository.findByUserId(user.getId());
+        Optional<Points> userPoints = pointRepository.findByUser(user);
         Points point = new Points();
         point = userPoints.get();
         point.setPoint(point.getPoint() + points);
@@ -38,7 +38,7 @@ public class PointService {
     public void awardPointsByUsernameAndEmail(String username, double points)
     {
         Users user = userRepository.findByUsername(username).orElseThrow(() -> new IllegalArgumentException("User not found"));
-        Optional<Points> userPoints = pointRepository.findByUserId(user.getId());
+        Optional<Points> userPoints = pointRepository.findByUser(user);
         Points point = new Points();
         point = userPoints.get();
         point.setPoint(point.getPoint() + points);
@@ -49,9 +49,9 @@ public class PointService {
                                 Double glassKg, Double paperKg, Double cardboardKg ) {
         Users users = userRepository.findByUsername(username)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
-        Points points = pointRepository.findByUserId(users.getId())
+        Points points = pointRepository.findByUser(users)
                 .orElseThrow(() -> new IllegalArgumentException("Point not found"));
-        Results results = resultRepository.findByUsers(users).orElseThrow(() -> new IllegalArgumentException("User not found"));
+        Results results = resultRepository.findByUser(users).orElseThrow(() -> new IllegalArgumentException("User not found"));
         double totalPoints = 0;
         double totalCo2Saved = 0;
         if (plasticKg != null && plasticKg > 0) {

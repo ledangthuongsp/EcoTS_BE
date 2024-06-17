@@ -34,7 +34,7 @@ public class UserAchievementController {
         resultService.getAllAchievementProgress(userId);
         //Xuất
         Users users = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
-        UserAchievement userAchievement = userAchievementRepository.findByUsers(users).orElseThrow(() -> new RuntimeException("User achievement not found"));
+        UserAchievement userAchievement = userAchievementRepository.findByUser(users).orElseThrow(() -> new RuntimeException("User achievement not found"));
         return ResponseEntity.ok().body(userAchievement);
     }
 }

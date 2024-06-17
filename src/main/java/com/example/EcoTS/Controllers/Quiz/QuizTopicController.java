@@ -11,6 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -38,9 +40,13 @@ public class QuizTopicController {
         return quizTopicRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Topic not found"));
     }
 
-    @PostMapping(value = "/add-new", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE})
+    @PostMapping(value = "/add-new", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
     public QuizTopic addTopic(@RequestParam String topicName, @RequestParam String description, @RequestPart MultipartFile multipartFile) throws IOException {
-        return quizTopicService.addTopic(topicName, description, multipartFile);
+        // Lấy thông tin người dùng hiện tại từ security context
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        // Gọi service để thêm chủ đề
+        return quizTopicService.addTopic(topicName, description, multipartFile, username);
     }
 }
 

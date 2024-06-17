@@ -1,7 +1,9 @@
 package com.example.EcoTS.Services.Quiz;
 
 import com.example.EcoTS.Models.UserProgress;
+import com.example.EcoTS.Models.Users;
 import com.example.EcoTS.Repositories.UserProgressRepository;
+import com.example.EcoTS.Repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -12,12 +14,15 @@ public class UserProgressService {
 
     @Autowired
     private UserProgressRepository userProgressRepository;
+    @Autowired
+    private UserRepository userRepository;
 
     public UserProgress creatNew (Long userId, Long topicId, double progress)
     {
+        Users users = userRepository.findById(userId).orElseThrow();
         UserProgress userProgress= new UserProgress();
         userProgress.setProgress(progress);
-        userProgress.setUserId(userId);
+        userProgress.setUser(users);
         userProgress.setTopicId(topicId);
         userProgress.setReachMax(false);
         userProgress.setCollection(true);

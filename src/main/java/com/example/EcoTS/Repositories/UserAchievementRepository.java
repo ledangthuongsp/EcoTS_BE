@@ -12,5 +12,6 @@ import java.util.Optional;
 @Repository
 @Hidden
 public interface UserAchievementRepository extends JpaRepository<UserAchievement, Long> {
-    Optional<UserAchievement> findByUsers(Users users);
+    Optional<UserAchievement> findByUser(Users user);
+    void deleteByUserId(Long userId);
 }

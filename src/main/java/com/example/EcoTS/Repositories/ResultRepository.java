@@ -12,5 +12,6 @@ import java.util.Optional;
 @Repository
 @Hidden
 public interface ResultRepository extends JpaRepository<Results, Long> {
-    Optional<Results> findByUsers(Users users);
+    Optional<Results> findByUser(Users user);
+    void deleteByUserId(Long userId);
 }

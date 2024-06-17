@@ -22,7 +22,10 @@ public class UserProgress {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Long userId;
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    private Users user;
+
     private Long topicId;
     private double progress;
     private boolean reachMax;

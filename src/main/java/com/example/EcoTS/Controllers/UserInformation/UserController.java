@@ -8,6 +8,7 @@ import com.example.EcoTS.Services.SecurityService.JwtService;
 import com.example.EcoTS.Services.UserService.UserService;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -79,13 +80,23 @@ public class UserController {
         }
         return new ResponseEntity<>(users, HttpStatus.OK);
     }
-    @DeleteMapping("/delete-user-by-id")
-    public ResponseEntity <Users> deleteUserById(@RequestParam Long id)
-    {
+    @DeleteMapping("/delete-user")
+    public ResponseEntity<?> deleteUserByUsername(@RequestParam Long id, @RequestParam String username) {
         if (!userRepository.existsById(id)) {
             return ResponseEntity.notFound().build();
         }
-        userRepository.deleteById(id);
-        return ResponseEntity.ok().build();
+
+        Users user = userRepository.findById(id).orElse(null);
+
+        if (user == null || !user.getUsername().equals(username)) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Username does not match with the user ID.");
+        }
+
+        try {
+            userService.deleteUserById(id);
+            return ResponseEntity.ok().build();
+        } catch (DataIntegrityViolationException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("Cannot delete user due to foreign key constraints.");
+        }
     }
 }

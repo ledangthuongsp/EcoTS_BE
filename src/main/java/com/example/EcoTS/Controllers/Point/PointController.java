@@ -45,7 +45,7 @@ public class PointController {
 
         String username = jwtService.getUsername(token);
         Users user = userRepository.findByUsername(username).orElseThrow(() -> new IllegalArgumentException("User not found"));
-        Points userPoints = pointRepository.findByUserId(user.getId()).orElseThrow(() -> new IllegalArgumentException("Point with this user not found"));
+        Points userPoints = pointRepository.findByUser(user).orElseThrow(() -> new IllegalArgumentException("Point with this user not found"));
         return ResponseEntity.ok(userPoints);
     }
     @PutMapping("/admin/add-user-points-by-form")
@@ -64,8 +64,8 @@ public class PointController {
     public ResponseEntity<String> addPointsByQuiz(@RequestParam Long userId, @RequestParam double points)
     {
         Users user = userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("User not found"));
-        Points userPoints = pointRepository.findByUserId(user.getId()).orElseThrow(() -> new IllegalArgumentException("Point with this user not found"));
-        Results results = resultRepository.findByUsers(user).orElseThrow(() -> new IllegalArgumentException("Point with this user not found"));
+        Points userPoints = pointRepository.findByUser(user).orElseThrow(() -> new IllegalArgumentException("Point with this user not found"));
+        Results results = resultRepository.findByUser(user).orElseThrow(() -> new IllegalArgumentException("Point with this user not found"));
         userPoints.setPoint(userPoints.getPoint() + points);
         pointRepository.save(userPoints);
         results.setMaximumPoints(results.getMaximumPoints()+points);

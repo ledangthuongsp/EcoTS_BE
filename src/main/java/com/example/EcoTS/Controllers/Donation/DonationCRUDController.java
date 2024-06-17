@@ -10,6 +10,8 @@ import net.bytebuddy.asm.Advice;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -46,7 +48,9 @@ public class DonationCRUDController {
             @RequestParam("startDate") Timestamp startDate,
             @RequestParam("endDate") Timestamp endDate,
             @RequestParam("totalDonations") double totalDonations) throws IOException {
-        Donations volunteer = donationService.createVolunteer(title, name, description, coverImage, sponsorImages, startDate, endDate, totalDonations);
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        Donations volunteer = donationService.createVolunteer(title, name, description, coverImage, sponsorImages, startDate, endDate, totalDonations, username);
         return ResponseEntity.ok(volunteer);
     }
 }

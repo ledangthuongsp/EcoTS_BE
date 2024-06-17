@@ -1,5 +1,6 @@
 package com.example.EcoTS.Services.Notification;
 
+import com.example.EcoTS.Enum.Roles;
 import com.example.EcoTS.Models.Locations;
 import com.example.EcoTS.Models.Notifications;
 import com.example.EcoTS.Models.ReceiveHistory;
@@ -26,6 +27,12 @@ public class NotificationService {
     private NotificationRepository notificationRepository;
     @Transactional
     public void createNotification(Long userId, double points, Long employeeId) {
+        Users employee = userRepository.findById(employeeId).orElseThrow(() -> new IllegalArgumentException("Employee not found"));
+
+        if (!Roles.EMPLOYEE.name().equals(employee.getRole())) {
+            throw new IllegalArgumentException("Only employees can create notifications");
+        }
+
         Locations location = locationRepository.findByEmployeeId(employeeId).orElseThrow();
         ReceiveHistory receiveHistory = new ReceiveHistory();
         receiveHistory.setUserId(userId);
@@ -33,7 +40,14 @@ public class NotificationService {
         receiveHistory.setExchangePointLocation(location.getTypeOfLocation());
         receiveHistoryRepository.save(receiveHistory);
     }
-    public void notifyAllUsers(String title, String description) {
+
+    public void notifyAllUsers(String title, String description, String username) {
+        Users user = userRepository.findByUsername(username).orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        if (!Roles.EMPLOYEE.name().equals(user.getRole())) {
+            throw new IllegalArgumentException("Only employees can notify all users");
+        }
+
         List<Users> users = userRepository.findAll();
         Notifications notification = Notifications.builder()
                 .title(title)
@@ -41,13 +55,12 @@ public class NotificationService {
                 .build();
         notificationRepository.save(notification);
 
-        for (Users user : users) {
+        for (Users u : users) {
             // Here you can implement your logic to send notifications
             // For example, sending an email, an in-app notification, etc.
-            System.out.println("Notifying user: " + user.getUsername() + " - " + title + ": " + description);
+            System.out.println("Notifying user: " + u.getUsername() + " - " + title + ": " + description);
         }
     }
-
     public List<Notifications> getAllNotifications() {
         return notificationRepository.findAll();
     }
