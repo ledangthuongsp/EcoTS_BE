@@ -101,7 +101,7 @@ public class DonationService {
         results.setNumberOfTimeDonate(results.getNumberOfTimeDonate() + 1);
         //so diem da donate
         results.setPointDonate(results.getPointDonate() + donationPoints);
-
+        resultRepository.save(results);
         // Find donation to update total points
         Donations donation = donationRepository.findById(donationId).orElseThrow(() -> new IllegalArgumentException("Donation not found"));
 

@@ -75,6 +75,7 @@ public class PredictionController {
             Users users = userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("User not found"));
             Results results = resultRepository.findByUser(users).orElseThrow(() -> new IllegalArgumentException("Results not found"));
             results.setNumberOfTimeDetect(results.getNumberOfTimeDetect()+1);
+            resultRepository.save(results);
             return ResponseEntity.ok(result.toString());
         } catch (IOException | JSONException e) {
             logger.error("Error during the request to Flask API", e);
