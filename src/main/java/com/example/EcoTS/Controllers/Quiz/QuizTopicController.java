@@ -50,5 +50,9 @@ public class QuizTopicController {
         quizTopicService.deleteTopic(id);
         return ResponseEntity.ok("Topic and related data deleted successfully");
     }
+    @PutMapping(value = "/update/{id}", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
+    public QuizTopic updateTopic(@PathVariable Long id, @RequestParam String topicName, @RequestParam String description, @RequestPart MultipartFile multipartFile) throws IOException {
+        return quizTopicService.updateTopic(id, topicName, description, multipartFile);
+    }
 }
 

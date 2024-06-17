@@ -53,6 +53,9 @@ public class QuizQuestionController {
         quizQuestionService.deleteQuestion(id);
         return ResponseEntity.ok("Question deleted successfully");
     }
-
+    @PutMapping("/update/{id}")
+    public QuizQuestion updateQuestion(@PathVariable Long id, @RequestBody QuizQuestionDTO quizQuestionDTO) {
+        return quizQuestionService.updateQuestion(id, quizQuestionDTO);
+    }
 }
 

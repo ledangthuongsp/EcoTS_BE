@@ -48,15 +48,14 @@ public class QuizQuestionService {
         quizQuestionRepository.delete(quizQuestion);
     }
 
-    public Optional<QuizQuestion> getQuizQuestionById(Long id) {
-        return quizQuestionRepository.findById(id);
+    @Transactional
+    public QuizQuestion updateQuestion(Long id, QuizQuestionDTO quizQuestionDTO) {
+        QuizQuestion quizQuestion = quizQuestionRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Question not found"));
+        quizQuestion.setQuestionText(quizQuestionDTO.getQuestionText());
+        quizQuestion.setCorrectAnswer(quizQuestionDTO.getCorrectAnswer());
+        quizQuestion.setIncorrectAnswer1(quizQuestionDTO.getIncorrectAnswer1());
+        quizQuestion.setIncorrectAnswer2(quizQuestionDTO.getIncorrectAnswer2());
+        return quizQuestionRepository.save(quizQuestion);
     }
 
-    public List<QuizQuestion> getAllQuizQuestions() {
-        return quizQuestionRepository.findAll();
-    }
-
-    public void deleteQuizQuestion(Long id) {
-        quizQuestionRepository.deleteById(id);
-    }
 }
