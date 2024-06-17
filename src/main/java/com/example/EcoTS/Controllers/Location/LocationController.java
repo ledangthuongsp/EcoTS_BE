@@ -51,14 +51,16 @@ public class LocationController {
     }
     @PutMapping(value = "/update-location", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<Locations> updateLocationById(@RequestParam Long locationId,
-                                                        @RequestPart MultipartFile backGroundImage,
-                                                        @RequestPart List<MultipartFile> imageDetails)
-    {
+                                                        @RequestParam String description,
+                                                        @RequestParam String address,
+                                                        @RequestParam double latitude,
+                                                        @RequestParam double longitude,
+                                                        @RequestPart(required = false) MultipartFile backGroundImage,
+                                                        @RequestPart(required = false) List<MultipartFile> imageDetails) {
         try {
-            Locations newLocation = locationService.updateInfoLocation(locationId,backGroundImage, imageDetails);
-            return ResponseEntity.ok(newLocation);
-        }
-        catch (RuntimeException e) {
+            Locations updatedLocation = locationService.updateInfoLocation(locationId, description, address, latitude, longitude, backGroundImage, imageDetails);
+            return ResponseEntity.ok(updatedLocation);
+        } catch (RuntimeException e) {
             return ResponseEntity.status(404).body(null);
         } catch (IOException e) {
             throw new RuntimeException(e);

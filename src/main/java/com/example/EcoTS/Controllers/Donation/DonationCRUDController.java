@@ -3,6 +3,8 @@ package com.example.EcoTS.Controllers.Donation;
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 import com.example.EcoTS.Models.Donations;
+import com.example.EcoTS.Repositories.DonationHistoryRepository;
+import com.example.EcoTS.Repositories.DonationRepository;
 import com.example.EcoTS.Services.DonationService.DonationService;
 
 import net.bytebuddy.asm.Advice;
@@ -38,6 +40,8 @@ public class DonationCRUDController {
     private DonationService donationService;
     @Autowired
     private Cloudinary cloudinary;
+    @Autowired
+    private DonationRepository donationRepository;
     @PostMapping(value = "/admin/donate/create-donation", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
     public ResponseEntity<Donations> createVolunteer(
             @RequestParam("title") String title,
@@ -52,5 +56,10 @@ public class DonationCRUDController {
         String username = authentication.getName();
         Donations volunteer = donationService.createVolunteer(title, name, description, coverImage, sponsorImages, startDate, endDate, totalDonations, username);
         return ResponseEntity.ok(volunteer);
+    }
+    @DeleteMapping("/detele-donation-by-id")
+    public void deleteDonation(@RequestParam Long donationId)
+    {
+        donationRepository.deleteById(donationId);
     }
 }
