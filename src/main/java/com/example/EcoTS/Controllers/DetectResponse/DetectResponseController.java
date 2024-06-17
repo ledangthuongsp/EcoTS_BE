@@ -1,6 +1,8 @@
 package com.example.EcoTS.Controllers.DetectResponse;
 
 
+import com.example.EcoTS.Models.DetectResponse;
+import com.example.EcoTS.Repositories.DetectResponseRepository;
 import com.example.EcoTS.Services.DetectResponse.DetectResponseService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.List;
 
 @RestController
 @CrossOrigin
@@ -44,5 +47,13 @@ public class DetectResponseController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
+    }
+    @Autowired
+    private DetectResponseRepository detectResponseRepository;
+
+    @GetMapping("/all")
+    public ResponseEntity<List<DetectResponse>> getAllDetectResponses() {
+        List<DetectResponse> detectResponses = detectResponseRepository.findAll();
+        return ResponseEntity.ok(detectResponses);
     }
 }

@@ -1,5 +1,9 @@
 package com.example.EcoTS.Controllers.Prediction;
 
+import com.example.EcoTS.Models.Results;
+import com.example.EcoTS.Models.Users;
+import com.example.EcoTS.Repositories.ResultRepository;
+import com.example.EcoTS.Repositories.UserRepository;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.cloudinary.json.JSONArray;
@@ -7,6 +11,7 @@ import org.cloudinary.json.JSONException;
 import org.cloudinary.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -31,10 +36,13 @@ public class PredictionController {
 
     private final RestTemplate restTemplate = new RestTemplate();
     private final Logger logger = LoggerFactory.getLogger(PredictionController.class);
-
+    @Autowired
+    private ResultRepository resultRepository;
+    @Autowired
+    private UserRepository userRepository;
     @Operation(summary = "Predict garbage type from image", description = "Uploads an image and returns the prediction of garbage type")
     @PostMapping(value = "/predict", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
-    public ResponseEntity<String> predict(@RequestPart("file") MultipartFile file) {
+    public ResponseEntity<String> predict(@RequestParam Long userId, @RequestPart("file") MultipartFile file) {
         try {
             String flaskApiUrl = "https://tensorflow-flask.onrender.com/detect";
             HttpHeaders headers = new HttpHeaders();
@@ -64,7 +72,10 @@ public class PredictionController {
             } else {
                 result.put("class", "No predictions found.");
             }
-
+            Users users = userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("User not found"));
+            Results results = resultRepository.findByUser(users).orElseThrow(() -> new IllegalArgumentException("Results not found"));
+            results.setNumberOfTimeDetect(results.getNumberOfTimeDetect()+1);
+            resultRepository.save(results);
             return ResponseEntity.ok(result.toString());
         } catch (IOException | JSONException e) {
             logger.error("Error during the request to Flask API", e);

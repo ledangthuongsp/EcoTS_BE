@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import io.swagger.annotations.Api;
@@ -55,5 +56,18 @@ public class LocationService {
         updateLocation.setBackGroundImgUrl(backGroundImgUrl);
         updateLocation.setImgDetailsUrl(imgDetailsUrl);
         return locationRepository.save(updateLocation);
+    }
+    @Transactional(readOnly = true)
+    public Locations addEmployeeToLocation(Long employeeId, Long locationId) {
+        Locations locations = locationRepository.findById(locationId).orElseThrow();
+        List<Long> employeeList;
+        if (locations.getEmployeeId() == null) {
+            employeeList = new ArrayList<>();
+        } else {
+            employeeList = locations.getEmployeeId();
+        }
+        employeeList.add(employeeId);
+        locations.setEmployeeId(employeeList);
+        return locationRepository.save(locations);
     }
 }

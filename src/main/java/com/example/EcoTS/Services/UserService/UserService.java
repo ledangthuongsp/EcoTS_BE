@@ -40,6 +40,8 @@ public class UserService {
     private UserProgressRepository userProgressRepository;
     @Autowired
     private LocationRepository locationRepository;
+    @Autowired
+    private TokenRepository tokenRepository;
 
     public String uploadUserAvatar(String token, MultipartFile file) throws IOException {
         // Lấy thông tin người dùng từ UserRepository
@@ -92,7 +94,7 @@ public class UserService {
         resultRepository.deleteByUser(user);
         userAchievementRepository.deleteByUser(user);
         userProgressRepository.deleteByUser(user);
-
+        tokenRepository.deleteByUser(user);
         // Xóa employee khỏi danh sách employeeId trong bảng locations
         locationRepository.findAll().forEach(location -> {
             location.getEmployeeId().remove(user.getId());
