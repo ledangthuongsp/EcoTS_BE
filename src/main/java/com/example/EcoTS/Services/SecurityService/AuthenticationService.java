@@ -51,7 +51,7 @@ public class AuthenticationService {
         this.userAchievementRepository = userAchievementRepository;
     }
 
-    public Users signup(SignUpDTO input) {
+    public Users signup(SignUpDTO input, Roles roles) {
         Optional<Users> existingUser = userRepository.findByUsername(input.getUsername());
 
         if (existingUser.isPresent()) {
@@ -64,7 +64,7 @@ public class AuthenticationService {
         user.setPassword(passwordEncoder.encode(input.getPassword()));
         user.setFullName(input.getFullName());
         user.setDayOfBirth(input.getDayOfBirth());
-        user.setRole(Roles.CUSTOMER.name());
+        user.setRole(roles != null ? roles.name() : Roles.CUSTOMER.name());
 
         Users savedUser = userRepository.save(user);
 

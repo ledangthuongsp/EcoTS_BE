@@ -52,6 +52,6 @@ public class EmployeeService {
     @Transactional
     public List<Users> getAllEmployee()
     {
-        return userRepository.findByRole(Roles.EMPLOYEE);
+        return userRepository.findByRole(Roles.EMPLOYEE.toString());
     }
 }
