@@ -42,11 +42,8 @@ public class QuizTopicController {
 
     @PostMapping(value = "/add-new", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
     public QuizTopic addTopic(@RequestParam String topicName, @RequestParam String description, @RequestPart MultipartFile multipartFile) throws IOException {
-        // Lấy thông tin người dùng hiện tại từ security context
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String username = authentication.getName();
         // Gọi service để thêm chủ đề
-        return quizTopicService.addTopic(topicName, description, multipartFile, username);
+        return quizTopicService.addTopic(topicName, description, multipartFile);
     }
 }
 

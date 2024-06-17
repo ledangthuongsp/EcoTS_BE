@@ -37,13 +37,7 @@ public class QuizTopicService {
     @Autowired
     private UserRepository userRepository;
     @Transactional
-    public QuizTopic addTopic(String topicName, String description, MultipartFile file, String username) throws IOException {
-        Users user = userRepository.findByUsername(username).orElseThrow(() -> new IllegalArgumentException("User not found"));
-
-        if (!Roles.EMPLOYEE.name().equals(user.getRole())) {
-            throw new IllegalArgumentException("Only employees can add topics");
-        }
-
+    public QuizTopic addTopic(String topicName, String description, MultipartFile file) throws IOException {
         String imgUrl = cloudinaryService.uploadFileQuizTopic(file);
         QuizTopic topic = new QuizTopic();
         topic.setTopicName(topicName);
