@@ -38,4 +38,16 @@ public class ChangeAvatarController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
+    @PostMapping(value = "/employee/upload-new-avatar", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE})
+    public ResponseEntity<String> employeeUploadAvatar(@RequestParam Long employeeId,
+                                               @RequestPart("avatarFile") MultipartFile avatarFile) {
+        try {
+            String avatarUrl = userService.uploadEmployeeAvatar(employeeId, avatarFile);
+            return ResponseEntity.ok(avatarUrl);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
 }

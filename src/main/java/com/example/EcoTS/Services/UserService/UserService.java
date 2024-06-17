@@ -59,6 +59,21 @@ public class UserService {
 
         return newAvatarUrl;
     }
+    public String uploadEmployeeAvatar(Long employeeId, MultipartFile file) throws IOException {
+        // Lấy thông tin người dùng từ UserRepository
+
+        Users user = userRepository.findById(employeeId).orElseThrow();
+
+        // Lấy URL avatar hiện tại của người dùng
+        String currentAvatarUrl = user.getAvatarUrl();
+
+        // Tải lên avatar mới và cập nhật URL avatar cho người dùng
+        String newAvatarUrl = cloudinaryService.userUploadAvatar(file, currentAvatarUrl);
+        user.setAvatarUrl(newAvatarUrl);
+        userRepository.save(user);
+
+        return newAvatarUrl;
+    }
     public List<Users> getAllUsers() {
         return userRepository.findAll();
     }
