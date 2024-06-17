@@ -6,6 +6,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+
 @Service
 public class StatisticService {
     @Autowired
@@ -22,5 +25,25 @@ public class StatisticService {
         statistic.setMetalKg(metalKg);
         statistic.setEmployeeId(employeeId);
         statisticRepository.save(statistic);
+    }
+
+    public Statistic calculateStatistics(String period) {
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime startDate;
+
+        switch (period.toLowerCase()) {
+            case "month":
+                startDate = now.minus(1, ChronoUnit.MONTHS);
+                break;
+            case "year":
+                startDate = now.minus(1, ChronoUnit.YEARS);
+                break;
+            case "week":
+            default:
+                startDate = now.minus(1, ChronoUnit.WEEKS);
+                break;
+        }
+
+        return statisticRepository.calculateStatistics(startDate, now);
     }
 }

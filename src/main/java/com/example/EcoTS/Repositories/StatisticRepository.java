@@ -3,9 +3,21 @@ package com.example.EcoTS.Repositories;
 import com.example.EcoTS.Models.Statistic;
 import io.swagger.v3.oas.annotations.Hidden;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
+
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.util.List;
 
 @Repository
 @Hidden
 public interface StatisticRepository extends JpaRepository<Statistic, Long> {
+    @Query("SELECT new com.example.EcoTS.Models.Statistic(" +
+            "SUM(s.paperKg), SUM(s.cardBoardKg), SUM(s.plasticKg), SUM(s.glassKg), " +
+            "SUM(s.clothKg), SUM(s.metalKg), SUM(s.saveCo2)) " +
+            "FROM Statistic s WHERE s.createdAt BETWEEN :startDate AND :endDate")
+    Statistic calculateStatistics(LocalDateTime startDate, LocalDateTime endDate);
+    @Query("SELECT s FROM Statistic s WHERE s.createdAt >= :startDate AND s.createdAt <= :endDate")
+    List<Statistic> findAllByDateRange(Timestamp startDate, Timestamp endDate);
 }
