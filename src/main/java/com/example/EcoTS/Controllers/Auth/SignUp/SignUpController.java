@@ -38,16 +38,7 @@ public class SignUpController {
     @PostMapping("/auth/signup")
     public ResponseEntity<Users> register(@RequestBody SignUpDTO registerUserDto, @RequestParam (required = false) Roles roles,
                                           @RequestParam (required = false) Long locationId) {
-        Users registeredUser = authenticationService.signup(registerUserDto, roles);
-        if (roles != null && roles == Roles.EMPLOYEE && locationId != null) {
-            Locations location = locationRepository.findById(locationId).orElseThrow();
-            List<Long> employeeList = location.getEmployeeId() != null ? location.getEmployeeId() : new ArrayList<>();
-            employeeList.add(registeredUser.getId());
-            location.setEmployeeId(employeeList);
-            registeredUser.setRole(Roles.EMPLOYEE.name());
-        } else {
-            registeredUser.setRole(Roles.CUSTOMER.name());
-        }
-        return ResponseEntity.ok().body(registeredUser);
+        Users registeredUser = authenticationService.signup(registerUserDto, roles, locationId);
+        return ResponseEntity.ok(registeredUser);
     }
 }

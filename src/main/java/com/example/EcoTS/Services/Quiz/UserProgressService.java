@@ -19,7 +19,7 @@ public class UserProgressService {
 
     public UserProgress creatNew (Long userId, Long topicId, double progress)
     {
-        Users users = userRepository.findById(userId).orElseThrow();
+        Users users = userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("User not found"));
         UserProgress userProgress= new UserProgress();
         userProgress.setProgress(progress);
         userProgress.setUser(users);
@@ -34,7 +34,7 @@ public class UserProgressService {
     }
     public UserProgress updateProgress(Long userId, Long topicId, double progress) {
         Optional<UserProgress> optionalUserProgress = userProgressRepository.findByUserIdAndTopicId(userId, topicId);
-        UserProgress userProgress = optionalUserProgress.orElseThrow();
+        UserProgress userProgress = optionalUserProgress.orElseThrow(() -> new IllegalArgumentException("User progress not found"));
 
         userProgress.setProgress(progress);
 

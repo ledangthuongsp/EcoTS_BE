@@ -5,6 +5,7 @@ import com.example.EcoTS.DTOs.Request.Auth.SignUpDTO;
 import com.example.EcoTS.Enum.Roles;
 import com.example.EcoTS.Models.*;
 import com.example.EcoTS.Repositories.*;
+import com.example.EcoTS.Services.Location.LocationService;
 import com.example.EcoTS.Utils.EmailUtils;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,6 +40,8 @@ public class AuthenticationService {
     private VerificationRepository verificationRepository;
     @Autowired
     private EmailUtils emailUtil;
+    @Autowired
+    private LocationService locationService;
     public AuthenticationService(
             UserRepository userRepository,
             AuthenticationManager authenticationManager,
@@ -53,7 +56,7 @@ public class AuthenticationService {
     }
 
     @Transactional
-    public Users signup(SignUpDTO input, Roles roles) {
+    public Users signup(SignUpDTO input, Roles roles, Long locationId) {
         Optional<Users> existingUser = userRepository.findByUsername(input.getUsername());
 
         if (existingUser.isPresent()) {
@@ -100,6 +103,9 @@ public class AuthenticationService {
                 userProgress.setProgress(0.0);
                 userProgressRepository.save(userProgress);
             }
+        }
+        if (locationId != null) {
+            locationService.addEmployeeToLocation(savedUser.getId(), locationId);
         }
 
         return savedUser;
