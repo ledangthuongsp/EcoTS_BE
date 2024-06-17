@@ -20,7 +20,7 @@ public class StatisticService {
     @Autowired
     private StatisticRepository statisticRepository;
     @Autowired
-    private MaterialRepository materialsRepository;
+    private MaterialRepository materialRepository;
 
     @Transactional
     public void saveStatistic(Double paperKg, Double cardboardKg, Double plasticKg, Double glassKg, Double clothKg, Double metalKg, Long employeeId) {
@@ -35,8 +35,7 @@ public class StatisticService {
         statisticRepository.save(statistic);
     }
 
-    @Transactional
-    public Map<String, Object> getStatisticsByPeriod(String period) {
+    public Statistic getStatisticsByPeriod(String period) {
         LocalDateTime endTime = LocalDateTime.now();
         LocalDateTime startTime;
 
@@ -81,33 +80,36 @@ public class StatisticService {
         result.setClothKg(totalClothKg);
         result.setMetalKg(totalMetalKg);
 
-        double totalCO2Saved = calculateTotalCO2Saved(result);
-
-        Map<String, Object> response = new HashMap<>();
-        response.put("statistics", result);
-        response.put("totalCO2Saved", totalCO2Saved);
-
-        return response;
+        return result;
     }
-    @Transactional
+
     public double calculateTotalCO2Saved(Statistic statistics) {
+        List<Materials> materials = materialRepository.findAll();
         double totalCO2Saved = 0.0;
 
-        totalCO2Saved += calculateCO2SavedForMaterial("paperKg", statistics.getPaperKg());
-        totalCO2Saved += calculateCO2SavedForMaterial("cardboardKg", statistics.getCardBoardKg());
-        totalCO2Saved += calculateCO2SavedForMaterial("plasticKg", statistics.getPlasticKg());
-        totalCO2Saved += calculateCO2SavedForMaterial("glassKg", statistics.getGlassKg());
-        totalCO2Saved += calculateCO2SavedForMaterial("clothKg", statistics.getClothKg());
-        totalCO2Saved += calculateCO2SavedForMaterial("metalKg", statistics.getMetalKg());
+        for (Materials material : materials) {
+            switch (material.getType()) {
+                case "paperKg":
+                    totalCO2Saved += statistics.getPaperKg() * material.getCo2SavedPerKg();
+                    break;
+                case "cardboardKg":
+                    totalCO2Saved += statistics.getCardBoardKg() * material.getCo2SavedPerKg();
+                    break;
+                case "plasticKg":
+                    totalCO2Saved += statistics.getPlasticKg() * material.getCo2SavedPerKg();
+                    break;
+                case "glassKg":
+                    totalCO2Saved += statistics.getGlassKg() * material.getCo2SavedPerKg();
+                    break;
+                case "clothKg":
+                    totalCO2Saved += statistics.getClothKg() * material.getCo2SavedPerKg();
+                    break;
+                case "metalKg":
+                    totalCO2Saved += statistics.getMetalKg() * material.getCo2SavedPerKg();
+                    break;
+            }
+        }
 
         return totalCO2Saved;
-    }
-
-    private double calculateCO2SavedForMaterial(String materialType, double quantity) {
-        Materials material = materialsRepository.findByType(materialType);
-        if (material != null) {
-            return material.getCo2SavedPerKg() * quantity;
-        }
-        return 0.0;
     }
 }

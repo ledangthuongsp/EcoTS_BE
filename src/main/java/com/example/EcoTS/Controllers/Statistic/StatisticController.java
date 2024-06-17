@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -33,8 +34,14 @@ public class StatisticController {
     }
     @GetMapping("/by-period")
     public ResponseEntity<Map<String, Object>> getStatisticsByPeriod(@RequestParam("period") String period) {
-        Map<String, Object> statistics = statisticService.getStatisticsByPeriod(period);
-        return ResponseEntity.ok(statistics);
+        Statistic statistics = statisticService.getStatisticsByPeriod(period);
+        double totalCO2Saved = statisticService.calculateTotalCO2Saved(statistics);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("statistics", statistics);
+        response.put("totalCO2Saved", totalCO2Saved);
+
+        return ResponseEntity.ok(response);
     }
 
 }
