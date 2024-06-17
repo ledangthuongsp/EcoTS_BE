@@ -1,5 +1,6 @@
 package com.example.EcoTS.Models;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -26,6 +27,7 @@ public class UserAchievement {
 
     @OneToOne
     @JoinColumn(name = "user_id", nullable = false)
+    @JsonBackReference
     private Users user;
     private List<String> badgeUrl;
 

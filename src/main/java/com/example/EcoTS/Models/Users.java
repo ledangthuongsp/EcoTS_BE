@@ -1,5 +1,6 @@
 package com.example.EcoTS.Models;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -59,15 +60,19 @@ public class Users implements UserDetails {
     private Timestamp updatedAt;
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     private Points points;
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     private Results results;
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     private UserAchievement userAchievement;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     private List<UserProgress> userProgresses;
 
     @Override

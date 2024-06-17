@@ -1,5 +1,6 @@
 package com.example.EcoTS.Models;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -24,6 +25,7 @@ public class UserProgress {
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
+    @JsonBackReference
     private Users user;
 
     private Long topicId;

@@ -2,6 +2,7 @@ package com.example.EcoTS.Models;
 
 import com.example.EcoTS.Repositories.UserRepository;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,6 +47,7 @@ public class Points {
 
     @OneToOne
     @JoinColumn(name = "user_id", nullable = false)
+    @JsonBackReference
     private Users user;
 
     @CreationTimestamp
