@@ -36,6 +36,40 @@ public class StatisticService {
         statisticRepository.save(statistic);
     }
 
+    public List<Statistic> getStatisticsByPeriod(Timestamp startTime, Timestamp endTime) {
+        return statisticRepository.findAllByCreatedAtBetween(startTime, endTime);
+    }
+
+    public Statistic getTotalStatistics() {
+        List<Statistic> statistics = statisticRepository.findAll();
+
+        double totalPaperKg = 0.0;
+        double totalCardboardKg = 0.0;
+        double totalPlasticKg = 0.0;
+        double totalGlassKg = 0.0;
+        double totalClothKg = 0.0;
+        double totalMetalKg = 0.0;
+
+        for (Statistic stat : statistics) {
+            totalPaperKg += stat.getPaperKg();
+            totalCardboardKg += stat.getCardBoardKg();
+            totalPlasticKg += stat.getPlasticKg();
+            totalGlassKg += stat.getGlassKg();
+            totalClothKg += stat.getClothKg();
+            totalMetalKg += stat.getMetalKg();
+        }
+
+        Statistic result = new Statistic();
+        result.setPaperKg(totalPaperKg);
+        result.setCardBoardKg(totalCardboardKg);
+        result.setPlasticKg(totalPlasticKg);
+        result.setGlassKg(totalGlassKg);
+        result.setClothKg(totalClothKg);
+        result.setMetalKg(totalMetalKg);
+
+        return result;
+    }
+
     public List<Map<String, Object>> getStatisticsByPeriod(String period) {
         LocalDateTime endTime = LocalDateTime.now();
         LocalDateTime startTime;
