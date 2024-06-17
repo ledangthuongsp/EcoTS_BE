@@ -42,7 +42,7 @@ public class PredictionController {
     private UserRepository userRepository;
     @Operation(summary = "Predict garbage type from image", description = "Uploads an image and returns the prediction of garbage type")
     @PostMapping(value = "/predict", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
-    public ResponseEntity<String> predict(@RequestParam Long userId,@RequestPart("file") MultipartFile file) {
+    public ResponseEntity<String> predict(@RequestParam Long userId, @RequestPart("file") MultipartFile file) {
         try {
             String flaskApiUrl = "https://tensorflow-flask.onrender.com/detect";
             HttpHeaders headers = new HttpHeaders();
