@@ -14,4 +14,5 @@ import java.util.List;
 @Repository
 @Hidden
 public interface StatisticRepository extends JpaRepository<Statistic, Long> {
+    List<Statistic> findAllByCreatedAtBetween(Timestamp start, Timestamp end);
 }

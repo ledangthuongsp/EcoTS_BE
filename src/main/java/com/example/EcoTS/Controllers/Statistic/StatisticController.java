@@ -4,16 +4,10 @@ import com.example.EcoTS.Models.Statistic;
 import com.example.EcoTS.Repositories.StatisticRepository;
 import com.example.EcoTS.Services.Statistic.StatisticService;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import lombok.Getter;
-import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -32,16 +26,10 @@ public class StatisticController {
         List<Statistic> statistics = statisticRepository.findAll();
         return ResponseEntity.ok(statistics);
     }
+
     @GetMapping("/by-period")
-    public ResponseEntity<Map<String, Object>> getStatisticsByPeriod(@RequestParam("period") String period) {
-        Statistic statistics = statisticService.getStatisticsByPeriod(period);
-        double totalCO2Saved = statisticService.calculateTotalCO2Saved(statistics);
-
-        Map<String, Object> response = new HashMap<>();
-        response.put("statistics", statistics);
-        response.put("totalCO2Saved", totalCO2Saved);
-
-        return ResponseEntity.ok(response);
+    public ResponseEntity<List<Map<String, Object>>> getStatisticsByPeriod(@RequestParam("period") String period) {
+        List<Map<String, Object>> statistics = statisticService.getStatisticsByPeriod(period);
+        return ResponseEntity.ok(statistics);
     }
-
 }
