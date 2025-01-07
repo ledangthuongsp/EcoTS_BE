@@ -15,27 +15,27 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class React {
 
+public class React {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long id;
+    private Long id;
+
+    private boolean liked;
 
     @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
-    Users user; // Người react
+    private Users user;
 
     @ManyToOne
-    @JoinColumn(name = "newsfeed_id")
-    Newsfeed newsfeed; // React trên bài viết
+    private Newsfeed newsfeed;
 
     @ManyToOne
-    @JoinColumn(name = "comment_id")
-    Comment comment; // React trên bình luận
+    private Comment comment;
 
-    @Column(nullable = false)
-    String type; // Loại react: like, love, haha...
+    @ManyToOne
+    private ReplyComment replyComment;
 
-    @CreationTimestamp
-    LocalDateTime createdAt;
+    private LocalDateTime createdAt = LocalDateTime.now();
+
+    // Getters and setters
 }

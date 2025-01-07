@@ -1,30 +1,33 @@
 package com.example.EcoTS.Models.Newsfeed;
 
+import com.example.EcoTS.Models.Users;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
+
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
-@Table(name = "poll")
+@Table(name = "reply_comment")
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @NoArgsConstructor
 @AllArgsConstructor
-public class Poll {
+public class ReplyComment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String question;
+    private String content;
 
-    @OneToMany(mappedBy = "poll", cascade = CascadeType.ALL)
-    private List<PollOption> options = new ArrayList<>();
+    @ManyToOne
+    private Users author;
 
-    @OneToOne
-    private Newsfeed newsfeed;
+    @ManyToOne
+    private Comment comment;
 
     private LocalDateTime createdAt = LocalDateTime.now();
 

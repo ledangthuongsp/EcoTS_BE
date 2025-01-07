@@ -7,6 +7,8 @@ import lombok.experimental.FieldDefaults;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "comment")
@@ -16,26 +18,25 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 public class Comment {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long id;
+    private Long id;
+
+    private String content;
 
     @ManyToOne
-    @JoinColumn(name = "newsfeed_id", nullable = false)
-    Newsfeed newsfeed; // Bài viết được bình luận
+    private Users author;
 
     @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
-    Users user; // Người bình luận
+    private Newsfeed newsfeed;
 
-    @Column(nullable = false, length = 300)
-    String content; // Nội dung bình luận
+    @OneToMany(mappedBy = "comment", cascade = CascadeType.ALL)
+    private List<ReplyComment> replies = new ArrayList<>();
 
-    @ManyToOne
-    @JoinColumn(name = "parent_comment_id")
-    Comment parentComment; // Dùng để reply bình luận khác
+    @OneToMany(mappedBy = "comment", cascade = CascadeType.ALL)
+    private List<React> reactions = new ArrayList<>();
 
-    @CreationTimestamp
-    LocalDateTime createdAt;
+    private LocalDateTime createdAt = LocalDateTime.now();
+
+    // Getters and setters
 }

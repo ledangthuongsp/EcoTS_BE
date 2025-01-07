@@ -8,6 +8,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -18,27 +19,30 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class Newsfeed {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long id;
-
+    private Long id;
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
-    Users user; // Người tạo bài viết
-
+    private Users user;
     @Column(nullable = false, length = 500)
-    String content; // Nội dung bài viết
-
+    private String content; // Nội dung bài viết
     @ElementCollection
-    List<String> mediaUrls; // Danh sách URL hình ảnh hoặc video
+    private List<String> mediaUrls;
 
-    @Column(name = "react_count")
-    int reactCount; // Số lượng react
+    @OneToMany(mappedBy = "newsfeed", cascade = CascadeType.ALL)
+    private List<Comment> comments = new ArrayList<>();
+
+    @OneToMany(mappedBy = "newsfeed", cascade = CascadeType.ALL)
+    private List<React> reactions = new ArrayList<>();
+
+    @OneToOne(mappedBy = "newsfeed", cascade = CascadeType.ALL)
+    private Poll poll;
 
     @CreationTimestamp
-    LocalDateTime createdAt;
-
+    private LocalDateTime createdAt;
     @UpdateTimestamp
-    LocalDateTime updatedAt;
+    private LocalDateTime updatedAt;
+    private Long sponsorId;
+    private double pointForActivity;
 }

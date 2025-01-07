@@ -6,6 +6,7 @@ import com.example.EcoTS.Models.Users;
 import com.example.EcoTS.Repositories.RankRepository;
 import com.example.EcoTS.Repositories.UserRankRepository;
 import com.example.EcoTS.Repositories.UserRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -17,7 +18,40 @@ public class RankService {
     private final UserRankRepository userRankRepository;
     private final RankRepository rankRepository;
 
-    // Quy đổi điểm và cập nhật rank
+
+    // Thêm rank mới
+
+    @Transactional
+    public void addRank(double rankPoint, String rankName) {
+        Rank rank = new Rank();
+        rank.setRankPoint(rankPoint);
+        rank.setRankName(rankName);
+        rankRepository.save(rank);
+    }
+
+    // Sửa rank hiện tại
+    @Transactional
+    public void updateRank(Long rankId, Rank updatedRank) {
+        Rank rank = rankRepository.findById(rankId)
+                .orElseThrow(() -> new RuntimeException("Rank not found"));
+
+        rank.setRankName(updatedRank.getRankName());
+        rank.setRankPoint(updatedRank.getRankPoint());
+
+        rankRepository.save(rank);
+    }
+
+    // Xóa rank
+    @Transactional
+    public void deleteRank(Long rankId) {
+        Rank rank = rankRepository.findById(rankId)
+                .orElseThrow(() -> new RuntimeException("Rank not found"));
+
+        rankRepository.delete(rank);
+    }
+
+    // Quy đổi điểm và cập nhật rank cho người dùng
+    @Transactional
     public void contributePoints(Long userId, double contributedPoints) {
         // Tìm User và UserRank hiện tại
         Users user = userRepository.findById(userId)
@@ -35,21 +69,31 @@ public class RankService {
         updateRankIfNeeded(userRank);
     }
 
-    // Hàm kiểm tra và cập nhật rank của người dùng
+    // Cập nhật rank của người dùng nếu cần
+    @Transactional
     private void updateRankIfNeeded(UserRank userRank) {
         double currentRankPoints = userRank.getUserRankPoint();
         Rank currentRank = userRank.getRank();
 
         Rank newRank;
-        if (currentRankPoints >= 100) {
+        if (currentRankPoints >= 1000000) {
+            newRank = rankRepository.findByRankName("Diamond")
+                    .orElseThrow(() -> new RuntimeException("Rank Diamond not found"));
+        } else if (currentRankPoints >= 50000) {
+            newRank = rankRepository.findByRankName("Platinum")
+                    .orElseThrow(() -> new RuntimeException("Rank Platinum not found"));
+        } else if (currentRankPoints >= 25000) {
             newRank = rankRepository.findByRankName("Gold")
                     .orElseThrow(() -> new RuntimeException("Rank Gold not found"));
-        } else if (currentRankPoints >= 50) {
+        } else if (currentRankPoints >= 10000) {
             newRank = rankRepository.findByRankName("Silver")
                     .orElseThrow(() -> new RuntimeException("Rank Silver not found"));
-        } else {
+        } else if (currentRankPoints >= 5000) {
             newRank = rankRepository.findByRankName("Bronze")
                     .orElseThrow(() -> new RuntimeException("Rank Bronze not found"));
+        } else {
+            newRank = rankRepository.findByRankName("Iron")
+                    .orElseThrow(() -> new RuntimeException("Rank Iron not found"));
         }
 
         // Cập nhật rank nếu rank mới khác rank hiện tại
@@ -58,5 +102,26 @@ public class RankService {
             userRankRepository.save(userRank);
         }
     }
-}
 
+    // Lấy thông tin rank của người dùng
+    @Transactional
+    public UserRank getUserRank(Long userId) {
+        Users user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // Tạo mới UserRank nếu không tồn tại
+        return userRankRepository.findByUserId(userId)
+                .orElseGet(() -> {
+                    Rank defaultRank = rankRepository.findByRankName("Iron")
+                            .orElseThrow(() -> new RuntimeException("Default rank Iron not found"));
+
+                    UserRank newUserRank = UserRank.builder()
+                            .user(user)
+                            .rank(defaultRank)
+                            .userRankPoint(0.0)
+                            .build();
+                    return userRankRepository.save(newUserRank);
+                });
+    }
+
+}
