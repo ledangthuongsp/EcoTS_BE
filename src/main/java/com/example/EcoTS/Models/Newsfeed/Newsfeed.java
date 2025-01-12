@@ -41,8 +41,10 @@ public class Newsfeed {
 
     @CreationTimestamp
     private LocalDateTime createdAt;
+
     @UpdateTimestamp
     private LocalDateTime updatedAt;
+
     private Long sponsorId;
-    private double pointForActivity;
+    private double pointForActivity; // Mặc định cho hoạt động đó là bao nhiêu điểm
 }

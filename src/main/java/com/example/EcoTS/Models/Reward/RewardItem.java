@@ -19,14 +19,12 @@ public class RewardItem {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     private List<String> rewardItemUrl;
     private double pointCharge;
     private int stock;
     private String itemName;
     private String itemDescription;
     private List<Long> itemType;
-
     private double height;
     private double humidity;
     private String size;
