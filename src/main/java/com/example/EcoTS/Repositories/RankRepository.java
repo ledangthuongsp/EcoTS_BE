@@ -13,4 +13,5 @@ public interface RankRepository extends JpaRepository<Rank, Long> {
 
     // Tìm Rank theo tên rank
     Optional<Rank> findByRankName(String rankName);
+
 }

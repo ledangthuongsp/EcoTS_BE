@@ -10,6 +10,8 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class RankService {
@@ -18,6 +20,9 @@ public class RankService {
     private final UserRankRepository userRankRepository;
     private final RankRepository rankRepository;
 
+    public List<Rank> getAllRanks() {
+        return rankRepository.findAll();
+    }
 
     // Thêm rank mới
 

@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/rank")
 @Tag(name = "User Ranking")
@@ -16,7 +18,10 @@ public class RankController {
 
     @Autowired
     private RankService rankService;
-
+    @GetMapping
+    public List<Rank> getAllRanks() {
+        return rankService.getAllRanks();
+    }
     // Lấy thông tin rank của người dùng
     @GetMapping("/user/{userId}")
     public UserRank getUserRank(@PathVariable Long userId) {
