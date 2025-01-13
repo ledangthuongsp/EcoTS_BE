@@ -20,23 +20,24 @@ import java.util.List;
 public class Comment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    Long id;
 
-    private String content;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "newsfeed_id", nullable = false)
+    @ToString.Exclude
+    Newsfeed newsfeed;
 
-    @ManyToOne
-    private Users author;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    Users user;
 
-    @ManyToOne
-    private Newsfeed newsfeed;
+    @Column(nullable = false, length = 500)
+    String content;
 
-    @OneToMany(mappedBy = "comment", cascade = CascadeType.ALL)
-    private List<ReplyComment> replies = new ArrayList<>();
+    @OneToMany(mappedBy = "parentComment", cascade = CascadeType.ALL)
+    @ToString.Exclude
+    List<Reply> replies = new ArrayList<>();
 
-    @OneToMany(mappedBy = "comment", cascade = CascadeType.ALL)
-    private List<React> reactions = new ArrayList<>();
-
-    private LocalDateTime createdAt = LocalDateTime.now();
-
-    // Getters and setters
+    @CreationTimestamp
+    LocalDateTime createdAt;
 }

@@ -2,7 +2,7 @@ package com.example.EcoTS.Controllers.Rank;
 
 import com.example.EcoTS.Models.Rank;
 import com.example.EcoTS.Models.UserRank;
-import com.example.EcoTS.Services.UserService.RankService;
+import com.example.EcoTS.Services.Rank.RankService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

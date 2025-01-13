@@ -16,17 +16,13 @@ import java.util.List;
 public class Poll {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    Long id;
 
-    private String question;
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "newsfeed_id", nullable = false)
+    Newsfeed newsfeed;
 
-    @OneToMany(mappedBy = "poll", cascade = CascadeType.ALL)
-    private List<PollOption> options = new ArrayList<>();
-
-    @OneToOne
-    private Newsfeed newsfeed;
-
-    private LocalDateTime createdAt = LocalDateTime.now();
-
-    // Getters and setters
+    @OneToMany(mappedBy = "poll", cascade = CascadeType.ALL, orphanRemoval = true)
+    @ToString.Exclude
+    List<PollOption> options = new ArrayList<>();
 }

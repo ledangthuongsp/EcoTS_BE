@@ -1,4 +1,4 @@
-package com.example.EcoTS.Services.UserService;
+package com.example.EcoTS.Services.Rank;
 
 import com.example.EcoTS.Models.Rank;
 import com.example.EcoTS.Models.UserRank;

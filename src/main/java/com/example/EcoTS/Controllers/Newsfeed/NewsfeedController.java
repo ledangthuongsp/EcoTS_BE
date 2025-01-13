@@ -1,5 +1,7 @@
 package com.example.EcoTS.Controllers.Newsfeed;
 
+import com.example.EcoTS.DTOs.Request.Newsfeed.NewsfeedRequest;
+import com.example.EcoTS.DTOs.Response.Newsfeed.NewsfeedResponse;
 import com.example.EcoTS.Models.Newsfeed.Newsfeed;
 import com.example.EcoTS.Services.Newsfeed.NewsfeedService;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -19,42 +21,21 @@ public class NewsfeedController {
     @Autowired
     private NewsfeedService newsfeedService;
 
-    // Create a new newsfeed post
     @PostMapping
-    public ResponseEntity<Newsfeed> createNewsfeed(@RequestBody Newsfeed newsfeed) {
-        Newsfeed createdNewsfeed = newsfeedService.createNewsfeed(newsfeed);
-        return new ResponseEntity<>(createdNewsfeed, HttpStatus.CREATED);
+    public ResponseEntity<NewsfeedResponse> createOrUpdateNewsfeed(@RequestBody NewsfeedRequest requestDTO) {
+        NewsfeedResponse response = newsfeedService.createOrUpdateNewsfeed(requestDTO);
+        return ResponseEntity.ok(response);
     }
 
-    // Get all newsfeed posts
-    @GetMapping
-    public ResponseEntity<List<Newsfeed>> getAllNewsfeeds() {
-        List<Newsfeed> newsfeeds = newsfeedService.getAllNewsfeeds();
-        return new ResponseEntity<>(newsfeeds, HttpStatus.OK);
-    }
-
-    // Get a specific newsfeed post by ID
     @GetMapping("/{id}")
-    public ResponseEntity<Newsfeed> getNewsfeedById(@PathVariable Long id) {
-        Optional<Newsfeed> newsfeed = newsfeedService.getNewsfeedById(id);
-        return newsfeed.map(ResponseEntity::ok).orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    public ResponseEntity<NewsfeedResponse> getNewsfeed(@PathVariable Long id) {
+        NewsfeedResponse response = newsfeedService.getNewsfeed(id);
+        return ResponseEntity.ok(response);
     }
 
-    // Update a newsfeed post
-    @PutMapping("/{id}")
-    public ResponseEntity<Newsfeed> updateNewsfeed(@PathVariable Long id, @RequestBody Newsfeed newsfeed) {
-        try {
-            Newsfeed updatedNewsfeed = newsfeedService.updateNewsfeed(id, newsfeed);
-            return new ResponseEntity<>(updatedNewsfeed, HttpStatus.OK);
-        } catch (RuntimeException e) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-    }
-
-    // Delete a newsfeed post
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteNewsfeed(@PathVariable Long id) {
-        newsfeedService.deleteNewsfeed(id);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    @GetMapping
+    public ResponseEntity<List<NewsfeedResponse>> getAllNewsfeeds() {
+        List<NewsfeedResponse> response = newsfeedService.getAllNewsfeeds();
+        return ResponseEntity.ok(response);
     }
 }

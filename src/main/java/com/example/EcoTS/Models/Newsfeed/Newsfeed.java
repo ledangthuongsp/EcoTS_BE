@@ -1,5 +1,8 @@
 package com.example.EcoTS.Models.Newsfeed;
 
+import com.example.EcoTS.DTOs.Response.Newsfeed.CommentResponse;
+import com.example.EcoTS.DTOs.Response.Newsfeed.PollResponse;
+import com.example.EcoTS.DTOs.Response.Newsfeed.ReactResponse;
 import com.example.EcoTS.Models.Users;
 import jakarta.persistence.*;
 import lombok.*;
@@ -22,29 +25,29 @@ public class Newsfeed {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
-    private Users user;
-    @Column(nullable = false, length = 500)
-    private String content; // Nội dung bài viết
-    @ElementCollection
-    private List<String> mediaUrls;
 
+    private String content;
+    private List<String> mediaUrls;
+    private Long sponsorId;
+    private double pointForActivity;
+    private String createdBy; // "User" or "Sponsor"
+    private Long createdById; // User or Sponsor ID
+    // Quan hệ với Poll (một Newsfeed có thể có một Poll)
+    @OneToOne(fetch = FetchType.LAZY, mappedBy = "newsfeed", cascade = CascadeType.ALL)
+    @ToString.Exclude
+    private Poll poll;
+
+    // Quan hệ với Comment (một Newsfeed có thể có nhiều comment)
     @OneToMany(mappedBy = "newsfeed", cascade = CascadeType.ALL)
+    @ToString.Exclude
     private List<Comment> comments = new ArrayList<>();
 
+    // Quan hệ với React (một Newsfeed có thể có nhiều react)
     @OneToMany(mappedBy = "newsfeed", cascade = CascadeType.ALL)
+    @ToString.Exclude
     private List<React> reactions = new ArrayList<>();
-
-    @OneToOne(mappedBy = "newsfeed", cascade = CascadeType.ALL)
-    private Poll poll;
 
     @CreationTimestamp
     private LocalDateTime createdAt;
-
-    @UpdateTimestamp
-    private LocalDateTime updatedAt;
-
-    private Long sponsorId;
-    private double pointForActivity; // Mặc định cho hoạt động đó là bao nhiêu điểm
 }
+

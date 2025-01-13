@@ -2,20 +2,22 @@ package com.example.EcoTS.Models.Newsfeed;
 
 import com.example.EcoTS.Models.Users;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "react")
+@Table(name = "reply")
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
-public class React {
+public class Reply {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
@@ -30,7 +32,7 @@ public class React {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "comment_id")
-    Comment comment;
+    Comment parentComment;
 
     @CreationTimestamp
     LocalDateTime createdAt;

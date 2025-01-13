@@ -7,6 +7,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Table(name = "poll_option")
 @Data
@@ -16,14 +19,15 @@ import lombok.experimental.FieldDefaults;
 public class PollOption {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    Long id;
 
-    private String optionText;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "poll_id", nullable = false)
+    Poll poll;
 
-    private int voteCount;
+    @Column(nullable = false)
+    String optionText;
 
-    @ManyToOne
-    private Poll poll;
-
-    // Getters and setters
+    @ElementCollection
+    List<Long> votedUserIds = new ArrayList<>();
 }
