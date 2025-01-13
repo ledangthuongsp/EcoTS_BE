@@ -57,5 +57,9 @@ public class AchievementLevelController {
                                                     @RequestPart MultipartFile imgUrl, @RequestPart MultipartFile iconUrl) throws IOException {
         return ResponseEntity.ok().body(achievementLevelService.updateAchievementLevel(achievementLevelId, name, description,imgUrl,iconUrl,maxIndex));
     }
-
+    @DeleteMapping("/delete-achievement-level")
+    public ResponseEntity<?> deleteAchievementLevel(@RequestParam Long achievementLevelId) {
+        achievementLevelService.deleteAchievementLevel(achievementLevelId);
+        return ResponseEntity.ok().body("Achievement level deleted successfully.");
+    }
 }

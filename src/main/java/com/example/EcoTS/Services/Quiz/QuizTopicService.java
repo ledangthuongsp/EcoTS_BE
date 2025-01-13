@@ -37,13 +37,7 @@ public class QuizTopicService {
     @Autowired
     private UserRepository userRepository;
     @Transactional
-    public QuizTopic addTopic(String topicName, String description, MultipartFile file, String username) throws IOException {
-        Users user = userRepository.findByUsername(username).orElseThrow(() -> new IllegalArgumentException("User not found"));
-
-        if (!Roles.EMPLOYEE.name().equals(user.getRole())) {
-            throw new IllegalArgumentException("Only employees can add topics");
-        }
-
+    public QuizTopic addTopic(String topicName, String description, MultipartFile file) throws IOException {
         String imgUrl = cloudinaryService.uploadFileQuizTopic(file);
         QuizTopic topic = new QuizTopic();
         topic.setTopicName(topicName);
@@ -70,5 +64,34 @@ public class QuizTopicService {
     public QuizTopic getTopicById(Long id) {
         return quizTopicRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Topic not found"));
+    }
+    @Transactional
+    public void deleteTopic(Long topicId) {
+        QuizTopic topic = quizTopicRepository.findById(topicId).orElseThrow(() -> new ResourceNotFoundException("Topic not found"));
+
+        // Delete all questions related to the topic
+        List<QuizQuestion> questions = quizQuestionRepository.findByQuizTopic(topic);
+        quizQuestionRepository.deleteAll(questions);
+
+        // Delete all user progress related to the topic
+        List<UserProgress> progressList = userProgressRepository.findByTopicId(topicId);
+        userProgressRepository.deleteAll(progressList);
+
+        // Delete the topic
+        quizTopicRepository.delete(topic);
+    }
+    @Transactional
+    public QuizTopic updateTopic(Long id, String topicName, String description, MultipartFile file) throws IOException {
+        QuizTopic topic = quizTopicRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Topic not found"));
+        topic.setTopicName(topicName);
+        topic.setDescription(description);
+
+        // Chỉ upload file và cập nhật URL nếu file không null
+        if (file != null && !file.isEmpty()) {
+            String imgUrl = cloudinaryService.uploadFileQuizTopic(file);
+            topic.setImgUrl(imgUrl);
+        }
+
+        return quizTopicRepository.save(topic);
     }
 }

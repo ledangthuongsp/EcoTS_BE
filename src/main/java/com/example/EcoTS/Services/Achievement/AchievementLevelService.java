@@ -52,4 +52,9 @@ public class AchievementLevelService {
         level.setMaxIndex(maxIndex);
         return achievementLevelRepository.save(level);
     }
+    @Transactional
+    public void deleteAchievementLevel(Long achievementLevelId) {
+        AchievementLevel level = achievementLevelRepository.findById(achievementLevelId).orElseThrow(() -> new RuntimeException("Achievement level not found"));
+        achievementLevelRepository.delete(level);
+    }
 }

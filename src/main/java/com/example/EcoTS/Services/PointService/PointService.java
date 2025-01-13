@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.xml.transform.Result;
+import java.awt.*;
 import java.util.Optional;
 @Service
 public class PointService {
@@ -35,6 +36,7 @@ public class PointService {
         point.setPoint(point.getPoint() + points);
         pointRepository.save(point);
     }
+
     public void awardPointsByUsernameAndEmail(String username, double points)
     {
         Users user = userRepository.findByUsername(username).orElseThrow(() -> new IllegalArgumentException("User not found"));
@@ -100,5 +102,15 @@ public class PointService {
         notificationService.createNotification(users.getId(), totalPoints, employeeId);
         statisticService.saveStatistic(paperKg, cardboardKg, plasticKg, glassKg, clothKg, metalKg, employeeId);
         return points;
+    }
+    @Transactional
+    public void addPoints(Long userId, double points) {
+        Users user = userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("User not found"));
+        Points userPoints = pointRepository.findByUser(user).orElseThrow(() -> new IllegalArgumentException("Point with this user not found"));
+        Results results = resultRepository.findByUser(user).orElseThrow(() -> new IllegalArgumentException("Point with this user not found"));
+        userPoints.setPoint(userPoints.getPoint() + points);
+        pointRepository.save(userPoints);
+        results.setMaximumPoints(results.getMaximumPoints()+points);
+        resultRepository.save(results);
     }
 }

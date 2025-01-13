@@ -23,7 +23,8 @@ public class QuizQuestionService {
 
     @Autowired
     private QuizTopicRepository quizTopicRepository;
-
+    @Autowired
+    private UserProgressService userProgressService;  // Service để xử lý tiến độ người dùng
     @Transactional
     public QuizQuestion addQuestion(Long topicId, QuizQuestionDTO quizQuestionDTO) {
         QuizQuestion quizQuestion = new QuizQuestion();
@@ -34,22 +35,27 @@ public class QuizQuestionService {
         quizQuestion.setIncorrectAnswer2(quizQuestionDTO.getIncorrectAnswer2());
         quizQuestion.setQuizTopic(topic);
         topic.setNumberQuestion(topic.getNumberQuestion()+1);
+
+        userProgressService.resetProgressForTopic(topicId);  // Reset progress của tất cả người dùng cho topic này
         return quizQuestionRepository.save(quizQuestion);
     }
 
+    @Transactional
     public void deleteQuestion(Long questionId) {
-        quizQuestionRepository.deleteById(questionId);
+        QuizQuestion quizQuestion = quizQuestionRepository.findById(questionId).orElseThrow(() -> new ResourceNotFoundException("Question not found"));
+        QuizTopic topic = quizQuestion.getQuizTopic();
+        topic.setNumberQuestion(topic.getNumberQuestion() - 1);
+        quizQuestionRepository.delete(quizQuestion);
     }
 
-    public Optional<QuizQuestion> getQuizQuestionById(Long id) {
-        return quizQuestionRepository.findById(id);
+    @Transactional
+    public QuizQuestion updateQuestion(Long id, QuizQuestionDTO quizQuestionDTO) {
+        QuizQuestion quizQuestion = quizQuestionRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Question not found"));
+        quizQuestion.setQuestionText(quizQuestionDTO.getQuestionText());
+        quizQuestion.setCorrectAnswer(quizQuestionDTO.getCorrectAnswer());
+        quizQuestion.setIncorrectAnswer1(quizQuestionDTO.getIncorrectAnswer1());
+        quizQuestion.setIncorrectAnswer2(quizQuestionDTO.getIncorrectAnswer2());
+        return quizQuestionRepository.save(quizQuestion);
     }
 
-    public List<QuizQuestion> getAllQuizQuestions() {
-        return quizQuestionRepository.findAll();
-    }
-
-    public void deleteQuizQuestion(Long id) {
-        quizQuestionRepository.deleteById(id);
-    }
 }

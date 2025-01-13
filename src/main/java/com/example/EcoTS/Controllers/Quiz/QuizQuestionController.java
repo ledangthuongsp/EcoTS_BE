@@ -48,11 +48,14 @@ public class QuizQuestionController {
     public QuizQuestion saveQuestion(@RequestParam Long topicId ,@RequestBody QuizQuestionDTO quizQuestionDTO) {
         return quizQuestionService.addQuestion(topicId, quizQuestionDTO);
     }
-    @DeleteMapping("/delete-question-from-topic")
-    public void deleveQuestion (@RequestParam Long questionId)
-    {
-        quizQuestionService.deleteQuestion(questionId);
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<String> deleteQuestion(@PathVariable Long id) {
+        quizQuestionService.deleteQuestion(id);
+        return ResponseEntity.ok("Question deleted successfully");
     }
-
+    @PutMapping("/update/{id}")
+    public QuizQuestion updateQuestion(@PathVariable Long id, @RequestBody QuizQuestionDTO quizQuestionDTO) {
+        return quizQuestionService.updateQuestion(id, quizQuestionDTO);
+    }
 }
 

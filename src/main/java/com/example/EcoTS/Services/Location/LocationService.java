@@ -44,19 +44,34 @@ public class LocationService {
     public List<Locations> getLocationsByType(String type) {
         return locationRepository.findByTypeOfLocation(type);
     }
+
     @Transactional
     public List<Locations> getAllLocations(){
         return locationRepository.findAll();
     }
+
     @Transactional
-    public Locations updateInfoLocation(Long locationId, MultipartFile backGroundImage, List<MultipartFile> imageDetails) throws IOException {
+    public Locations updateInfoLocation(Long locationId, String description, String address, double latitude, double longitude, MultipartFile backGroundImage, List<MultipartFile> imageDetails) throws IOException {
         Locations updateLocation = locationRepository.findById(locationId).orElseThrow(() -> new IllegalArgumentException("Location not found"));
-        String backGroundImgUrl = cloudinaryService.uploadFileLocation(backGroundImage);
-        List<String> imgDetailsUrl = cloudinaryService.uploadMultipleFilesLocations(imageDetails);
-        updateLocation.setBackGroundImgUrl(backGroundImgUrl);
-        updateLocation.setImgDetailsUrl(imgDetailsUrl);
+
+        updateLocation.setDescription(description);
+        updateLocation.setTypeOfLocation(address);
+        updateLocation.setLatitude(latitude);
+        updateLocation.setLongitude(longitude);
+
+        if (backGroundImage != null && !backGroundImage.isEmpty()) {
+            String backGroundImgUrl = cloudinaryService.uploadFileLocation(backGroundImage);
+            updateLocation.setBackGroundImgUrl(backGroundImgUrl);
+        }
+
+        if (imageDetails != null && !imageDetails.isEmpty()) {
+            List<String> imgDetailsUrl = cloudinaryService.uploadMultipleFilesLocations(imageDetails);
+            updateLocation.setImgDetailsUrl(imgDetailsUrl);
+        }
+
         return locationRepository.save(updateLocation);
     }
+
     @Transactional(readOnly = true)
     public Locations addEmployeeToLocation(Long employeeId, Long locationId) {
         Locations locations = locationRepository.findById(locationId).orElseThrow();
