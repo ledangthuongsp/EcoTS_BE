@@ -8,6 +8,7 @@ import java.util.List;
 @Data
 @Builder
 public class NewsfeedRequest {
+    private Long id;
     private String content;
     private List<String> mediaUrls;
     private Long sponsorId;

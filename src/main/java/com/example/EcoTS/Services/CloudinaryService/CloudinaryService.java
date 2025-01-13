@@ -41,7 +41,21 @@ public class CloudinaryService {
         }
         return urls;
     }
-
+    public String uploadFileNewsfeed(MultipartFile file) throws IOException {
+        Map response = cloudinary.uploader().upload(file.getBytes(),
+                ObjectUtils.asMap(
+                        "resource_type", "auto",
+                        "folder", "Newsfeed" // Thêm folder "Newsfeed"
+                ));
+        return (String) response.get("url");
+    }
+    public List<String> uploadMultipleFilesNewsfeed(List<MultipartFile> files) throws IOException{
+        List<String> urls = new ArrayList<>();
+        for (MultipartFile file : files) {
+            urls.add(uploadFileNewsfeed(file));
+        }
+        return urls;
+    }
     public String userUploadAvatar(MultipartFile newAvatar, String oldAvatar) throws IOException {
         Map uploadResult = cloudinary.uploader().upload(newAvatar.getBytes(),
                 ObjectUtils.asMap(
