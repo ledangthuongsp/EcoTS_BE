@@ -1,6 +1,7 @@
 package com.example.EcoTS.Controllers.Newsfeed;
 
 import com.example.EcoTS.DTOs.Request.Newsfeed.NewsfeedRequest;
+import com.example.EcoTS.DTOs.Request.Newsfeed.PollRequest;
 import com.example.EcoTS.DTOs.Response.Newsfeed.NewsfeedResponse;
 import com.example.EcoTS.Models.Newsfeed.Newsfeed;
 import com.example.EcoTS.Services.Newsfeed.NewsfeedService;
@@ -29,11 +30,13 @@ public class NewsfeedController {
     public ResponseEntity<Newsfeed> createNewsfeed(
             @RequestParam("title") String title,
             @RequestParam("content") String content,
-            @RequestPart("imageUrl")List<MultipartFile> mediaUrls) throws IOException {
+            @RequestPart("imageUrl") List<MultipartFile> mediaUrls,
+            @RequestParam(value = "pollRequest", required = false) PollRequest pollRequest) throws IOException {
 
-        Newsfeed createdNewsfeed = newsfeedService.createNewsfeed(title, content, mediaUrls);
+        Newsfeed createdNewsfeed = newsfeedService.createNewsfeed(title, content, mediaUrls, pollRequest);
         return ResponseEntity.ok(createdNewsfeed);
     }
+
 
     // READ: Get all newsfeeds
     @GetMapping("/newsfeed/all")
