@@ -54,7 +54,7 @@ public class RewardController {
     }
 
     @PutMapping("/update-reward-history")
-    @Operation(description = "Phan nay la tu dong update diem cho nguoi dung (Phan rank), tu tru stock, tu luu lai history")
+    @Operation(summary = "My summary", description = "Phan nay la tu dong update diem cho nguoi dung (Phan rank), tu tru stock, tu luu lai history")
     public  ResponseEntity<Void> updateRewardHistory(@RequestParam Long userId, @RequestParam double point,
                                                      @RequestParam Long rewardItemId,  @RequestParam Long numberOfItem,
                                                      @RequestParam Long locationId)
