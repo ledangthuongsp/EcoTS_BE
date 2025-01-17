@@ -17,19 +17,22 @@ public class PollController {
     @Autowired
     private PollService pollService;
 
-    @PostMapping("/{pollOptionId}/votes")
+    @PostMapping("/{newsfeedId}/{pollOptionId}/votes")
     public ResponseEntity<PollOption> addVote(
+            @PathVariable Long newsfeedId,
             @PathVariable Long pollOptionId,
             @RequestParam Long userId,
             @RequestParam boolean status) {
-        PollOption updatedPollOption = pollService.addVote(pollOptionId, userId, status);
+        PollOption updatedPollOption = pollService.addVote(newsfeedId, pollOptionId, userId, status);
         return ResponseEntity.ok(updatedPollOption);
     }
-    @DeleteMapping("/{pollOptionId}/votes/{voteId}")
+
+    @DeleteMapping("/{newsfeedId}/{pollOptionId}/votes/{voteId}")
     public ResponseEntity<PollOption> removeVote(
+            @PathVariable Long newsfeedId,
             @PathVariable Long pollOptionId,
             @PathVariable Long voteId) {
-        PollOption updatedPollOption = pollService.removeVote(pollOptionId, voteId);
+        PollOption updatedPollOption = pollService.removeVote(newsfeedId, pollOptionId, voteId);
         return ResponseEntity.ok(updatedPollOption);
     }
 }

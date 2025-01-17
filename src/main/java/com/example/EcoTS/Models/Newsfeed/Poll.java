@@ -18,5 +18,6 @@ public class Poll {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String title;
-    private List<Long> pollOptionIds;
+    @ElementCollection
+    private List<Long> pollOptionIds = new ArrayList<>();
 }

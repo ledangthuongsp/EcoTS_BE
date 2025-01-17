@@ -1,7 +1,9 @@
 package com.example.EcoTS.Services.Newsfeed;
 
+import com.example.EcoTS.Models.Newsfeed.Newsfeed;
 import com.example.EcoTS.Models.Newsfeed.PollOption;
 import com.example.EcoTS.Models.Newsfeed.Vote;
+import com.example.EcoTS.Repositories.Newsfeed.NewsfeedRepository;
 import com.example.EcoTS.Repositories.Newsfeed.PollOptionRepository;
 import com.example.EcoTS.Repositories.Newsfeed.VoteRepository;
 import lombok.RequiredArgsConstructor;
@@ -12,14 +14,23 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 public class PollService {
-
     @Autowired
     private PollOptionRepository pollOptionRepository;
     @Autowired
     private VoteRepository voteRepository;
+    @Autowired
+    private NewsfeedRepository newsfeedRepository;
 
     @Transactional
-    public PollOption addVote(Long pollOptionId, Long userId, boolean status) {
+    public PollOption addVote(Long newsfeedId, Long pollOptionId, Long userId, boolean status) {
+        // Kiểm tra Newsfeed tồn tại
+        Newsfeed newsfeed = newsfeedRepository.findById(newsfeedId)
+                .orElseThrow(() -> new IllegalArgumentException("Newsfeed not found"));
+
+        if (!newsfeed.getPollId().equals(pollOptionId)) {
+            throw new IllegalArgumentException("PollOption does not belong to Newsfeed");
+        }
+
         // Tạo vote mới
         Vote vote = Vote.builder()
                 .userId(userId)
@@ -37,8 +48,17 @@ public class PollService {
         // Lưu lại PollOption
         return pollOptionRepository.save(pollOption);
     }
+
     @Transactional
-    public PollOption removeVote(Long pollOptionId, Long voteId) {
+    public PollOption removeVote(Long newsfeedId, Long pollOptionId, Long voteId) {
+        // Kiểm tra Newsfeed tồn tại
+        Newsfeed newsfeed = newsfeedRepository.findById(newsfeedId)
+                .orElseThrow(() -> new IllegalArgumentException("Newsfeed not found"));
+
+        if (!newsfeed.getPollId().equals(pollOptionId)) {
+            throw new IllegalArgumentException("PollOption does not belong to Newsfeed");
+        }
+
         // Xóa vote khỏi database
         voteRepository.deleteById(voteId);
 
