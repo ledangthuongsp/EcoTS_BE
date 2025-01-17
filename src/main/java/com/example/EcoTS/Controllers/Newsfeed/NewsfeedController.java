@@ -46,7 +46,7 @@ public class NewsfeedController {
         List<Newsfeed> newsfeeds = newsfeedService.getAllNewsfeed();
         return ResponseEntity.ok(newsfeeds);
     }
-    @GetMapping("/get-your-activity")
+    @GetMapping(value = "/get-your-activity", name = "Cai nay la de lay nhung activity ma minh da post len")
     public ResponseEntity<List<Newsfeed>> getNewsfeedYourActivity(Long userId)
     {
         List<Newsfeed> newsfeeds = newsfeedService.getYourActivity(userId);

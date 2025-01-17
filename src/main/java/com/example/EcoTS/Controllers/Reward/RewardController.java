@@ -1,7 +1,9 @@
 package com.example.EcoTS.Controllers.Reward;
 
+import com.example.EcoTS.Models.Reward.RewardHistory;
 import com.example.EcoTS.Models.Reward.RewardItem;
 import com.example.EcoTS.Services.RewardItem.RewardItemService;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -50,4 +52,25 @@ public class RewardController {
         rewardItemService.deleteReward(id);
         return ResponseEntity.noContent().build();
     }
+
+    @PutMapping("/update-reward-history")
+    @Operation(description = "Phan nay la tu dong update diem cho nguoi dung (Phan rank), tu tru stock, tu luu lai history")
+    public  ResponseEntity<Void> updateRewardHistory(@RequestParam Long userId, @RequestParam double point,
+                                                     @RequestParam Long rewardItemId,  @RequestParam Long numberOfItem,
+                                                     @RequestParam Long locationId)
+    {
+        rewardItemService.updateHistoryCharge(userId, point, rewardItemId, numberOfItem, locationId);
+        return ResponseEntity.ok().build();
+    }
+    @GetMapping("/get-reward-history")
+    public ResponseEntity<List<RewardHistory>> getRewardHistory(@RequestParam Long userId) {
+        List<RewardHistory> rewardHistory = rewardItemService.getAllRewardHistoryById(userId);
+
+        if (rewardHistory == null || rewardHistory.isEmpty()) {
+            return ResponseEntity.notFound().build(); // Trả về 404 nếu không tìm thấy dữ liệu
+        }
+
+        return ResponseEntity.ok(rewardHistory); // Trả về 200 với danh sách dữ liệu
+    }
+
 }
