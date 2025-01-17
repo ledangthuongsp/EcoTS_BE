@@ -44,17 +44,16 @@ public class MaterialController {
     }
 
     // Cập nhật thông tin về một vật liệu
-    @PutMapping("/update/{id}")
-    public ResponseEntity<String> updateMaterial(@PathVariable Long id, @RequestBody Materials updatedMaterial) {
+    @PutMapping("/update")
+    public ResponseEntity<String> updateMaterial(@RequestParam Long id, @RequestParam double pointPerKg, @RequestParam double saveCo2perKg ) {
         Materials existingMaterial = materialRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Material not found"));
-
-        existingMaterial.setName(updatedMaterial.getName());
-        existingMaterial.setPointsPerKg(updatedMaterial.getPointsPerKg());
-        existingMaterial.setCo2SavedPerKg(updatedMaterial.getCo2SavedPerKg());
+        existingMaterial.setPointsPerKg(pointPerKg);
+        existingMaterial.setCo2SavedPerKg(saveCo2perKg);
 
         materialRepository.save(existingMaterial);
         return new ResponseEntity<>("Material updated successfully", HttpStatus.OK);
+
     }
 }
 

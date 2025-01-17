@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Optional;
 
 import io.swagger.v3.oas.annotations.Hidden;
+import org.tensorflow.op.Op;
 
 @Repository
 @RepositoryRestResource
@@ -19,4 +20,5 @@ public interface UserRepository extends JpaRepository<Users, Long> {
     Optional<Users> findByUsername(String username);
     Optional<Users> findByEmail (String email);
     List<Users> findByRole(String roles);
+    Optional<Users> findById(Long userId);
 }

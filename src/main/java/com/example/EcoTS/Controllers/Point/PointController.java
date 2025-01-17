@@ -61,16 +61,9 @@ public class PointController {
         return ResponseEntity.ok(points);
     }
     @PutMapping("/complete-quiz-add-points")
-    public ResponseEntity<String> addPointsByQuiz(@RequestParam Long userId, @RequestParam double points)
+    public void addPointsByQuiz(@RequestParam Long userId, @RequestParam double points)
     {
-        Users user = userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("User not found"));
-        Points userPoints = pointRepository.findByUser(user).orElseThrow(() -> new IllegalArgumentException("Point with this user not found"));
-        Results results = resultRepository.findByUser(user).orElseThrow(() -> new IllegalArgumentException("Point with this user not found"));
-        userPoints.setPoint(userPoints.getPoint() + points);
-        pointRepository.save(userPoints);
-        results.setMaximumPoints(results.getMaximumPoints()+points);
-        resultRepository.save(results);
-        return ResponseEntity.ok("Points added successfully.");
+        pointService.addPoints(userId, points);
     }
 }
 
