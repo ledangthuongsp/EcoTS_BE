@@ -7,15 +7,14 @@ import java.util.List;
 
 @Data
 @Builder
-public class NewsfeedResponse {
-    private Long id;
-    private String content;
-    private List<String> mediaUrls;
-    private Long sponsorId;
-    private double pointForActivity;
-    private String createdBy; // "User" or "Sponsor"
-    private Long createdById; // User or Sponsor ID
-    private List<PollResponse> poll; // Lưu Poll (nếu có)
-    private List<CommentResponse> comments; // Lưu Comment
-    private List<ReactResponse> reactions; // Lưu React
+public class  NewsfeedResponse {
+    private Long id;                      // ID của bài viết
+    private String content;               // Nội dung bài viết
+    private List<String> mediaUrls;       // Danh sách ảnh hoặc video
+    private Long sponsorId;               // ID nhà tài trợ
+    private double pointForActivity;      // Điểm hoạt động
+    private Long userId;                  // ID người tạo bài viết
+    private PollResponse poll;            // Thông tin về Poll (nếu có)
+    private List<CommentResponse> comments; // Danh sách comment
+    private List<ReactResponse> reacts;   // Danh sách react
 }

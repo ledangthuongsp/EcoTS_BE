@@ -12,6 +12,6 @@ import java.util.List;
 @Getter
 @Setter
 public class PollRequest {
-    private String question;
-    private List<String> options;
+    private String title;                // Tiêu đề poll
+    private List<PollOptionRequest> options;
 }

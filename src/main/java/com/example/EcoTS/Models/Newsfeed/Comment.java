@@ -20,24 +20,8 @@ import java.util.List;
 public class Comment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long id;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "newsfeed_id", nullable = false)
-    @ToString.Exclude
-    Newsfeed newsfeed;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    Users user;
-
-    @Column(nullable = false, length = 500)
-    String content;
-
-    @OneToMany(mappedBy = "parentComment", cascade = CascadeType.ALL)
-    @ToString.Exclude
-    List<Reply> replies = new ArrayList<>();
-
-    @CreationTimestamp
-    LocalDateTime createdAt;
+    private Long id;
+    private Long userId;
+    private String message;
+    private List<String> imgUrls;
 }

@@ -161,6 +161,23 @@ public class CloudinaryService {
                 ));
         return (String) response.get("url");
     }
+    public String uploadCommentImage(MultipartFile file) throws IOException
+    {
+        Map response = cloudinary.uploader().upload(file.getBytes(),
+                ObjectUtils.asMap(
+                        "resource_type", "auto",
+                        "folder", "Comment" // Thêm folder "Reviews"
+                ));
+        return (String) response.get("url");
+    }
+    public List<String> uploadMultipleCommetImage(List<MultipartFile> files) throws IOException
+    {
+        List<String> urls = new ArrayList<>();
+        for (MultipartFile file : files) {
+            urls.add(uploadCommentImage(file));
+        }
+        return urls;
+    }
 }
 
 

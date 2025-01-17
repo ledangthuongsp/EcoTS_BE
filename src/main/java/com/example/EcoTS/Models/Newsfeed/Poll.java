@@ -16,13 +16,7 @@ import java.util.List;
 public class Poll {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long id;
-
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "newsfeed_id", nullable = false)
-    Newsfeed newsfeed;
-
-    @OneToMany(mappedBy = "poll", cascade = CascadeType.ALL, orphanRemoval = true)
-    @ToString.Exclude
-    List<PollOption> options = new ArrayList<>();
+    private Long id;
+    private String title;
+    private List<Long> pollOptionIds;
 }

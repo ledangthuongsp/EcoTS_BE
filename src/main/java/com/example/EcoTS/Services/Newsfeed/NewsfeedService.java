@@ -1,11 +1,13 @@
 package com.example.EcoTS.Services.Newsfeed;
 
+import com.example.EcoTS.DTOs.Request.Newsfeed.NewsfeedRequest;
 import com.example.EcoTS.DTOs.Request.Newsfeed.PollRequest;
 import com.example.EcoTS.DTOs.Response.Newsfeed.NewsfeedResponse;
 import com.example.EcoTS.Models.Newsfeed.Newsfeed;
 import com.example.EcoTS.Models.Newsfeed.Poll;
 import com.example.EcoTS.Models.Newsfeed.PollOption;
 import com.example.EcoTS.Repositories.Newsfeed.NewsfeedRepository;
+import com.example.EcoTS.Repositories.Newsfeed.PollOptionRepository;
 import com.example.EcoTS.Repositories.Newsfeed.PollRepository;
 import com.example.EcoTS.Services.CloudinaryService.CloudinaryService;
 import org.modelmapper.ModelMapper;
@@ -30,84 +32,66 @@ public class NewsfeedService {
     private CloudinaryService cloudinaryService;
     @Autowired
     private PollRepository pollRepository;
+    @Autowired
+    private PollOptionRepository pollOptionRepository;
+
     // CREATE: Add a new newsfeed
-    public Newsfeed createNewsfeed(String title, String content, List<MultipartFile> mediaUrls, PollRequest pollRequest) throws IOException {
-        Newsfeed newsfeed = new Newsfeed();
-        newsfeed.setContent(title);
-        newsfeed.setContent(content);
+    public Newsfeed createNewsfeed(String content, Long sponsorId, Double pointForActivity,
+                                   Long userId, List<String> pollOptions,
+                                   List<MultipartFile> files) throws IOException {
+        // 1. Upload các file lên Cloudinary (hoặc dịch vụ khác) và lấy URL
+        List<String> mediaUrls = cloudinaryService.uploadMultipleFilesNewsfeed(files);
 
-        // Save media files to storage and update the mediaUrls
-        List<String> mediaPaths = cloudinaryService.uploadMultipleFilesNewsfeed(mediaUrls);
-        newsfeed.setMediaUrls(mediaPaths);
+        // 2. Tạo đối tượng Poll
+        Poll poll = new Poll();
+        poll.setTitle("Poll title"); // Thay bằng title mong muốn
+        poll.setPollOptionIds(new ArrayList<>());
+        Poll savedPoll = pollRepository.save(poll);
 
-        // Create Poll if provided
-        if (pollRequest != null) {
-            Poll poll = new Poll();
-            poll.setNewsfeed(newsfeed);  // Associate Poll with the Newsfeed
+        // 3. Tạo các PollOption và liên kết với Poll
+        for (String option : pollOptions) {
+            PollOption pollOption = new PollOption();
+            pollOption.setType(option);
+            pollOption.setVoteIds(new ArrayList<>());
+            PollOption savedOption = pollOptionRepository.save(pollOption);
 
-            // Create Poll Options from the request
-            Poll finalPoll = poll;
-            List<PollOption> pollOptions = pollRequest.getOptions().stream()
-                    .map(optionText -> new PollOption(null, finalPoll, optionText, new ArrayList<>()))
-                    .collect(Collectors.toList());
-
-            poll.setOptions(pollOptions);
-
-            // Save Poll and associate it with the Newsfeed
-            poll = pollRepository.save(poll);  // No need for final keyword here
-            newsfeed.setPoll(poll);
+            // Thêm ID của PollOption vào Poll
+            savedPoll.getPollOptionIds().add(savedOption.getId());
         }
 
-        // Set default Comments and Reactions as empty or null
-        newsfeed.setComments(Collections.emptyList());
-        newsfeed.setReactions(Collections.emptyList());
+        // Cập nhật lại Poll sau khi thêm các Option
+        pollRepository.save(savedPoll);
 
+        // 4. Tạo đối tượng Newsfeed
+        Newsfeed newsfeed = Newsfeed.builder()
+                .content(content)
+                .sponsorId(sponsorId)
+                .pointForActivity(pointForActivity)
+                .userId(userId)
+                .mediaUrls(mediaUrls)
+                .pollId(savedPoll.getId())
+                .commentIds(new ArrayList<>())
+                .reactIds(new ArrayList<>())
+                .build();
+
+        // 5. Lưu Newsfeed vào database
         return newsfeedRepository.save(newsfeed);
     }
-
-
 
     // READ: Get all newsfeeds
-    public List<NewsfeedResponse> getAllNewsfeeds() {
-        List<Newsfeed> newsfeedList = newsfeedRepository.findAll();
-        return Collections.singletonList(modelMapper.map(newsfeedList, NewsfeedResponse.class));
+    public List<Newsfeed> getAllNewsfeed() {
+        return newsfeedRepository.findAll();
     }
 
-    // READ: Get a single newsfeed by ID
-    public Newsfeed getNewsfeedById(Long id) {
-        return newsfeedRepository.findById(id).orElse(null);
+
+    public List<Newsfeed> getYourActivity (Long userId)
+    {
+        return newsfeedRepository.findByUserId(userId);
     }
-
-    // UPDATE: Update an existing newsfeed by ID
-    public Newsfeed updateNewsfeed(Long id, String title, String content, List<MultipartFile> mediaUrls) throws IOException {
-        Newsfeed newsfeed = newsfeedRepository.findById(id).orElse(null);
-        if (newsfeed == null) {
-            return null; // If not found, return null
-        }
-
-        // Update fields
-        if (title != null && !title.isEmpty()) {
-            newsfeed.setContent(title);
-        }
-        if (content != null && !content.isEmpty()) {
-            newsfeed.setContent(content);
-        }
-
-        // Handle media files update
-        if (mediaUrls != null && !mediaUrls.isEmpty()) {
-            List<String> mediaPaths = cloudinaryService.uploadMultipleFilesNewsfeed(mediaUrls);
-            newsfeed.setMediaUrls(mediaPaths);
-        }
-
-        return newsfeedRepository.save(newsfeed);
-    }
-
     // DELETE: Delete a newsfeed by ID
-    public boolean deleteNewsfeed(Long id) {
+    public void deleteNewsfeed(Long id) {
         if (newsfeedRepository.existsById(id)) {
             newsfeedRepository.deleteById(id);
-            return true;
         }
-        return false;
     }
 }

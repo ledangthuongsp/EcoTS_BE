@@ -18,20 +18,7 @@ import java.time.LocalDateTime;
 public class React {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long id;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    Users user;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "newsfeed_id")
-    Newsfeed newsfeed;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "comment_id")
-    Comment comment;
-
-    @CreationTimestamp
-    LocalDateTime createdAt;
+    private Long id;
+    private Long userId;
+    private boolean status;
 }

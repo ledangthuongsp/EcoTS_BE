@@ -1,13 +1,14 @@
 package com.example.EcoTS.DTOs.Response.Newsfeed;
 
+import lombok.Builder;
+import lombok.Data;
+
 import java.util.List;
 
+@Data
+@Builder
 public class ReactResponse {
-    private String content;
-    private List<String> mediaUrls;
-    private Long sponsorId;
-    private double pointForActivity;
-    private String createdBy; // "User" or "Sponsor"
-    private Long createdById; // User or Sponsor ID
-    private List<Long> pollOptionIds; // ID các option của Poll
+    private Long id;
+    private Long userId;
+    private boolean status;
 }

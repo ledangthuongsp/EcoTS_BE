@@ -5,6 +5,7 @@ import com.example.EcoTS.DTOs.Request.Newsfeed.PollRequest;
 import com.example.EcoTS.DTOs.Response.Newsfeed.NewsfeedResponse;
 import com.example.EcoTS.Models.Newsfeed.Newsfeed;
 import com.example.EcoTS.Services.Newsfeed.NewsfeedService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -26,47 +27,39 @@ public class NewsfeedController {
     private NewsfeedService newsfeedService;
 
     // CREATE: Add a new newsfeed
-    @PostMapping(value = "/admin/newsfeed/create", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
+    @PostMapping(value = "/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Newsfeed> createNewsfeed(
-            @RequestParam("title") String title,
-            @RequestParam("content") String content,
-            @RequestPart("imageUrl") List<MultipartFile> mediaUrls,
-            @RequestParam(value = "pollRequest", required = false) PollRequest pollRequest) throws IOException {
-
-        Newsfeed createdNewsfeed = newsfeedService.createNewsfeed(title, content, mediaUrls, pollRequest);
+            @RequestParam String content,
+            @RequestParam (required = false) Long sponsorId,
+            @RequestParam (required = false) Double pointForActivity,
+            @RequestParam (required = false) Long userId,
+            @RequestParam List<String> pollOptions, // Các lựa chọn cho Poll
+            @RequestPart("files") List<MultipartFile> files // Danh sách file tải lên
+    ) throws IOException {
+        Newsfeed createdNewsfeed = newsfeedService.createNewsfeed(content, sponsorId, pointForActivity, userId, pollOptions, files);
         return ResponseEntity.ok(createdNewsfeed);
     }
 
 
+
+
     // READ: Get all newsfeeds
-    @GetMapping("/newsfeed/all")
-    public ResponseEntity<List<NewsfeedResponse>> getAllNewsfeeds() {
-        List<NewsfeedResponse> newsfeeds = newsfeedService.getAllNewsfeeds();
+    @GetMapping("/getAll")
+    public ResponseEntity<List<Newsfeed>> getAllNewsfeeds() {
+        List<Newsfeed> newsfeeds = newsfeedService.getAllNewsfeed();
+        return ResponseEntity.ok(newsfeeds);
+    }
+    @GetMapping("/get-your-activity")
+    public ResponseEntity<List<Newsfeed>> getNewsfeedYourActivity(Long userId)
+    {
+        List<Newsfeed> newsfeeds = newsfeedService.getYourActivity(userId);
 
         return ResponseEntity.ok(newsfeeds);
     }
-
-    // READ: Get a single newsfeed by ID
-    @GetMapping("/newsfeed/{id}")
-    public ResponseEntity<Newsfeed> getNewsfeedById(@PathVariable Long id) {
-        Newsfeed newsfeed = newsfeedService.getNewsfeedById(id);
-        return ResponseEntity.ok(newsfeed);
-    }
-
-    // UPDATE: Update an existing newsfeed by ID
-    @PutMapping(value = "/admin/newsfeed/update/{id}", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
-    public ResponseEntity<Newsfeed> updateNewsfeed(
-            @PathVariable Long id,
-            @RequestParam(value = "title", required = false) String title,
-            @RequestParam(value = "content", required = false) String content,
-            @RequestPart(value = "imageUrl", required = false) List<MultipartFile> imageUrl) throws IOException {
-
-        Newsfeed updatedNewsfeed = newsfeedService.updateNewsfeed(id, title, content, imageUrl);
-        return ResponseEntity.ok(updatedNewsfeed);
-    }
+    // READ: Get a single newsfeed by I
 
     // DELETE: Delete a newsfeed by ID
-    @DeleteMapping("/admin/newsfeed/delete/{id}")
+    @DeleteMapping("/delete/{id}")
     public ResponseEntity<String> deleteNewsfeed(@PathVariable Long id) {
         newsfeedService.deleteNewsfeed(id);
         return ResponseEntity.ok("Newsfeed deleted successfully");

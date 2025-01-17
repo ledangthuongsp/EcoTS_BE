@@ -1,5 +1,6 @@
 package com.example.EcoTS.Services.Newsfeed;
 
+import com.example.EcoTS.DTOs.Request.Newsfeed.CommentRequest;
 import com.example.EcoTS.DTOs.Response.Newsfeed.CommentResponse;
 import com.example.EcoTS.Models.Newsfeed.Comment;
 import com.example.EcoTS.Models.Newsfeed.Newsfeed;
@@ -7,10 +8,13 @@ import com.example.EcoTS.Models.Users;
 import com.example.EcoTS.Repositories.Newsfeed.CommentRepository;
 import com.example.EcoTS.Repositories.Newsfeed.NewsfeedRepository;
 import com.example.EcoTS.Repositories.UserRepository;
+import com.example.EcoTS.Services.CloudinaryService.CloudinaryService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -28,42 +32,23 @@ public class CommentService {
     @Autowired
     private ModelMapper modelMapper;
 
-    // Add comment to a newsfeed
-    public CommentResponse addComment(Long newsfeedId, Long userId, String content) {
-        Newsfeed newsfeed = newsfeedRepository.findById(newsfeedId)
-                .orElseThrow(() -> new RuntimeException("Newsfeed not found"));
+    @Autowired
+    private CloudinaryService cloudinaryService;
 
-        Users user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
+    public void createNewCommment (CommentRequest commentRequest, List<MultipartFile> imgUrls) throws IOException {
         Comment comment = new Comment();
-        comment.setNewsfeed(newsfeed);
-        comment.setUser(user);
-        comment.setContent(content);
-
+        comment.setMessage(commentRequest.getMessage());
+        List<String> images = cloudinaryService.uploadMultipleCommetImage(imgUrls);
+        comment.setImgUrls(images);
+        comment.setUserId(commentRequest.getUserId());
         commentRepository.save(comment);
-
-        return mapToResponseDTO(comment);
     }
-
-    // Delete comment by ID
-    public void deleteComment(Long commentId) {
-        Comment comment = commentRepository.findById(commentId)
-                .orElseThrow(() -> new RuntimeException("Comment not found"));
-
-        commentRepository.delete(comment);
+    public List<Comment> getAllComment()
+    {
+        return commentRepository.findAll();
     }
-
-    // Get all comments for a specific newsfeed
-    public List<CommentResponse> getCommentsForNewsfeed(Long newsfeedId) {
-        List<Comment> comments = commentRepository.findByNewsfeedId(newsfeedId);
-        return comments.stream()
-                .map(this::mapToResponseDTO)
-                .collect(Collectors.toList());
-    }
-
-    // Helper method to map Comment entity to Response DTO
-    private CommentResponse mapToResponseDTO(Comment comment) {
-        return modelMapper.map(comment, CommentResponse.class);
+    public void deleteComment(Long commmentId)
+    {
+        commentRepository.deleteById(commmentId);
     }
 }

@@ -15,9 +15,5 @@ import java.util.Optional;
 @Repository
 @Hidden
 public interface ReactRepository extends JpaRepository<React, Long> {
-    Optional<React> findByUserIdAndNewsfeedIdOrCommentId(Long userId, Long newsfeedId, Long commentId);
-    List<React> findByNewsfeedId(Long newsfeedId);
-    List<React> findByCommentId(Long commentId);
-    React findByNewsfeedAndUser(Newsfeed newsfeed, Users users);
-    React findByCommentAndUser(Comment comment, Users users);
+
 }

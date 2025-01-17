@@ -25,29 +25,13 @@ public class Newsfeed {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     private String content;
     private List<String> mediaUrls;
     private Long sponsorId;
-    private double pointForActivity;
-    private String createdBy; // "User" or "Sponsor"
-    private Long createdById; // User or Sponsor ID
-    // Quan hệ với Poll (một Newsfeed có thể có một Poll)
-    @OneToOne(fetch = FetchType.LAZY, mappedBy = "newsfeed", cascade = CascadeType.ALL)
-    @ToString.Exclude
-    private Poll poll;
-
-    // Quan hệ với Comment (một Newsfeed có thể có nhiều comment)
-    @OneToMany(mappedBy = "newsfeed", cascade = CascadeType.ALL)
-    @ToString.Exclude
-    private List<Comment> comments = new ArrayList<>();
-
-    // Quan hệ với React (một Newsfeed có thể có nhiều react)
-    @OneToMany(mappedBy = "newsfeed", cascade = CascadeType.ALL)
-    @ToString.Exclude
-    private List<React> reactions = new ArrayList<>();
-
-    @CreationTimestamp
-    private LocalDateTime createdAt;
+    private Double pointForActivity;
+    private Long userId;
+    private Long pollId;
+    private List<Long> commentIds;
+    private List<Long> reactIds;
 }
 

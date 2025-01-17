@@ -10,5 +10,5 @@ import java.util.Optional;
 @Repository
 @Hidden
 public interface PollRepository extends JpaRepository<Poll, Long> {
-    Optional<Poll> findByNewsfeedId (Long newsfeedId);
+
 }

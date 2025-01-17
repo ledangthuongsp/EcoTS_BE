@@ -12,6 +12,5 @@ import java.util.Optional;
 @Hidden
 public interface CommentRepository extends JpaRepository <Comment, Long>
 {
-    List<Comment> findByNewsfeedId(Long newsfeedId);
-    Optional<Comment> findById(Long commentId);
+
 }
