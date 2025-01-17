@@ -238,25 +238,18 @@ public class NewsfeedService {
         }
     }
     @Transactional
-    // Lấy toàn bộ React có giá trị true (status = true)
-    public List<React> getAllReactsTrue(Long newsfeedId) {
-        Optional<Newsfeed> newsfeed = newsfeedRepository.findById(newsfeedId);
-        if (newsfeed.isPresent()) {
-            List<Long> reactIds = newsfeed.get().getReactIds();
-            return reactRepository.findAllById(reactIds).stream()
-                    .filter(React::isStatus) // Lọc những react có status = true
-                    .collect(Collectors.toList());
-        } else {
-            throw new RuntimeException("Newsfeed not found");
-        }
-    }
-    @Transactional
     // Lấy toàn bộ React và trả về số lượng
-    public long countReacts(Long newsfeedId) {
-        Optional<Newsfeed> newsfeed = newsfeedRepository.findById(newsfeedId);
-        return newsfeed.map(nf -> reactRepository.findAllById(nf.getReactIds()).size())
-                .orElseThrow(() -> new RuntimeException("Newsfeed not found"));
+    public long countReactsByNewsfeed(Long newsfeedId) {
+        return newsfeedRepository.findById(newsfeedId)
+                .map(newsfeed -> newsfeed.getReactIds().stream()
+                        .map(reactId -> reactRepository.findById(reactId))
+                        .filter(Optional::isPresent) // Kiểm tra React tồn tại
+                        .map(Optional::get)          // Lấy React
+                        .filter(React::isStatus)     // Chỉ đếm React có status = true
+                        .count())
+                .orElse(0L);
     }
+
     @Transactional
     // Lấy tất cả comment và trả về số lượng
     public long countComments(Long newsfeedId) {

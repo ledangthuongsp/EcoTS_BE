@@ -93,7 +93,7 @@ public class NewsfeedController {
             @RequestParam Long userId
     ) {
         newsfeedService.updateReactStatus(newsfeedId, userId);
-        return ResponseEntity.ok("React updated to false for userId: " + userId);
+        return ResponseEntity.ok("Status react update for userId: " + userId);
     }
 
     // Cập nhật comment
@@ -123,17 +123,10 @@ public class NewsfeedController {
         return ResponseEntity.ok(comments);
     }
 
-    // Lấy toàn bộ react có giá trị true
-    @GetMapping("/{newsfeedId}/reaacts/true")
-    public ResponseEntity<List<React>> getAllReactsTrue(@PathVariable Long newsfeedId) {
-        List<React> reactsTrue = newsfeedService.getAllReactsTrue(newsfeedId);
-        return ResponseEntity.ok(reactsTrue);
-    }
-
     // Lấy tổng số lượng react của một newsfeed
     @GetMapping("/{newsfeedId}/reacts/count")
     public ResponseEntity<Long> countReacts(@PathVariable Long newsfeedId) {
-        long reactCount = newsfeedService.countReacts(newsfeedId);
+        long reactCount = newsfeedService.countReactsByNewsfeed(newsfeedId);
         return ResponseEntity.ok(reactCount);
     }
 
