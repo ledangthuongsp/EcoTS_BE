@@ -1,6 +1,11 @@
 package com.example.EcoTS.Controllers.Newsfeed;
 
+import com.example.EcoTS.DTOs.Response.Newsfeed.PollResponse;
+import com.example.EcoTS.Models.Newsfeed.Newsfeed;
+import com.example.EcoTS.Models.Newsfeed.Poll;
 import com.example.EcoTS.Models.Newsfeed.PollOption;
+import com.example.EcoTS.Repositories.Newsfeed.NewsfeedRepository;
+import com.example.EcoTS.Repositories.Newsfeed.PollRepository;
 import com.example.EcoTS.Services.Newsfeed.PollService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +21,10 @@ import org.springframework.web.bind.annotation.*;
 public class PollController {
     @Autowired
     private PollService pollService;
+    @Autowired
+    private NewsfeedRepository newsfeedRepository;
+    @Autowired
+    private PollRepository pollRepository;
 
     @PostMapping("/{newsfeedId}/{pollOptionId}/votes")
     public ResponseEntity<PollOption> addVote(
@@ -34,5 +43,10 @@ public class PollController {
             @PathVariable Long voteId) {
         PollOption updatedPollOption = pollService.removeVote(newsfeedId, pollOptionId, voteId);
         return ResponseEntity.ok(updatedPollOption);
+    }
+    @GetMapping("/by-newsfeed/{newsfeedId}")
+    public ResponseEntity<PollResponse> getPollByNewsfeedId(@PathVariable Long newsfeedId) {
+        PollResponse pollResponse = pollService.getPollByNewsfeedId(newsfeedId);
+        return ResponseEntity.ok(pollResponse);
     }
 }
