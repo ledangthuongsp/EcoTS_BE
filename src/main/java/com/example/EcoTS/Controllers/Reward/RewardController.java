@@ -54,14 +54,24 @@ public class RewardController {
     }
 
     @PutMapping("/update-reward-history")
-    @Operation(summary = "My summary", description = "Phan nay la tu dong update diem cho nguoi dung (Phan rank), tu tru stock, tu luu lai history")
-    public  ResponseEntity<Void> updateRewardHistory(@RequestParam Long userId, @RequestParam double point,
-                                                     @RequestParam Long rewardItemId,  @RequestParam Long numberOfItem,
-                                                     @RequestParam Long locationId)
-    {
-        rewardItemService.updateHistoryCharge(userId, point, rewardItemId, numberOfItem, locationId);
-        return ResponseEntity.ok().build();
+    @Operation(summary = "Update Reward History", description = "Tự động cập nhật điểm, trừ stock, lưu lại lịch sử nếu điều kiện hợp lệ.")
+    public ResponseEntity<String> updateRewardHistory(
+            @RequestParam Long userId,
+            @RequestParam double point,
+            @RequestParam Long rewardItemId,
+            @RequestParam Long numberOfItem,
+            @RequestParam Long locationId) {
+
+        try {
+            rewardItemService.updateHistoryCharge(userId, point, rewardItemId, numberOfItem, locationId);
+            return ResponseEntity.ok("Reward history updated successfully.");
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.badRequest().body(ex.getMessage());
+        } catch (RuntimeException ex) {
+            return ResponseEntity.status(500).body("Internal server error: " + ex.getMessage());
+        }
     }
+
     @GetMapping("/get-reward-history")
     public ResponseEntity<List<RewardHistory>> getRewardHistory(@RequestParam Long userId) {
         List<RewardHistory> rewardHistory = rewardItemService.getAllRewardHistoryById(userId);
