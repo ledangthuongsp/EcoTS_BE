@@ -31,7 +31,10 @@ public class Newsfeed {
     private Double pointForActivity;
     private Long userId;
     private Long pollId;
-    private List<Long> commentIds;
-    private List<Long> reactIds;
+    @ElementCollection
+    private List<Long> commentIds = new ArrayList<>();
+
+    @ElementCollection
+    private List<Long> reactIds = new ArrayList<>();
 }
 
