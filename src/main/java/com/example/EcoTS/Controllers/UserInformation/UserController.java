@@ -100,4 +100,11 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to delete user.");
         }
     }
+    @GetMapping ("/get-user-by-id")
+    @Operation(description = "Lay thong tin nguoi dung bang id")
+    public ResponseEntity<?> getUserById(@RequestParam Long userId)
+    {
+        Users user = userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("User not found"));
+        return ResponseEntity.ok().body(user);
+    }
 }

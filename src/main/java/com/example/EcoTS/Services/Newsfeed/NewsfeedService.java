@@ -229,14 +229,23 @@ public class NewsfeedService {
     }
     @Transactional
     // Lấy toàn bộ comment của một newsfeed
-    public List<Long> getAllComments(Long newsfeedId) {
+    public List<Comment> getAllComments(Long newsfeedId) {
+        // Tìm kiếm Newsfeed theo ID
         Optional<Newsfeed> optionalNewsfeed = newsfeedRepository.findById(newsfeedId);
+
         if (optionalNewsfeed.isPresent()) {
-            return optionalNewsfeed.get().getCommentIds();  // Trả về danh sách commentIds
+            Newsfeed newsfeed = optionalNewsfeed.get();
+
+            // Giả sử bạn có một repository cho Comment
+            List<Long> commentIds = newsfeed.getCommentIds();
+
+            // Lấy danh sách Comment từ commentIds
+            return commentRepository.findAllById(commentIds);
         } else {
             throw new RuntimeException("Newsfeed not found");
         }
     }
+
     @Transactional
     // Lấy toàn bộ React và trả về số lượng
     public long countReactsByNewsfeed(Long newsfeedId) {

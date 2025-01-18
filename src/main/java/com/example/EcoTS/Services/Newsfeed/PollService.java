@@ -86,6 +86,7 @@ public class PollService {
         // Lưu lại PollOption
         return pollOptionRepository.save(pollOption);
     }
+    @Transactional
     public PollResponse getPollByNewsfeedId(Long newsfeedId) {
         // Tìm Newsfeed
         Newsfeed newsfeed = newsfeedRepository.findById(newsfeedId)
@@ -95,20 +96,25 @@ public class PollService {
         Poll poll = pollRepository.findById(newsfeed.getPollId())
                 .orElseThrow(() -> new IllegalArgumentException("Poll not found"));
 
-        // Lấy danh sách PollOption
-        List<PollOption> pollOptions = pollOptionRepository.findAllById(poll.getPollOptionIds());
+        // Fetch PollOption dựa trên pollOptionIds
+        List<PollOption> pollOptions = poll.getPollOptionIds().stream()
+                .map(pollOptionId -> pollOptionRepository.findById(pollOptionId)
+                        .orElseThrow(() -> new IllegalArgumentException("PollOption not found")))
+                .toList();
 
         // Xây dựng PollResponse
         return PollResponse.builder()
                 .id(poll.getId())
                 .title(poll.getTitle())
                 .pollOptions(pollOptions.stream().map(option -> {
-                    // Lấy danh sách Vote từ PollOption
-                    List<Vote> votes = voteRepository.findAllById(option.getVoteIds());
+                    // Fetch Vote dựa trên voteIds
+                    List<Vote> votes = option.getVoteIds().stream()
+                            .map(voteId -> voteRepository.findById(voteId)
+                                    .orElseThrow(() -> new IllegalArgumentException("Vote not found")))
+                            .toList();
 
                     // Chuyển đổi Vote -> VoteResponse
                     List<VoteResponse> voteResponses = votes.stream().map(vote -> {
-                        // Lấy thông tin User
                         Users user = userRepository.findById(vote.getUserId())
                                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
                         return VoteResponse.builder()
@@ -127,5 +133,4 @@ public class PollService {
                 }).toList())
                 .build();
     }
-
 }
