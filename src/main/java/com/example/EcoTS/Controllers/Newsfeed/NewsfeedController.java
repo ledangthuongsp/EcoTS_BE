@@ -3,6 +3,7 @@ package com.example.EcoTS.Controllers.Newsfeed;
 import com.example.EcoTS.DTOs.Request.Newsfeed.NewsfeedRequest;
 import com.example.EcoTS.DTOs.Request.Newsfeed.PollRequest;
 import com.example.EcoTS.DTOs.Response.Newsfeed.NewsfeedResponse;
+import com.example.EcoTS.Models.Newsfeed.Comment;
 import com.example.EcoTS.Models.Newsfeed.Newsfeed;
 import com.example.EcoTS.Models.Newsfeed.React;
 import com.example.EcoTS.Services.Newsfeed.NewsfeedService;
@@ -118,8 +119,8 @@ public class NewsfeedController {
 
     // Lấy toàn bộ comment của một newsfeed
     @GetMapping("/{newsfeedId}/comments")
-    public ResponseEntity<List<Long>> getAllComments(@PathVariable Long newsfeedId) {
-        List<Long> comments = newsfeedService.getAllComments(newsfeedId);
+    public ResponseEntity<List<Comment>> getAllComments(@PathVariable Long newsfeedId) {
+        List<Comment> comments = newsfeedService.getAllComments(newsfeedId);
         return ResponseEntity.ok(comments);
     }
 

@@ -20,6 +20,6 @@ public class PollOption {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private List<Long> voteIds;
+    private List<Long> voteIds = new ArrayList<>();
     private String type;
 }

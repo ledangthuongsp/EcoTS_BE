@@ -9,6 +9,6 @@ import java.util.List;
 @Builder
 public class PollOptionResponse {
     private Long id;
-    private List<Long> voteIds;
     private String type;
+    private List<VoteResponse> votes;
 }

@@ -61,22 +61,48 @@ public class RewardItemService {
         rewardItemRepository.deleteById(id);
     }
     @Transactional
-    public void updateHistoryCharge(Long userId, double point, Long rewardItemId, Long numberOfItem, Long locationId)
-    {
-        Users fetchUser = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
-        Points points = pointRepository.findByUser(fetchUser).orElseThrow(() -> new RuntimeException("Point not found"));
+    public void updateHistoryCharge(Long userId, double point, Long rewardItemId, Long numberOfItem, Long locationId) {
+        // Lấy thông tin người dùng
+        Users fetchUser = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
+        // Lấy thông tin điểm người dùng
+        Points points = pointRepository.findByUser(fetchUser)
+                .orElseThrow(() -> new RuntimeException("Point not found"));
+
+        // Kiểm tra số điểm đủ để đổi
+        if (points.getPoint() - point < 0) {
+            throw new IllegalArgumentException("Người dùng không đủ điểm để đổi quà.");
+        }
+
+        // Trừ điểm
         points.setPoint(points.getPoint() - point);
-        RewardItem rewardItem = rewardItemRepository.findById(rewardItemId).orElseThrow(() -> new RuntimeException("Reward Item not found"));
-        UserRank userRank = userRankRepository.findByUserId(userId).orElseThrow(()->new RuntimeException("User Rank not found"));
-        userRank.setUserRankPoint(userRank.getUserRankPoint() + point);
+
+        // Lấy thông tin phần thưởng
+        RewardItem rewardItem = rewardItemRepository.findById(rewardItemId)
+                .orElseThrow(() -> new RuntimeException("Reward Item not found"));
+
+        // Kiểm tra số lượng hàng tồn kho
+        if (rewardItem.getStock() < numberOfItem) {
+            throw new IllegalArgumentException("Không đủ số lượng hàng để đổi quà.");
+        }
+
+        // Trừ số lượng trong kho
         rewardItem.setStock((int) (rewardItem.getStock() - numberOfItem));
+
+        // Cập nhật điểm xếp hạng người dùng
+        UserRank userRank = userRankRepository.findByUserId(userId)
+                .orElseThrow(() -> new RuntimeException("User Rank not found"));
+        userRank.setUserRankPoint(userRank.getUserRankPoint() + point);
+
+        // Lưu lịch sử đổi thưởng
         RewardHistory rewardHistory = new RewardHistory();
         rewardHistory.setRewardItemId(rewardItemId);
         rewardHistory.setUserId(userId);
         rewardHistory.setLocationId(locationId);
         rewardHistoryRepository.save(rewardHistory);
     }
+
     @Transactional
     public List<RewardHistory> getAllRewardHistoryById(Long userId)
     {

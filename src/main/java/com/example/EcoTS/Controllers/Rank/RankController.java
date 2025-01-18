@@ -28,14 +28,6 @@ public class RankController {
         return rankService.getUserRank(userId);
     }
 
-    // Cập nhật rank cho người dùng (Quy đổi điểm và kiểm tra rank)
-    @PostMapping("/user/{userId}/contribute")
-    public void contributePoints(
-            @PathVariable Long userId,
-            @RequestParam double contributedPoints) {
-        rankService.contributePoints(userId, contributedPoints);
-    }
-
     // Thêm rank mới
     @PostMapping("/add")
     @ResponseStatus(HttpStatus.CREATED)

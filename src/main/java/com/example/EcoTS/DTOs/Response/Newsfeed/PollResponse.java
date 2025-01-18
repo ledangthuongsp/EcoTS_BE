@@ -9,6 +9,7 @@ import java.util.List;
 @Data
 @Builder
 public class PollResponse {
-    private String title;                // Tiêu đề poll
-    private List<PollOptionRequest> options; // Danh sách các lựa chọn trong poll
+    private Long id;
+    private String title;
+    private List<PollOptionResponse> pollOptions;
 }
