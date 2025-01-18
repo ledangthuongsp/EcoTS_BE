@@ -43,8 +43,22 @@ public class PollService {
         Newsfeed newsfeed = newsfeedRepository.findById(newsfeedId)
                 .orElseThrow(() -> new IllegalArgumentException("Newsfeed not found"));
 
-        if (!newsfeed.getPollId().equals(pollOptionId)) {
-            throw new IllegalArgumentException("PollOption does not belong to Newsfeed");
+        // Kiểm tra Poll tồn tại
+        Poll poll = pollRepository.findById(newsfeed.getPollId())
+                .orElseThrow(() -> new IllegalArgumentException("Poll not found"));
+
+        // Kiểm tra PollOption có tồn tại trong Poll
+        if (!poll.getPollOptionIds().contains(pollOptionId)) {
+            throw new IllegalArgumentException("PollOption does not belong to Poll");
+        }
+
+        // Kiểm tra xem userId đã bỏ phiếu cho PollOption này chưa
+        PollOption pollOption = pollOptionRepository.findById(pollOptionId)
+                .orElseThrow(() -> new IllegalArgumentException("PollOption not found"));
+
+        // Kiểm tra nếu user đã bỏ phiếu cho PollOption này
+        if (pollOptionRepository.existsByUserIdAndVoteIdsContaining(userId, pollOption.getVoteIds())) {
+            throw new IllegalArgumentException("User has already voted for this PollOption");
         }
 
         // Tạo vote mới
@@ -57,13 +71,14 @@ public class PollService {
         Vote savedVote = voteRepository.save(vote);
 
         // Thêm vote ID vào PollOption
-        PollOption pollOption = pollOptionRepository.findById(pollOptionId)
-                .orElseThrow(() -> new IllegalArgumentException("PollOption not found"));
         pollOption.getVoteIds().add(savedVote.getId());
 
         // Lưu lại PollOption
-        return pollOptionRepository.save(pollOption);
+        pollOptionRepository.save(pollOption);
+
+        return pollOption;
     }
+
 
     @Transactional
     public PollOption removeVote(Long newsfeedId, Long pollOptionId, Long voteId) {
