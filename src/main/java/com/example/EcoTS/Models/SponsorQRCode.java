@@ -20,29 +20,23 @@ public class SponsorQRCode {
     private Long id;
 
     @Column(name = "sponsor_id", nullable = false)
-    private Long sponsorId;  // ID của sponsor tạo QR code
+    private Long sponsorId;
 
     @Column(name = "qr_code_url", nullable = false)
-    private String qrCodeUrl;  // URL của QR code đã tạo
+    private String qrCodeUrl;
 
     @Column(name = "points", nullable = false)
-    private Double points;  // Điểm mà người quét sẽ nhận
+    private Double points;
 
     @Column(name = "created_at", nullable = false)
-    private Timestamp createdAt;  // Thời gian tạo QR code
+    private Timestamp createdAt;
 
     @Column(name = "expired_at", nullable = false)
-    private Timestamp expiredAt;  // Thời gian hết hạn của QR code (sau 3 phút)
+    private Timestamp expiredAt;
 
     @Column(name = "is_used", nullable = false)
-    private Boolean isUsed;  // Trạng thái xem QR đã được sử dụng hay chưa
+    private Boolean isUsed;  // TRUE nếu đã bị khóa hoặc hết hạn
 
-    @Column(name ="newsfeed_id", nullable = false)
+    @Column(name = "newsfeed_id", nullable = false)
     private Long newsfeedId;
-
-    @Column(name = "user_email", nullable = true)
-    private String userEmail;  // Email của người quét QR nếu cần (có thể lưu lại sau khi người dùng quét)
-
-    @Column(name = "proof_image_url", nullable = true)
-    private String proofImageUrl;  // URL của ảnh minh chứng (được upload sau khi quét QR)
 }
