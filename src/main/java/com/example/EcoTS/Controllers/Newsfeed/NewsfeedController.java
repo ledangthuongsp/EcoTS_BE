@@ -18,6 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.sql.Timestamp;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -138,14 +139,17 @@ public class NewsfeedController {
         long commentCount = newsfeedService.countComments(newsfeedId);
         return ResponseEntity.ok(commentCount);
     }
-    @GetMapping("/{newsfeedId}/react-status")
-    public ResponseEntity<Boolean> getUserReactStatus(
+    @GetMapping("/react-status/{newsfeedId}")
+    public ResponseEntity<?> getReactStatus(
             @PathVariable Long newsfeedId,
             @RequestParam Long userId) {
-        // Call the service method to get the react status
-        boolean reactStatus = newsfeedService.getReactStatus(newsfeedId, userId);
-
-        // Return the react status in the response
-        return ResponseEntity.ok(reactStatus);
+        try {
+            boolean status = newsfeedService.getReactStatus(newsfeedId, userId);
+            return ResponseEntity.ok(Collections.singletonMap("status", status));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Collections.singletonMap("error", e.getMessage()));
+        }
     }
+
 }

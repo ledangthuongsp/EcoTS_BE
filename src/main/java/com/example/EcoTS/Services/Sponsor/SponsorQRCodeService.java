@@ -75,10 +75,17 @@ public class SponsorQRCodeService {
         byte[] qrCodeImage = generateQRCode(content);
         return cloudinaryService.uploadSponsorQrCode(new MultipartFileWrapper(qrCodeImage));
     }
-
+    @Transactional
     public Optional<SponsorQRCode> getActiveQRCode(Long sponsorId) {
-        return sponsorQRCodeRepository.findBySponsorIdAndIsUsedFalse(sponsorId);
+        java.util.List<SponsorQRCode> qrCodes = sponsorQRCodeRepository.findBySponsorIdAndIsUsedFalse(sponsorId);
+
+        // Lọc danh sách để tìm QR Code còn hạn
+        return qrCodes.stream()
+                .filter(qrCode -> qrCode.getExpiredAt() != null
+                        && qrCode.getExpiredAt().after(new Timestamp(System.currentTimeMillis())))
+                .findFirst();
     }
+
 
     @Transactional
     public SponsorQRCode useQRCode(Long qrCodeId, String userEmail, String proofImageUrl) {

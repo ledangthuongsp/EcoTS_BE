@@ -17,6 +17,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -64,27 +65,18 @@ public class SponsorController {
     public ResponseEntity<?> getActiveQRCode(@PathVariable Long sponsorId) {
         try {
             Optional<SponsorQRCode> qrCode = sponsorQRCodeService.getActiveQRCode(sponsorId);
+
             if (qrCode.isPresent()) {
-                SponsorQRCode activeQrCode = qrCode.get();
-
-                // Kiểm tra nếu mã đã hết hạn
-                if (activeQrCode.getExpiredAt().before(new Timestamp(System.currentTimeMillis()))) {
-                    return ResponseEntity.ok(Collections.singletonMap("message", "QR Code đã hết hạn."));
-                }
-
-                // Trả về QR code hợp lệ
-                return ResponseEntity.ok(activeQrCode);
+                return ResponseEntity.ok(qrCode.get());
             } else {
-                String notFoundMessage = "Không tìm thấy QR code còn hiệu lực cho sponsorId: " + sponsorId;
-                return ResponseEntity.ok(Collections.singletonMap("message", notFoundMessage));
+                return ResponseEntity.ok(Collections.singletonMap("message", "Không tìm thấy QR code còn hiệu lực cho sponsorId: " + sponsorId));
             }
         } catch (Exception e) {
-            String errorMessage = "Không thể lấy QR code còn hiệu lực cho sponsorId: " + sponsorId;
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Collections.singletonMap("error", errorMessage));
+                    .body(Collections.singletonMap("error", "Không thể lấy QR code còn hiệu lực cho sponsorId: " + sponsorId + ". Nguyên nhân: " + e.getMessage()));
         }
     }
-
 
 
     // API tạo QR Code mới
