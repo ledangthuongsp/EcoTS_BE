@@ -6,12 +6,14 @@ import com.example.EcoTS.DTOs.Response.Newsfeed.VoteResponse;
 import com.example.EcoTS.Models.Newsfeed.Newsfeed;
 import com.example.EcoTS.Models.Newsfeed.Poll;
 import com.example.EcoTS.Models.Newsfeed.PollOption;
+import com.example.EcoTS.Models.Newsfeed.Vote;
 import com.example.EcoTS.Repositories.Newsfeed.NewsfeedRepository;
 import com.example.EcoTS.Repositories.Newsfeed.PollRepository;
 import com.example.EcoTS.Services.Newsfeed.PollService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -54,5 +56,15 @@ public class PollController {
 //        List<PollOptionResponse> pollOptionResponse = pollResponse.getPollOptions();
 //        List<VoteResponse> voteResponses = pollOptionResponse.
         return ResponseEntity.ok(pollResponse);
+    }
+    @GetMapping("/get-vote-id")
+    public ResponseEntity<?> getVoteIdByUserId(@RequestParam Long userId, @RequestParam Long newsfeedId)
+    {
+        try {
+            Long voteId = pollService.getVoteIdByUserId(userId, newsfeedId);
+            return ResponseEntity.ok(voteId);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
     }
 }

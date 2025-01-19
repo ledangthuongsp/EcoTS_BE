@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -150,4 +151,41 @@ public class PollService {
                 }).toList())
                 .build();
     }
+    @Transactional
+    public Long getVoteIdByUserId(Long userId, Long newsfeedId) {
+        // Tìm Newsfeed
+        Newsfeed newsfeed = newsfeedRepository.findById(newsfeedId)
+                .orElseThrow(() -> new IllegalArgumentException("Newsfeed not found"));
+
+        // Lấy Poll ID từ Newsfeed
+        Long pollId = newsfeed.getPollId();
+
+        // Tìm Poll
+        Poll poll = pollRepository.findById(pollId)
+                .orElseThrow(() -> new IllegalArgumentException("Poll not found"));
+
+        // Duyệt qua danh sách pollOptionIds
+        for (Long pollOptionId : poll.getPollOptionIds()) {
+            // Tìm PollOption
+            PollOption pollOption = pollOptionRepository.findById(pollOptionId)
+                    .orElseThrow(() -> new IllegalArgumentException("PollOption not found"));
+
+            // Duyệt qua danh sách voteIds trong PollOption
+            for (Long voteId : pollOption.getVoteIds()) {
+                // Tìm Vote
+                Vote vote = voteRepository.findById(voteId)
+                        .orElseThrow(() -> new IllegalArgumentException("Vote not found"));
+
+                // Kiểm tra userId
+                if (vote.getUserId().equals(userId)) {
+                    // Trả về voteId nếu khớp
+                    return vote.getId();
+                }
+            }
+        }
+
+        // Nếu không tìm thấy
+        throw new IllegalArgumentException("Vote not found for given userId and newsfeedId");
+    }
+
 }

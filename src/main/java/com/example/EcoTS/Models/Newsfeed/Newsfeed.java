@@ -10,6 +10,8 @@ import lombok.experimental.FieldDefaults;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import java.sql.Time;
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -36,5 +38,13 @@ public class Newsfeed {
 
     @ElementCollection
     private List<Long> reactIds = new ArrayList<>();
+
+    @CreationTimestamp
+    private Timestamp createdAt;
+    @UpdateTimestamp
+    private Timestamp updatedAt;
+
+    private Timestamp startedAt;
+    private Timestamp endedAt;
 }
 

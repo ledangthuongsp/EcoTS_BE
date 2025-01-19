@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -37,7 +38,7 @@ public class NewsfeedService {
     // CREATE: Add a new newsfeed
     public Newsfeed createNewsfeed(String content, Long sponsorId, Double pointForActivity,
                                    Long userId, List<String> pollOptions,
-                                   List<MultipartFile> files) throws IOException {
+                                   List<MultipartFile> files, Timestamp startedAt, Timestamp endedAt) throws IOException {
         // 1. Upload các file lên Cloudinary (hoặc dịch vụ khác) và lấy URL
         List<String> mediaUrls = cloudinaryService.uploadMultipleFilesNewsfeed(files);
 
@@ -71,6 +72,8 @@ public class NewsfeedService {
                 .pollId(savedPoll.getId())
                 .commentIds(new ArrayList<>())
                 .reactIds(new ArrayList<>())
+                .startedAt(startedAt)
+                .endedAt(endedAt)
                 .build();
 
         // 5. Lưu Newsfeed vào database
@@ -116,7 +119,7 @@ public class NewsfeedService {
     public Newsfeed addReact(Long newsfeedId, Long userId, boolean status) {
 
         // Kiểm tra nếu người dùng đã có react cho newsfeed này
-        React existingReact = reactRepository.findByNewsfeedIdAndUserId(newsfeedId, userId);
+        React existingReact = reactRepository.findByUserId(userId);
 
         if (existingReact != null) {
             // Nếu đã có react, cập nhật lại trạng thái
@@ -164,7 +167,7 @@ public class NewsfeedService {
                 .orElseThrow(() -> new RuntimeException("Newsfeed not found with id: " + newsfeedId));
 
         // Tìm React dựa trên newsfeedId và userId
-        React react = reactRepository.findByNewsfeedIdAndUserId(newsfeedId, userId);
+        React react = reactRepository.findByUserId(userId);
 
         // Đảo trạng thái react
         react.setStatus(!react.isStatus());
