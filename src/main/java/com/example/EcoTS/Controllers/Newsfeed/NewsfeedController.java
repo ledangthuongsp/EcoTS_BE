@@ -138,4 +138,14 @@ public class NewsfeedController {
         long commentCount = newsfeedService.countComments(newsfeedId);
         return ResponseEntity.ok(commentCount);
     }
+    @GetMapping("/{newsfeedId}/react-status")
+    public ResponseEntity<Boolean> getUserReactStatus(
+            @PathVariable Long newsfeedId,
+            @RequestParam Long userId) {
+        // Call the service method to get the react status
+        boolean reactStatus = newsfeedService.getReactStatus(newsfeedId, userId);
+
+        // Return the react status in the response
+        return ResponseEntity.ok(reactStatus);
+    }
 }

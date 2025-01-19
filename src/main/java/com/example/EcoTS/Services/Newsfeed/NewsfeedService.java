@@ -278,4 +278,25 @@ public class NewsfeedService {
             throw new RuntimeException("Newsfeed not found");
         }
     }
+    @Transactional
+    public boolean getReactStatus(Long newsfeedId, Long userId) {
+        // Tìm Newsfeed theo ID
+        Newsfeed newsfeed = newsfeedRepository.findById(newsfeedId)
+                .orElseThrow(() -> new IllegalArgumentException("Newsfeed not found"));
+
+        // Tìm React của người dùng theo userId
+        React react = reactRepository.findByUserId(userId);
+
+        if (react == null) {
+            throw new IllegalArgumentException("No react found for the given user and newsfeed");
+        }
+
+        // Kiểm tra react ID có nằm trong danh sách reactIds của Newsfeed không
+        if (!newsfeed.getReactIds().contains(react.getId())) {
+            throw new IllegalArgumentException("React does not belong to the given newsfeed");
+        }
+        // Trả về trạng thái (status) của React
+        return react.isStatus();
+    }
+
 }
