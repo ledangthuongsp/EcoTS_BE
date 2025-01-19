@@ -178,6 +178,25 @@ public class CloudinaryService {
         }
         return urls;
     }
+
+    public String uploadSponsorQrCode(MultipartFile file) throws IOException
+    {
+        Map response = cloudinary.uploader().upload(file.getBytes(),
+                ObjectUtils.asMap(
+                        "resource_type", "auto",
+                        "folder", "Sponsor QR Code" // Thêm folder "Reviews"
+                ));
+        return (String) response.get("url");
+    }
+    public String uploadUserProofImage(MultipartFile file) throws IOException
+    {
+        Map response = cloudinary.uploader().upload(file.getBytes(),
+                ObjectUtils.asMap(
+                        "resource_type", "auto",
+                        "folder", "User Proof"
+                ));
+        return (String) response.get("url");
+    }
 }
 
 
