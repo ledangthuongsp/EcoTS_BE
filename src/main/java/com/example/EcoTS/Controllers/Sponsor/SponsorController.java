@@ -7,8 +7,10 @@ import com.example.EcoTS.Services.Sponsor.SponsorQRCodeService;
 import com.example.EcoTS.Services.Sponsor.SponsorService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -58,8 +60,17 @@ public class SponsorController {
     // API lấy QR Code còn hiệu lực cho sponsor
     @GetMapping("/qrcode/active/{sponsorId}")
     public ResponseEntity<?> getActiveQRCode(@PathVariable Long sponsorId) {
-        Optional<SponsorQRCode> qrCode = sponsorQRCodeService.getActiveQRCode(sponsorId);
-        return qrCode.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+        try {
+            Optional<SponsorQRCode> qrCode = sponsorQRCodeService.getActiveQRCode(sponsorId);
+            return qrCode.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+        } catch (Exception e) {
+            // Tùy chỉnh thông báo lỗi để trả về client
+            String errorMessage = "Không thể lấy QR code còn hiệu lực cho sponsorId: " + sponsorId;
+
+            // Trả về lỗi với thông điệp tùy chỉnh và mã trạng thái 500
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(errorMessage);
+        }
     }
 
     // API tạo QR Code mới
