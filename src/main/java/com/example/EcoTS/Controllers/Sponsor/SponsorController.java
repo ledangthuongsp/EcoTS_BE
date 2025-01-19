@@ -150,6 +150,4 @@ public class SponsorController {
                     .body(Collections.singletonMap("message", "Không thể làm mới QR Code."));
         }
     }
-
-
 }

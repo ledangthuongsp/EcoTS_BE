@@ -79,24 +79,33 @@ public class PollService {
 
         return pollOption;
     }
-
-
     @Transactional
     public PollOption removeVote(Long newsfeedId, Long pollOptionId, Long voteId) {
         // Kiểm tra Newsfeed tồn tại
         Newsfeed newsfeed = newsfeedRepository.findById(newsfeedId)
                 .orElseThrow(() -> new IllegalArgumentException("Newsfeed not found"));
 
-        if (!newsfeed.getPollId().equals(pollOptionId)) {
+        // Tìm Poll để kiểm tra PollOption thuộc về Newsfeed
+        Poll poll = pollRepository.findById(newsfeed.getPollId())
+                .orElseThrow(() -> new IllegalArgumentException("Poll not found"));
+
+        // Kiểm tra PollOption có thuộc Poll không
+        if (!poll.getPollOptionIds().contains(pollOptionId)) {
             throw new IllegalArgumentException("PollOption does not belong to Newsfeed");
         }
 
-        // Xóa vote khỏi database
-        voteRepository.deleteById(voteId);
-
-        // Loại bỏ vote ID khỏi danh sách voteIds trong PollOption
+        // Tìm PollOption để xử lý
         PollOption pollOption = pollOptionRepository.findById(pollOptionId)
                 .orElseThrow(() -> new IllegalArgumentException("PollOption not found"));
+
+        // Kiểm tra voteId có trong danh sách voteIds hay không
+        if (!pollOption.getVoteIds().contains(voteId)) {
+            throw new IllegalArgumentException("Vote ID not found in PollOption");
+        }
+        // Xóa voteId khỏi cơ sở dữ liệu (nếu cần thiết)
+        voteRepository.deleteById(voteId);
+
+        // Loại bỏ voteId khỏi danh sách voteIds
         pollOption.getVoteIds().remove(voteId);
 
         // Lưu lại PollOption
