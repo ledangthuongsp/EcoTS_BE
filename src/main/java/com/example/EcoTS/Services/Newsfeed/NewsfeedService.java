@@ -1,8 +1,5 @@
 package com.example.EcoTS.Services.Newsfeed;
 
-import com.example.EcoTS.DTOs.Request.Newsfeed.NewsfeedRequest;
-import com.example.EcoTS.DTOs.Request.Newsfeed.PollRequest;
-import com.example.EcoTS.DTOs.Response.Newsfeed.NewsfeedResponse;
 import com.example.EcoTS.Models.Newsfeed.*;
 import com.example.EcoTS.Repositories.Newsfeed.*;
 import com.example.EcoTS.Services.CloudinaryService.CloudinaryService;
@@ -14,10 +11,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 public class NewsfeedService {
@@ -119,7 +114,19 @@ public class NewsfeedService {
     }
     @Transactional
     public Newsfeed addReact(Long newsfeedId, Long userId, boolean status) {
-        // Tạo react mới
+
+        // Kiểm tra nếu người dùng đã có react cho newsfeed này
+        React existingReact = reactRepository.findByNewsfeedIdAndUserId(newsfeedId, userId);
+
+        if (existingReact != null) {
+            // Nếu đã có react, cập nhật lại trạng thái
+            existingReact.setStatus(status);
+            reactRepository.save(existingReact);
+            return newsfeedRepository.findById(newsfeedId)
+                    .orElseThrow(() -> new IllegalArgumentException("Newsfeed not found"));
+        }
+
+        // Nếu chưa có react, tạo react mới
         React react = React.builder()
                 .userId(userId)
                 .status(status)
@@ -151,20 +158,19 @@ public class NewsfeedService {
     }
     @Transactional
     // Cập nhật React thành false dựa trên newsfeedId và userId
-    public React updateReactStatus(Long newsfeedId, Long userId) {
-        return newsfeedRepository.findById(newsfeedId)
-                .map(newsfeed -> newsfeed.getReactIds().stream()
-                        .map(reactId -> reactRepository.findById(reactId))
-                        .filter(Optional::isPresent) // Kiểm tra React tồn tại
-                        .map(Optional::get)          // Lấy React
-                        .filter(react -> react.getUserId().equals(userId)) // Đúng userId
-                        .findFirst()                 // Lấy React đầu tiên
-                        .map(react -> {
-                            react.setStatus(!react.isStatus()); // Đảo trạng thái
-                            return reactRepository.save(react); // Cập nhật trong DB
-                        })
-                        .orElseThrow(() -> new RuntimeException("React not found for userId: " + userId)))
+    public void updateReactStatus(Long newsfeedId, Long userId) {
+        // Tìm Newsfeed theo newsfeedId
+        Newsfeed newsfeed = newsfeedRepository.findById(newsfeedId)
                 .orElseThrow(() -> new RuntimeException("Newsfeed not found with id: " + newsfeedId));
+
+        // Tìm React dựa trên newsfeedId và userId
+        React react = reactRepository.findByNewsfeedIdAndUserId(newsfeedId, userId);
+
+        // Đảo trạng thái react
+        react.setStatus(!react.isStatus());
+
+        // Lưu lại React đã được cập nhật
+        reactRepository.save(react);
     }
 
     // Cập nhật comment

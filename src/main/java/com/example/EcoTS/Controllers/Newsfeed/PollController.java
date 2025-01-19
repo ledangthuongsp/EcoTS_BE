@@ -1,6 +1,8 @@
 package com.example.EcoTS.Controllers.Newsfeed;
 
+import com.example.EcoTS.DTOs.Response.Newsfeed.PollOptionResponse;
 import com.example.EcoTS.DTOs.Response.Newsfeed.PollResponse;
+import com.example.EcoTS.DTOs.Response.Newsfeed.VoteResponse;
 import com.example.EcoTS.Models.Newsfeed.Newsfeed;
 import com.example.EcoTS.Models.Newsfeed.Poll;
 import com.example.EcoTS.Models.Newsfeed.PollOption;
@@ -12,6 +14,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/poll")
@@ -47,6 +51,8 @@ public class PollController {
     @GetMapping("/by-newsfeed/{newsfeedId}")
     public ResponseEntity<PollResponse> getPollByNewsfeedId(@PathVariable Long newsfeedId) {
         PollResponse pollResponse = pollService.getPollByNewsfeedId(newsfeedId);
+//        List<PollOptionResponse> pollOptionResponse = pollResponse.getPollOptions();
+//        List<VoteResponse> voteResponses = pollOptionResponse.
         return ResponseEntity.ok(pollResponse);
     }
 }

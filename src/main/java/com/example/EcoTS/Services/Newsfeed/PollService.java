@@ -135,6 +135,8 @@ public class PollService {
                         return VoteResponse.builder()
                                 .id(vote.getId())
                                 .userId(user.getId())
+                                .avatarUrl(user.getAvatarUrl())
+                                .fullName(user.getFullName())
                                 .status(vote.isStatus())
                                 .build();
                     }).toList();

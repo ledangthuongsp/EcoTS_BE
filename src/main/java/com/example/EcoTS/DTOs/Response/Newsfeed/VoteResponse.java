@@ -8,5 +8,7 @@ import lombok.Data;
 public class VoteResponse {
     private Long id;
     private Long userId;
+    private String avatarUrl;
+    private String fullName;
     private boolean status;
 }

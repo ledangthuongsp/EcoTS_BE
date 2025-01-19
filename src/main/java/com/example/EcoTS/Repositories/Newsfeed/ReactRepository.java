@@ -16,4 +16,5 @@ import java.util.Optional;
 @Hidden
 public interface ReactRepository extends JpaRepository<React, Long> {
 
+    React findByNewsfeedIdAndUserId (Long newsfeedId, Long userId);
 }
