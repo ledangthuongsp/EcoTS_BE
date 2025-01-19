@@ -2,18 +2,28 @@ package com.example.EcoTS.Services.Sponsor;
 
 
 import com.example.EcoTS.Models.Sponsor;
+import com.example.EcoTS.Models.SponsorQRCode;
+import com.example.EcoTS.Models.Users;
+import com.example.EcoTS.Repositories.SponsorQRCodeRepository;
 import com.example.EcoTS.Repositories.SponsorRepository;
+import com.example.EcoTS.Repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class SponsorService {
+
+
     @Autowired
     private SponsorRepository sponsorRepository;
-
     // Tạo mới sponsor
     @Transactional
     public Sponsor createSponsor(Sponsor sponsor) {

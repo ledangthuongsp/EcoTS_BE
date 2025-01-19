@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.Optional;
 
@@ -36,9 +37,11 @@ public class NewsfeedController {
             @RequestParam (required = false) Double pointForActivity,
             @RequestParam (required = false) Long userId,
             @RequestParam List<String> pollOptions, // Các lựa chọn cho Poll
+            @RequestParam (required = true) Timestamp startedAt,
+            @RequestParam (required = true) Timestamp endedAt,
             @RequestPart("files") List<MultipartFile> files // Danh sách file tải lên
     ) throws IOException {
-        Newsfeed createdNewsfeed = newsfeedService.createNewsfeed(content, sponsorId, pointForActivity, userId, pollOptions, files);
+        Newsfeed createdNewsfeed = newsfeedService.createNewsfeed(content, sponsorId, pointForActivity, userId, pollOptions, files, startedAt, endedAt);
         return ResponseEntity.ok(createdNewsfeed);
     }
     // READ: Get all newsfeeds
@@ -51,11 +54,9 @@ public class NewsfeedController {
     public ResponseEntity<List<Newsfeed>> getNewsfeedYourActivity(Long userId)
     {
         List<Newsfeed> newsfeeds = newsfeedService.getYourActivity(userId);
-
         return ResponseEntity.ok(newsfeeds);
     }
     // READ: Get a single newsfeed by I
-
     // DELETE: Delete a newsfeed by ID
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<String> deleteNewsfeed(@PathVariable Long id) {

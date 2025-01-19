@@ -1,11 +1,19 @@
 package com.example.EcoTS.Controllers.Sponsor;
 
 import com.example.EcoTS.Models.Sponsor;
+import com.example.EcoTS.Models.SponsorQRCode;
+import com.example.EcoTS.Services.CloudinaryService.CloudinaryService;
+import com.example.EcoTS.Services.Sponsor.SponsorQRCodeService;
 import com.example.EcoTS.Services.Sponsor.SponsorService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/sponsor")
@@ -15,6 +23,10 @@ public class SponsorController {
 
     @Autowired
     private SponsorService sponsorService;
+    @Autowired
+    private SponsorQRCodeService sponsorQRCodeService;
+    @Autowired
+    private CloudinaryService cloudinaryService;
 
     // API tạo mới sponsor
     @PostMapping("/create")
@@ -43,4 +55,47 @@ public class SponsorController {
         sponsorService.deleteSponsor(id);
         return ResponseEntity.noContent().build();
     }
+    // API lấy QR Code còn hiệu lực cho sponsor
+    @GetMapping("/qrcode/active/{sponsorId}")
+    public ResponseEntity<?> getActiveQRCode(@PathVariable Long sponsorId) {
+        Optional<SponsorQRCode> qrCode = sponsorQRCodeService.getActiveQRCode(sponsorId);
+        return qrCode.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    // API tạo QR Code mới
+    @PostMapping("/qrcode/generate")
+    public ResponseEntity<?> generateQRCode(@RequestParam Long sponsorId, @RequestParam Double points, @RequestParam Long newsfeedId) {
+        try {
+            SponsorQRCode qrCode = sponsorQRCodeService.generateQRCode(sponsorId, points, newsfeedId);
+            return ResponseEntity.ok(qrCode);
+        } catch (IOException e) {
+            return ResponseEntity.status(500).body("Error generating QR Code");
+        }
+    }
+
+    // API sử dụng QR Code
+    @PostMapping(value = "/qrcode/use", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> useQRCode(@RequestParam Long qrCodeId, @RequestParam String userEmail, @RequestPart MultipartFile proofImage) throws IOException {
+        String proofImageUrl = cloudinaryService.uploadUserProofImage(proofImage);
+        SponsorQRCode qrCode = sponsorQRCodeService.useQRCode(qrCodeId, userEmail, proofImageUrl);
+        if (qrCode != null) {
+            return ResponseEntity.ok(qrCode);
+        }
+        return ResponseEntity.notFound().build();
+    }
+
+    // API làm mới QR Code
+    @PostMapping("/qrcode/refresh")
+    public ResponseEntity<?> refreshQRCode(@RequestParam Long sponsorId, @RequestParam Long qrCodeId) {
+        try {
+            SponsorQRCode qrCode = sponsorQRCodeService.refreshQRCode(sponsorId, qrCodeId);
+            if (qrCode != null) {
+                return ResponseEntity.ok(qrCode);
+            }
+            return ResponseEntity.notFound().build();
+        } catch (IOException e) {
+            return ResponseEntity.status(500).body("Error refreshing QR Code");
+        }
+    }
+
 }
