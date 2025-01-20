@@ -2,6 +2,7 @@ package com.example.EcoTS.Controllers.Sponsor;
 
 import com.example.EcoTS.Models.Sponsor;
 import com.example.EcoTS.Models.SponsorQRCode;
+import com.example.EcoTS.Repositories.SponsorRepository;
 import com.example.EcoTS.Services.CloudinaryService.CloudinaryService;
 import com.example.EcoTS.Services.Sponsor.SponsorQRCodeService;
 import com.example.EcoTS.Services.Sponsor.SponsorService;
@@ -32,6 +33,8 @@ public class SponsorController {
     private SponsorQRCodeService sponsorQRCodeService;
     @Autowired
     private CloudinaryService cloudinaryService;
+    @Autowired
+    private SponsorRepository sponsorRepository;
 
     // API tạo mới sponsor
     @PostMapping("/create")
@@ -141,5 +144,24 @@ public class SponsorController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Collections.singletonMap("message", "Không thể làm mới QR Code."));
         }
+    }
+    // Login Sponsor
+    @PostMapping("/login")
+    public ResponseEntity<String> login(@RequestParam String username, @RequestParam String password) {
+        Sponsor sponsor = sponsorRepository.findByCompanyUsername(username);
+        if (sponsor != null && sponsor.getCompanyPassword().equals(password)) {
+            return ResponseEntity.ok("Login successful");
+        }
+        return ResponseEntity.status(401).body("Invalid username or password");
+    }
+
+    // Get Sponsor by Username
+    @GetMapping("/get-by-username")
+    public ResponseEntity<Sponsor> getSponsorByUsername(@RequestParam String username) {
+        Sponsor sponsor = sponsorRepository.findByCompanyUsername(username);
+        if (sponsor != null) {
+            return ResponseEntity.ok(sponsor);
+        }
+        return ResponseEntity.status(404).body(null);
     }
 }

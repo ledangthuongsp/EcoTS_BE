@@ -10,4 +10,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 @Hidden
 public interface SponsorRepository extends JpaRepository<Sponsor, Long> {
+    Sponsor findByCompanyUsername(String username);
 }
