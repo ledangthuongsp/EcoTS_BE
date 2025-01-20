@@ -6,6 +6,7 @@ import com.example.EcoTS.DTOs.Response.Newsfeed.NewsfeedResponse;
 import com.example.EcoTS.Models.Newsfeed.Comment;
 import com.example.EcoTS.Models.Newsfeed.Newsfeed;
 import com.example.EcoTS.Models.Newsfeed.React;
+import com.example.EcoTS.Repositories.Newsfeed.NewsfeedRepository;
 import com.example.EcoTS.Services.Newsfeed.NewsfeedService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -29,7 +30,8 @@ import java.util.Optional;
 public class NewsfeedController {
     @Autowired
     private NewsfeedService newsfeedService;
-
+    @Autowired
+    private NewsfeedRepository newsfeedRepository;
     // CREATE: Add a new newsfeed
     @PostMapping(value = "/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Newsfeed> createNewsfeed(
@@ -151,5 +153,11 @@ public class NewsfeedController {
                     .body(Collections.singletonMap("error", e.getMessage()));
         }
     }
+    @GetMapping("/get-newsfeed-by-sponsor-id")
+    public ResponseEntity<List<Newsfeed>> getNewsfeedBySponsorId(@RequestParam Long sponsorId) {
 
+        List<Newsfeed> newsfeedList = newsfeedRepository.findBySponsorId(sponsorId);
+        return ResponseEntity.ok().body(newsfeedList);
+
+    }
 }

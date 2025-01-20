@@ -164,4 +164,10 @@ public class SponsorController {
         }
         return ResponseEntity.status(404).body(null);
     }
+    @GetMapping("/get-newsfeed-by-sponsor-id")
+    public ResponseEntity<Double> getSponsorPoints (@RequestParam Long sponsorId) {
+
+        double points = sponsorRepository.findByCompanyPoints(sponsorId);
+        return ResponseEntity.ok().body(points);
+    }
 }

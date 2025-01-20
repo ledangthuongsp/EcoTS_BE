@@ -147,15 +147,15 @@ public class SponsorQRCodeService {
         if (optionalQRCode.isPresent()) {
             SponsorQRCode sponsorQRCode = optionalQRCode.get();
             if (sponsorQRCode.getExpiredAt().before(new Timestamp(System.currentTimeMillis()))) {
-                String newContent = "Sponsor QR Code - Sponsor ID: " + sponsorId + " - Newsfeed ID: " + sponsorQRCode.getNewsfeedId();
-                return generateQRCode(sponsorId, sponsorQRCode.getPoints(), sponsorQRCode.getNewsfeedId());
+                String newContent = "Sponsor QR Code - Sponsor ID: " + sponsorId + " - Newsfeed ID: " + sponsorQRCode.getNewsfeedId() + " - Qr ID: " + qrCodeId;
+                return generateQRCode(sponsorId, sponsorQRCode.getPoints(), sponsorQRCode.getNewsfeedId(), qrCodeId);
             }
         }
         return null;
     }
 
-    public SponsorQRCode generateQRCode(Long sponsorId, Double points, Long newsfeedId) throws IOException {
-        String content = "Sponsor QR Code - Sponsor ID: " + sponsorId + " - Newsfeed ID: " + newsfeedId;
+    public SponsorQRCode generateQRCode(Long sponsorId, Double points, Long newsfeedId, Long qrCodeId) throws IOException {
+        String content = "Sponsor QR Code - Sponsor ID: " + sponsorId + " - Newsfeed ID: " + newsfeedId + " - Qr ID: " + qrCodeId;
         String qrCodeUrl = createAndUploadQRCode(content);
 
         Timestamp currentTimestamp = new Timestamp(System.currentTimeMillis());
