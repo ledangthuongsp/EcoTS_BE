@@ -19,4 +19,5 @@ public interface ReactRepository extends JpaRepository<React, Long> {
     React findByUserId (Long userId);
     List<React> findAllByUserId(Long userId);
     Optional<React> findByUserIdAndNewsfeedId(Long userId, Long newsfeedId);
+    boolean existsByNewsfeedIdAndUserId(Long newsfeedId, Long userId);
 }

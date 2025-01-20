@@ -300,4 +300,8 @@ public class NewsfeedService {
         // Trả về trạng thái của React
         return react.isStatus();
     }
+    public boolean hasUserReacted(Long newsfeedId, Long userId) {
+        // Kiểm tra trong bảng React xem userId có "react" với newsfeedId không
+        return reactRepository.existsByNewsfeedIdAndUserId(newsfeedId, userId);
+    }
 }

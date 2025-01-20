@@ -122,8 +122,6 @@ public class SponsorController {
                     .body(Collections.singletonMap("message", "Đã xảy ra lỗi khi xử lý QR Code."));
         }
     }
-
-
     // API làm mới QR Code
     @PostMapping("/qrcode/refresh")
     public ResponseEntity<?> refreshQRCode(@RequestParam Long sponsorId, @RequestParam Long qrCodeId) {

@@ -185,5 +185,11 @@ public class NewsfeedController {
                 "ended", ended
         ));
     }
-
+    @GetMapping("/{newsfeedId}/reacts/exists")
+    public ResponseEntity<Map<String, Boolean>> hasUserReacted(
+            @PathVariable Long newsfeedId,
+            @RequestParam Long userId) {
+        boolean hasReacted = newsfeedService.hasUserReacted(newsfeedId, userId);
+        return ResponseEntity.ok(Collections.singletonMap("hasReacted", hasReacted));
+    }
 }
