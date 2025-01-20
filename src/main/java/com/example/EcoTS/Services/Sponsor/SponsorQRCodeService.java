@@ -155,13 +155,13 @@ public class SponsorQRCodeService {
     }
 
     public SponsorQRCode generateQRCode(Long sponsorId, Double points, Long newsfeedId) throws IOException {
-        // Bước 1: Tạo bản ghi QR code ban đầu (chưa có URL)
+        // Bước 1: Tạo bản ghi QR code ban đầu để lấy ID
         Timestamp currentTimestamp = new Timestamp(System.currentTimeMillis());
         Timestamp expiredAt = new Timestamp(currentTimestamp.getTime() + 3 * 60 * 1000);
 
         SponsorQRCode sponsorQRCode = SponsorQRCode.builder()
                 .sponsorId(sponsorId)
-                .qrCodeUrl(null) // Chưa có URL
+                .qrCodeUrl("") // Tạm thời để trống
                 .points(points)
                 .newsfeedId(newsfeedId)
                 .createdAt(currentTimestamp)
@@ -169,22 +169,20 @@ public class SponsorQRCodeService {
                 .isUsed(false)
                 .build();
 
-        // Lưu vào cơ sở dữ liệu để lấy ID
+        // Lưu bản ghi để lấy ID
         sponsorQRCode = sponsorQRCodeRepository.save(sponsorQRCode);
-        Long qrCodeId = sponsorQRCode.getId(); // Lấy ID sau khi lưu
+        Long qrCodeId = sponsorQRCode.getId(); // Lấy ID từ cơ sở dữ liệu
 
-        // Bước 2: Tạo nội dung QR code mới với qrCodeId
-        String content = "Sponsor QR Code - Sponsor ID: " + sponsorId + " - Newsfeed ID: " + newsfeedId + " - Qr ID: " + qrCodeId;
+        // Bước 2: Tạo nội dung QR code với ID
+        String content = String.valueOf(qrCodeId);
 
         // Tạo QR code và tải lên Cloudinary
         String qrCodeUrl = createAndUploadQRCode(content);
 
         // Bước 3: Cập nhật URL QR code vào bản ghi
         sponsorQRCode.setQrCodeUrl(qrCodeUrl);
-        sponsorQRCode = sponsorQRCodeRepository.save(sponsorQRCode);
+        sponsorQRCode = sponsorQRCodeRepository.save(sponsorQRCode); // Lưu lần nữa để cập nhật URL
 
         return sponsorQRCode;
     }
-
-
 }

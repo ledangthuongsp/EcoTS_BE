@@ -19,9 +19,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.sql.Timestamp;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @RestController
 @CrossOrigin
@@ -160,4 +158,32 @@ public class NewsfeedController {
         return ResponseEntity.ok().body(newsfeedList);
 
     }
+    @GetMapping("/get-newsfeed-by-sponsor-id-with-status")
+    public ResponseEntity<?> getNewsfeedWithStatus(@RequestParam Long sponsorId) {
+        List<Newsfeed> newsfeeds = newsfeedRepository.findBySponsorId(sponsorId);
+
+        // Phân loại theo trạng thái
+        Timestamp now = new Timestamp(System.currentTimeMillis());
+        List<Newsfeed> upcoming = new ArrayList<>();
+        List<Newsfeed> started = new ArrayList<>();
+        List<Newsfeed> ended = new ArrayList<>();
+
+        for (Newsfeed newsfeed : newsfeeds) {
+            if (now.before(newsfeed.getStartedAt())) {
+                upcoming.add(newsfeed);
+            } else if (now.after(newsfeed.getEndedAt())) {
+                ended.add(newsfeed);
+            } else {
+                started.add(newsfeed);
+            }
+        }
+
+        // Trả về dữ liệu phân loại
+        return ResponseEntity.ok(Map.of(
+                "upcoming", upcoming,
+                "started", started,
+                "ended", ended
+        ));
+    }
+
 }
