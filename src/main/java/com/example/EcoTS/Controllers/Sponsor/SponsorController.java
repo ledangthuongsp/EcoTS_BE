@@ -1,7 +1,9 @@
 package com.example.EcoTS.Controllers.Sponsor;
 
+import com.example.EcoTS.Models.Newsfeed.Newsfeed;
 import com.example.EcoTS.Models.Sponsor;
 import com.example.EcoTS.Models.SponsorQRCode;
+import com.example.EcoTS.Repositories.Newsfeed.NewsfeedRepository;
 import com.example.EcoTS.Repositories.SponsorRepository;
 import com.example.EcoTS.Services.CloudinaryService.CloudinaryService;
 import com.example.EcoTS.Services.Sponsor.SponsorQRCodeService;
@@ -17,9 +19,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.sql.Timestamp;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @RestController
 @RequestMapping("/sponsor")
@@ -35,6 +35,8 @@ public class SponsorController {
     private CloudinaryService cloudinaryService;
     @Autowired
     private SponsorRepository sponsorRepository;
+    @Autowired
+    private NewsfeedRepository newsfeedRepository;
 
     // API tạo mới sponsor
     @PostMapping("/create")
@@ -95,7 +97,7 @@ public class SponsorController {
 
     // API sử dụng QR Code
     @PostMapping(value = "/qrcode/use", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<?> useQRCode(@RequestParam Long qrCodeId, @RequestParam String userEmail, @RequestPart MultipartFile proofImage) {
+    public ResponseEntity<?> useQRCode(@RequestParam Long qrCodeId, @RequestParam String userEmail, @RequestPart (required = false) MultipartFile proofImage) {
         try {
             String proofImageUrl = cloudinaryService.uploadUserProofImage(proofImage);
 
@@ -170,4 +172,38 @@ public class SponsorController {
         double points = sponsorRepository.findByCompanyPoints(sponsorId);
         return ResponseEntity.ok().body(points);
     }
+    @GetMapping("/get-newsfeed-by-sponsor-id-with-status")
+    public ResponseEntity<?> getNewsfeedWithStatus(@RequestParam Long sponsorId) {
+        // Lấy tất cả các newsfeed của sponsor
+        List<Newsfeed> newsfeeds = newsfeedRepository.findBySponsorId(sponsorId);
+
+        // Lấy thời gian hiện tại
+        Timestamp now = new Timestamp(System.currentTimeMillis());
+
+        // Phân loại newsfeed theo trạng thái
+        List<Newsfeed> upcoming = new ArrayList<>();
+        List<Newsfeed> started = new ArrayList<>();
+        List<Newsfeed> ended = new ArrayList<>();
+
+        for (Newsfeed newsfeed : newsfeeds) {
+            if (now.before(newsfeed.getStartedAt())) {
+                // Upcoming: Chưa bắt đầu
+                upcoming.add(newsfeed);
+            } else if (now.after(newsfeed.getEndedAt())) {
+                // Ended: Đã kết thúc
+                ended.add(newsfeed);
+            } else {
+                // Started: Đang diễn ra
+                started.add(newsfeed);
+            }
+        }
+
+        // Trả về dữ liệu phân loại
+        return ResponseEntity.ok(Map.of(
+                "upcoming", upcoming,
+                "started", started,
+                "ended", ended
+        ));
+    }
+
 }
