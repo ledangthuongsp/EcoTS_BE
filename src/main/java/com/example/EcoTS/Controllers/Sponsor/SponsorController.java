@@ -84,9 +84,9 @@ public class SponsorController {
 
     // API tạo QR Code mới
     @PostMapping("/qrcode/generate")
-    public ResponseEntity<?> generateQRCode(@RequestParam Long sponsorId, @RequestParam Double points, @RequestParam Long newsfeedId, @RequestParam Long qrCodeId) {
+    public ResponseEntity<?> generateQRCode(@RequestParam Long sponsorId, @RequestParam Double points, @RequestParam Long newsfeedId) {
         try {
-            SponsorQRCode qrCode = sponsorQRCodeService.generateQRCode(sponsorId, points, newsfeedId, qrCodeId);
+            SponsorQRCode qrCode = sponsorQRCodeService.generateQRCode(sponsorId, points, newsfeedId);
             return ResponseEntity.ok(qrCode);
         } catch (IOException e) {
             return ResponseEntity.status(500).body("Error generating QR Code");
