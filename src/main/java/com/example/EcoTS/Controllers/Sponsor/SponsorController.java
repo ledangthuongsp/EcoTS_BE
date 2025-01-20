@@ -96,13 +96,13 @@ public class SponsorController {
     }
 
     // API sử dụng QR Code
-    @PostMapping(value = "/qrcode/use", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<?> useQRCode(@RequestParam Long qrCodeId, @RequestParam String userEmail, @RequestPart (required = false) MultipartFile proofImage) {
+    @PostMapping(value = "/qrcode/use")
+    public ResponseEntity<?> useQRCode(@RequestParam Long qrCodeId, @RequestParam String userEmail) {
         try {
-            String proofImageUrl = cloudinaryService.uploadUserProofImage(proofImage);
+
 
             // Gọi service để xử lý sử dụng QR code
-            SponsorQRCode qrCode = sponsorQRCodeService.useQRCode(qrCodeId, userEmail, proofImageUrl);
+            SponsorQRCode qrCode = sponsorQRCodeService.useQRCode(qrCodeId, userEmail);
 
             // Nếu sử dụng thành công, trả về thông tin QR code
             if (qrCode != null) {
@@ -116,11 +116,7 @@ public class SponsorController {
             // Lỗi nghiệp vụ (QR code đã sử dụng, người dùng quét lại, ...)
             return ResponseEntity.status(HttpStatus.CONFLICT)
                     .body(Collections.singletonMap("message", e.getMessage()));
-        } catch (IOException e) {
-            // Lỗi upload ảnh
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Collections.singletonMap("message", "Không thể tải ảnh chứng minh lên máy chủ."));
-        } catch (Exception e) {
+        }  catch (Exception e) {
             // Lỗi chung
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Collections.singletonMap("message", "Đã xảy ra lỗi khi xử lý QR Code."));
@@ -169,7 +165,7 @@ public class SponsorController {
     @GetMapping("/get-newsfeed-by-sponsor-id")
     public ResponseEntity<Double> getSponsorPoints (@RequestParam Long sponsorId) {
 
-        double points = sponsorRepository.findByCompanyPoints(sponsorId);
+        double points = sponsorRepository.findCompanyPointsBySponsorId(sponsorId);
         return ResponseEntity.ok().body(points);
     }
     @GetMapping("/get-newsfeed-by-sponsor-id-with-status")

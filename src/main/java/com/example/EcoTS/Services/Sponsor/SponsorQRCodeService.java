@@ -88,7 +88,7 @@ public class SponsorQRCodeService {
 
 
     @Transactional
-    public SponsorQRCode useQRCode(Long qrCodeId, String userEmail, String proofImageUrl) {
+    public SponsorQRCode useQRCode(Long qrCodeId, String userEmail) {
         SponsorQRCode qrCode = sponsorQRCodeRepository.findById(qrCodeId)
                 .orElseThrow(() -> new ResourceNotFoundException("QR Code not found"));
 
@@ -112,7 +112,7 @@ public class SponsorQRCodeService {
         QRCodeUsage usage = QRCodeUsage.builder()
                 .sponsorQRCode(qrCode)
                 .userEmail(userEmail)
-                .proofImageUrl(proofImageUrl)
+                .proofImageUrl("")
                 .usedAt(new Timestamp(System.currentTimeMillis()))
                 .build();
         qrCodeUsageRepository.save(usage);
