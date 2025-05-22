@@ -11,4 +11,6 @@ import java.util.List;
 @Hidden
 public interface NewsfeedRepository extends JpaRepository<Newsfeed, Long> {
     List<Newsfeed> findByUserId(Long userId);
+    List<Newsfeed> findBySponsorId(Long sponsorId);
+
 }

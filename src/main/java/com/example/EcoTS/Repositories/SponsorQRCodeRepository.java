@@ -11,6 +11,6 @@ import java.util.Optional;
 @Repository
 @Hidden
 public interface SponsorQRCodeRepository extends JpaRepository<SponsorQRCode, Long> {
-    Optional<SponsorQRCode> findBySponsorIdAndIsUsedFalse(Long sponsorId);  // Tìm QR code chưa sử dụng cho sponsor
+    List<SponsorQRCode> findBySponsorIdAndIsUsedFalse(Long sponsorId);  // Tìm QR code chưa sử dụng cho sponsor
     Optional<SponsorQRCode> findByIdAndIsUsedFalse(Long id);
 }

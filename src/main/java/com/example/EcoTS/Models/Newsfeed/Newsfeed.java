@@ -37,7 +37,10 @@ public class Newsfeed {
     private List<Long> commentIds = new ArrayList<>();
 
     @ElementCollection
+    @CollectionTable(name = "newsfeed_react_ids", joinColumns = @JoinColumn(name = "newsfeed_id"))
+    @Column(name = "react_ids")
     private List<Long> reactIds = new ArrayList<>();
+
 
     @CreationTimestamp
     private Timestamp createdAt;

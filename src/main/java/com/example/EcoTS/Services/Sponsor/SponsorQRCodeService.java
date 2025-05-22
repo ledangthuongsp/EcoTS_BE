@@ -1,7 +1,7 @@
 package com.example.EcoTS.Services.Sponsor;
 
-import com.example.EcoTS.Models.SponsorQRCode;
-import com.example.EcoTS.Repositories.SponsorQRCodeRepository;
+import com.example.EcoTS.Models.*;
+import com.example.EcoTS.Repositories.*;
 import com.example.EcoTS.Services.CloudinaryService.CloudinaryService;
 import com.example.EcoTS.Utils.MultipartFileWrapper;
 import com.google.zxing.BarcodeFormat;
@@ -9,6 +9,7 @@ import com.google.zxing.EncodeHintType;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.QRCodeWriter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,6 +29,14 @@ public class SponsorQRCodeService {
 
     @Autowired
     private CloudinaryService cloudinaryService;
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private SponsorRepository sponsorRepository;
+    @Autowired
+    private PointRepository pointRepository;
+    @Autowired
+    private QRCodeUsageRepository qrCodeUsageRepository;
 
     @Transactional
     public byte[] generateQRCode(String content) throws IOException {
@@ -66,22 +75,72 @@ public class SponsorQRCodeService {
         byte[] qrCodeImage = generateQRCode(content);
         return cloudinaryService.uploadSponsorQrCode(new MultipartFileWrapper(qrCodeImage));
     }
-
+    @Transactional
     public Optional<SponsorQRCode> getActiveQRCode(Long sponsorId) {
-        return sponsorQRCodeRepository.findBySponsorIdAndIsUsedFalse(sponsorId);
+        java.util.List<SponsorQRCode> qrCodes = sponsorQRCodeRepository.findBySponsorIdAndIsUsedFalse(sponsorId);
+
+        // Lọc danh sách để tìm QR Code còn hạn
+        return qrCodes.stream()
+                .filter(qrCode -> qrCode.getExpiredAt() != null
+                        && qrCode.getExpiredAt().after(new Timestamp(System.currentTimeMillis())))
+                .findFirst();
     }
 
-    public SponsorQRCode useQRCode(Long qrCodeId, String userEmail, String proofImageUrl) {
-        Optional<SponsorQRCode> optionalQRCode = sponsorQRCodeRepository.findByIdAndIsUsedFalse(qrCodeId);
-        if (optionalQRCode.isPresent()) {
-            SponsorQRCode sponsorQRCode = optionalQRCode.get();
-            sponsorQRCode.setIsUsed(true);
-            sponsorQRCode.setUserEmail(userEmail);
-            sponsorQRCode.setProofImageUrl(proofImageUrl);
-            return sponsorQRCodeRepository.save(sponsorQRCode);
+
+    @Transactional
+    public SponsorQRCode useQRCode(Long qrCodeId, String userEmail) {
+        SponsorQRCode qrCode = sponsorQRCodeRepository.findById(qrCodeId)
+                .orElseThrow(() -> new ResourceNotFoundException("QR Code not found"));
+
+        // Kiểm tra xem QR code đã hết hạn chưa
+        if (qrCode.getExpiredAt().before(new Timestamp(System.currentTimeMillis()))) {
+            throw new IllegalStateException("QR Code đã hết hạn.");
         }
-        return null;
+
+        // Kiểm tra trạng thái QR Code
+        if (qrCode.getIsUsed()) {
+            throw new IllegalStateException("QR Code đã được sử dụng.");
+        }
+
+        // Kiểm tra nếu user đã sử dụng mã này
+        boolean alreadyUsed = qrCodeUsageRepository.existsBySponsorQRCodeAndUserEmail(qrCode, userEmail);
+        if (alreadyUsed) {
+            throw new IllegalStateException("Bạn đã sử dụng mã QR này.");
+        }
+
+        // Lưu thông tin sử dụng
+        QRCodeUsage usage = QRCodeUsage.builder()
+                .sponsorQRCode(qrCode)
+                .userEmail(userEmail)
+                .proofImageUrl("")
+                .usedAt(new Timestamp(System.currentTimeMillis()))
+                .build();
+        qrCodeUsageRepository.save(usage);
+
+        // Cập nhật điểm
+        Sponsor sponsor = sponsorRepository.findById(qrCode.getSponsorId())
+                .orElseThrow(() -> new ResourceNotFoundException("Sponsor not found"));
+        Users user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        Points points = pointRepository.findByUser(user)
+                .orElseThrow(() -> new ResourceNotFoundException("Points not found"));
+
+        // Trừ điểm từ Sponsor
+        double sponsorPoints = sponsor.getCompanyPoints() - qrCode.getPoints();
+        if (sponsorPoints < 0) {
+            throw new IllegalArgumentException("Sponsor không đủ điểm.");
+        }
+        sponsor.setCompanyPoints(sponsorPoints);
+        sponsorRepository.save(sponsor);
+
+        // Cộng điểm cho User
+        double userPoints = points.getPoint() + qrCode.getPoints();
+        points.setPoint(userPoints);
+        pointRepository.save(points);
+
+        return qrCode;
     }
+
 
     public SponsorQRCode refreshQRCode(Long sponsorId, Long qrCodeId) throws IOException {
         Optional<SponsorQRCode> optionalQRCode = sponsorQRCodeRepository.findByIdAndIsUsedFalse(qrCodeId);
@@ -96,21 +155,34 @@ public class SponsorQRCodeService {
     }
 
     public SponsorQRCode generateQRCode(Long sponsorId, Double points, Long newsfeedId) throws IOException {
-        String content = "Sponsor QR Code - Sponsor ID: " + sponsorId + " - Newsfeed ID: " + newsfeedId;
-        String qrCodeUrl = createAndUploadQRCode(content);
-
+        // Bước 1: Tạo bản ghi QR code ban đầu để lấy ID
         Timestamp currentTimestamp = new Timestamp(System.currentTimeMillis());
         Timestamp expiredAt = new Timestamp(currentTimestamp.getTime() + 3 * 60 * 1000);
 
-        SponsorQRCode sponsorQRCode = new SponsorQRCode();
-        sponsorQRCode.setSponsorId(sponsorId);
-        sponsorQRCode.setNewsfeedId(newsfeedId);
-        sponsorQRCode.setQrCodeUrl(qrCodeUrl);
-        sponsorQRCode.setPoints(points);
-        sponsorQRCode.setCreatedAt(currentTimestamp);
-        sponsorQRCode.setExpiredAt(expiredAt);
-        sponsorQRCode.setIsUsed(false);
+        SponsorQRCode sponsorQRCode = SponsorQRCode.builder()
+                .sponsorId(sponsorId)
+                .qrCodeUrl("") // Tạm thời để trống
+                .points(points)
+                .newsfeedId(newsfeedId)
+                .createdAt(currentTimestamp)
+                .expiredAt(expiredAt)
+                .isUsed(false)
+                .build();
 
-        return sponsorQRCodeRepository.save(sponsorQRCode);
+        // Lưu bản ghi để lấy ID
+        sponsorQRCode = sponsorQRCodeRepository.save(sponsorQRCode);
+        Long qrCodeId = sponsorQRCode.getId(); // Lấy ID từ cơ sở dữ liệu
+
+        // Bước 2: Tạo nội dung QR code với ID
+        String content = String.valueOf(qrCodeId);
+
+        // Tạo QR code và tải lên Cloudinary
+        String qrCodeUrl = createAndUploadQRCode(content);
+
+        // Bước 3: Cập nhật URL QR code vào bản ghi
+        sponsorQRCode.setQrCodeUrl(qrCodeUrl);
+        sponsorQRCode = sponsorQRCodeRepository.save(sponsorQRCode); // Lưu lần nữa để cập nhật URL
+
+        return sponsorQRCode;
     }
 }

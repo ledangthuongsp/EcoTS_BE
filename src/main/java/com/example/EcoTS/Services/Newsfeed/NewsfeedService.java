@@ -117,48 +117,61 @@ public class NewsfeedService {
     }
     @Transactional
     public Newsfeed addReact(Long newsfeedId, Long userId, boolean status) {
+        // Lấy Newsfeed từ database
+        Newsfeed newsfeed = newsfeedRepository.findById(newsfeedId)
+                .orElseThrow(() -> new IllegalArgumentException("Newsfeed not found"));
 
-        // Kiểm tra nếu người dùng đã có react cho newsfeed này
-        React existingReact = reactRepository.findByUserId(userId);
+        // Tìm React dựa trên userId và newsfeedId
+        Optional<React> existingReactOpt = reactRepository.findByUserIdAndNewsfeedId(userId, newsfeedId);
 
-        if (existingReact != null) {
-            // Nếu đã có react, cập nhật lại trạng thái
+        if (existingReactOpt.isPresent()) {
+            // Nếu React đã tồn tại, cập nhật trạng thái
+            React existingReact = existingReactOpt.get();
             existingReact.setStatus(status);
             reactRepository.save(existingReact);
-            return newsfeedRepository.findById(newsfeedId)
-                    .orElseThrow(() -> new IllegalArgumentException("Newsfeed not found"));
+        } else {
+            // Nếu chưa có React, tạo mới
+            React newReact = React.builder()
+                    .userId(userId)
+                    .newsfeedId(newsfeedId)
+                    .status(status)
+                    .build();
+            React savedReact = reactRepository.save(newReact);
+
+            // Thêm reactId vào danh sách reactIds của Newsfeed
+            List<Long> updatedReactIds = new ArrayList<>(newsfeed.getReactIds());
+            updatedReactIds.add(savedReact.getId());
+            newsfeed.setReactIds(updatedReactIds);
+            newsfeedRepository.save(newsfeed);
         }
 
-        // Nếu chưa có react, tạo react mới
-        React react = React.builder()
-                .userId(userId)
-                .status(status)
-                .build();
-
-        // Lưu react vào database
-        React savedReact = reactRepository.save(react);
-
-        // Thêm react ID vào Newsfeed
-        Newsfeed newsfeed = newsfeedRepository.findById(newsfeedId)
-                .orElseThrow(() -> new IllegalArgumentException("Newsfeed not found"));
-        newsfeed.getReactIds().add(savedReact.getId());
-
-        // Lưu lại Newsfeed
-        return newsfeedRepository.save(newsfeed);
+        // Trả về Newsfeed sau khi cập nhật
+        return newsfeed;
     }
+
+
     @Transactional
-    public Newsfeed removeReact(Long newsfeedId, Long reactId) {
-        // Xóa react khỏi database
-        reactRepository.deleteById(reactId);
-
-        // Loại bỏ react ID khỏi danh sách reactIds trong Newsfeed
+    public Newsfeed removeReact(Long newsfeedId, Long userId) {
+        // Lấy Newsfeed từ database
         Newsfeed newsfeed = newsfeedRepository.findById(newsfeedId)
                 .orElseThrow(() -> new IllegalArgumentException("Newsfeed not found"));
-        newsfeed.getReactIds().remove(reactId);
 
-        // Lưu lại Newsfeed
-        return newsfeedRepository.save(newsfeed);
+        // Tìm React dựa trên userId và newsfeedId
+        React react = reactRepository.findByUserIdAndNewsfeedId(userId, newsfeedId)
+                .orElseThrow(() -> new IllegalArgumentException("React not found for the given user and newsfeed"));
+
+        // Xóa react khỏi database
+        reactRepository.delete(react);
+
+        // Loại bỏ reactId khỏi danh sách reactIds
+        newsfeed.getReactIds().remove(react.getId());
+        newsfeedRepository.save(newsfeed);
+
+        // Trả về Newsfeed sau khi cập nhật
+        return newsfeed;
     }
+
+
     @Transactional
     // Cập nhật React thành false dựa trên newsfeedId và userId
     public void updateReactStatus(Long newsfeedId, Long userId) {
@@ -277,5 +290,18 @@ public class NewsfeedService {
         } else {
             throw new RuntimeException("Newsfeed not found");
         }
+    }
+    @Transactional
+    public boolean getReactStatus(Long newsfeedId, Long userId) {
+        // Tìm React dựa trên userId và newsfeedId
+        React react = reactRepository.findByUserIdAndNewsfeedId(userId, newsfeedId)
+                .orElseThrow(() -> new IllegalArgumentException("React not found for the given user and newsfeed"));
+
+        // Trả về trạng thái của React
+        return react.isStatus();
+    }
+    public boolean hasUserReacted(Long newsfeedId, Long userId) {
+        // Kiểm tra trong bảng React xem userId có "react" với newsfeedId không
+        return reactRepository.existsByNewsfeedIdAndUserId(newsfeedId, userId);
     }
 }

@@ -6,6 +6,7 @@ import com.example.EcoTS.DTOs.Response.Newsfeed.NewsfeedResponse;
 import com.example.EcoTS.Models.Newsfeed.Comment;
 import com.example.EcoTS.Models.Newsfeed.Newsfeed;
 import com.example.EcoTS.Models.Newsfeed.React;
+import com.example.EcoTS.Repositories.Newsfeed.NewsfeedRepository;
 import com.example.EcoTS.Services.Newsfeed.NewsfeedService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -18,8 +19,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.sql.Timestamp;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @RestController
 @CrossOrigin
@@ -28,7 +28,8 @@ import java.util.Optional;
 public class NewsfeedController {
     @Autowired
     private NewsfeedService newsfeedService;
-
+    @Autowired
+    private NewsfeedRepository newsfeedRepository;
     // CREATE: Add a new newsfeed
     @PostMapping(value = "/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Newsfeed> createNewsfeed(
@@ -137,5 +138,58 @@ public class NewsfeedController {
     public ResponseEntity<Long> countComments(@PathVariable Long newsfeedId) {
         long commentCount = newsfeedService.countComments(newsfeedId);
         return ResponseEntity.ok(commentCount);
+    }
+    @GetMapping("/react-status/{newsfeedId}")
+    public ResponseEntity<?> getReactStatus(
+            @PathVariable Long newsfeedId,
+            @RequestParam Long userId) {
+        try {
+            boolean status = newsfeedService.getReactStatus(newsfeedId, userId);
+            return ResponseEntity.ok(Collections.singletonMap("status", status));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Collections.singletonMap("error", e.getMessage()));
+        }
+    }
+    @GetMapping("/get-newsfeed-by-sponsor-id")
+    public ResponseEntity<List<Newsfeed>> getNewsfeedBySponsorId(@RequestParam Long sponsorId) {
+
+        List<Newsfeed> newsfeedList = newsfeedRepository.findBySponsorId(sponsorId);
+        return ResponseEntity.ok().body(newsfeedList);
+
+    }
+    @GetMapping("/get-newsfeed-by-sponsor-id-with-status")
+    public ResponseEntity<?> getNewsfeedWithStatus(@RequestParam Long sponsorId) {
+        List<Newsfeed> newsfeeds = newsfeedRepository.findBySponsorId(sponsorId);
+
+        // Phân loại theo trạng thái
+        Timestamp now = new Timestamp(System.currentTimeMillis());
+        List<Newsfeed> upcoming = new ArrayList<>();
+        List<Newsfeed> started = new ArrayList<>();
+        List<Newsfeed> ended = new ArrayList<>();
+
+        for (Newsfeed newsfeed : newsfeeds) {
+            if (now.before(newsfeed.getStartedAt())) {
+                upcoming.add(newsfeed);
+            } else if (now.after(newsfeed.getEndedAt())) {
+                ended.add(newsfeed);
+            } else {
+                started.add(newsfeed);
+            }
+        }
+
+        // Trả về dữ liệu phân loại
+        return ResponseEntity.ok(Map.of(
+                "upcoming", upcoming,
+                "started", started,
+                "ended", ended
+        ));
+    }
+    @GetMapping("/{newsfeedId}/reacts/exists")
+    public ResponseEntity<Map<String, Boolean>> hasUserReacted(
+            @PathVariable Long newsfeedId,
+            @RequestParam Long userId) {
+        boolean hasReacted = newsfeedService.hasUserReacted(newsfeedId, userId);
+        return ResponseEntity.ok(Collections.singletonMap("hasReacted", hasReacted));
     }
 }

@@ -21,4 +21,6 @@ public class React {
     private Long id;
     private Long userId;
     private boolean status;
+    @Column(name = "newsfeed_id", nullable = false)
+    private Long newsfeedId;
 }
