@@ -82,19 +82,18 @@ public class NewsfeedService {
 
     // READ: Get all newsfeeds
     public List<Newsfeed> getAllNewsfeed() {
-        return newsfeedRepository.findAll();
+        return newsfeedRepository.findAllByOrderByCreatedAtDesc();
     }
 
-
-    public List<Newsfeed> getYourActivity (Long userId)
-    {
-        return newsfeedRepository.findByUserId(userId);
+    // Get all newsfeeds for a specific user, ordered by createdAt (newest to oldest)
+    public List<Newsfeed> getYourActivity(Long userId) {
+        return newsfeedRepository.findByUserIdOrderByCreatedAtDesc(userId);
     }
     // DELETE: Delete a newsfeed by ID
     public void deleteNewsfeed(Long id) {
         if (newsfeedRepository.existsById(id)) {
             newsfeedRepository.deleteById(id);
-        }
+        } 
     }
     @Transactional
     public Newsfeed addComment(Long newsfeedId, Long userId, String message, List<String> imgUrls) {

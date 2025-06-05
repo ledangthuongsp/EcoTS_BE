@@ -12,5 +12,10 @@ import java.util.List;
 public interface NewsfeedRepository extends JpaRepository<Newsfeed, Long> {
     List<Newsfeed> findByUserId(Long userId);
     List<Newsfeed> findBySponsorId(Long sponsorId);
+    // Method to fetch all newsfeeds ordered by creation time, latest first
+    List<Newsfeed> findAllByOrderByCreatedAtDesc();
+
+    // Method to fetch newsfeeds for a specific user, ordered by creation time
+    List<Newsfeed> findByUserIdOrderByCreatedAtDesc(Long userId);
 
 }
