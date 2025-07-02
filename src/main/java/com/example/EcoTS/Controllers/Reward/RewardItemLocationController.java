@@ -24,7 +24,7 @@ public class RewardItemLocationController {
      * Trả về danh sách reward item và số lượng tồn kho tại địa điểm
      */
     @GetMapping("/employee/get-location-stock")
-    public ResponseEntity<List<RewardItemStockResponse>> getRewardItemsByLocation(@PathVariable Long locationId) {
+    public ResponseEntity<List<RewardItemStockResponse>> getRewardItemsByLocation(@RequestParam Long locationId) {
         List<RewardItemStockResponse> response = rewardItemLocationService.getStockByLocation(locationId);
         return ResponseEntity.ok(response);
     }

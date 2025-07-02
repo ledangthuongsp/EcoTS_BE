@@ -31,12 +31,12 @@ public class RewardImportController {
         return ResponseEntity.ok("Đã xác nhận nhập hàng.");
     }
 
-    @GetMapping("/requests")
+    @GetMapping("employee/requests")
     public ResponseEntity<List<RewardItemImportResponse>> getRequestsByLocation(@RequestParam Long locationId) {
         return ResponseEntity.ok(rewardImportService.getRequestsByLocationDTO(locationId));
     }
 
-    @PostMapping("/cancel-expired")
+    @PostMapping("employee/cancel-expired")
     public ResponseEntity<String> cancelExpiredImports() {
         rewardImportService.cancelStaleImports();
         return ResponseEntity.ok("Đã hủy các đơn nhập quá hạn.");
