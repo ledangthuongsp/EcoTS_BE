@@ -1,16 +1,17 @@
 package com.example.EcoTS.Services.RewardItem;
 
-import com.example.EcoTS.Models.Points;
-import com.example.EcoTS.Models.Rank;
+import com.example.EcoTS.Enum.RewardItemClaimStatus;
+import com.example.EcoTS.Models.*;
 import com.example.EcoTS.Models.Reward.RewardHistory;
 import com.example.EcoTS.Models.Reward.RewardItem;
-import com.example.EcoTS.Models.UserRank;
-import com.example.EcoTS.Models.Users;
+import com.example.EcoTS.Models.Reward.RewardItemClaim;
+import com.example.EcoTS.Models.Reward.RewardItemLocation;
 import com.example.EcoTS.Repositories.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.Optional;
 
@@ -26,6 +27,11 @@ public class RewardItemService {
     private UserRankRepository userRankRepository;
     @Autowired
     private RewardHistoryRepository rewardHistoryRepository;
+
+    @Autowired
+    private RewardItemClaimRepository claimRepository;
+    @Autowired
+    private RewardItemLocationRepository rewardItemLocationRepository;
 
     public List<RewardItem> getAllRewards() {
         return rewardItemRepository.findAll();
@@ -44,7 +50,6 @@ public class RewardItemService {
                 .map(reward -> {
                     reward.setRewardItemUrl(updatedReward.getRewardItemUrl());
                     reward.setPointCharge(updatedReward.getPointCharge());
-                    reward.setStock(updatedReward.getStock());
                     reward.setItemName(updatedReward.getItemName());
                     reward.setItemDescription(updatedReward.getItemDescription());
                     reward.setItemType(updatedReward.getItemType());
@@ -82,13 +87,6 @@ public class RewardItemService {
         RewardItem rewardItem = rewardItemRepository.findById(rewardItemId)
                 .orElseThrow(() -> new RuntimeException("Reward Item not found"));
 
-        // Kiểm tra số lượng hàng tồn kho
-        if (rewardItem.getStock() < numberOfItem) {
-            throw new IllegalArgumentException("Không đủ số lượng hàng để đổi quà.");
-        }
-
-        // Trừ số lượng trong kho
-        rewardItem.setStock((int) (rewardItem.getStock() - numberOfItem));
 
         // Cập nhật điểm xếp hạng người dùng
         UserRank userRank = userRankRepository.findByUserId(userId)
@@ -107,5 +105,70 @@ public class RewardItemService {
     public List<RewardHistory> getAllRewardHistoryById(Long userId)
     {
         return rewardHistoryRepository.findByUserId(userId);
+    }
+
+    @Transactional
+    public void createClaim(Long userId, Long rewardItemId, Long locationId, double pointCost) {
+        Users user = userRepository.findById(userId).orElseThrow();
+        RewardItem rewardItem = rewardItemRepository.findById(rewardItemId).orElseThrow();
+        Locations location = new Locations();
+        location.setId(locationId); // bạn có thể load location entity nếu muốn validate
+
+        Points points = pointRepository.findByUser(user).orElseThrow();
+        if (points.getPoint() < pointCost) throw new IllegalArgumentException("Không đủ điểm");
+
+        RewardItemLocation itemLocation = rewardItemLocationRepository.findByRewardItemAndLocation(rewardItem, location)
+                .orElseThrow();
+
+        if (itemLocation.getStock() < 1) throw new IllegalArgumentException("Hết hàng tại địa điểm");
+
+        // Trừ stock và tăng pending
+        itemLocation.setStock(itemLocation.getStock() - 1);
+        itemLocation.setPending(itemLocation.getPending() + 1);
+
+        points.setPoint(points.getPoint() - pointCost);
+
+        RewardItemClaim claim = RewardItemClaim.builder()
+                .user(user)
+                .rewardItem(rewardItem)
+                .location(location)
+                .status(RewardItemClaimStatus.PENDING)
+                .build();
+
+        claimRepository.save(claim);
+    }
+    @Transactional
+    public void confirmClaim(Long claimId) {
+        RewardItemClaim claim = claimRepository.findById(claimId).orElseThrow();
+
+        if (claim.getStatus() != RewardItemClaimStatus.PENDING) return;
+
+        RewardItemLocation itemLocation = rewardItemLocationRepository
+                .findByRewardItemAndLocation(claim.getRewardItem(), claim.getLocation())
+                .orElseThrow();
+
+        itemLocation.setPending(itemLocation.getPending() - 1);
+        claim.setStatus(RewardItemClaimStatus.COLLECTED);
+    }
+    @Transactional
+    public void autoCancelExpiredClaims() {
+        Timestamp cutoff = Timestamp.from(java.time.Instant.now().minusSeconds(3 * 24 * 60 * 60)); // 3 ngày
+
+        List<RewardItemClaim> expired = claimRepository.findByStatusAndCreatedAtBefore(
+                RewardItemClaimStatus.PENDING, cutoff);
+
+        for (RewardItemClaim claim : expired) {
+            claim.setStatus(RewardItemClaimStatus.CANCELLED);
+
+            RewardItemLocation location = rewardItemLocationRepository
+                    .findByRewardItemAndLocation(claim.getRewardItem(), claim.getLocation())
+                    .orElseThrow();
+
+            location.setStock(location.getStock() + 1);
+            location.setPending(location.getPending() - 1);
+
+            Points points = pointRepository.findByUser(claim.getUser()).orElseThrow();
+            points.setPoint(points.getPoint() + claim.getRewardItem().getPointCharge());
+        }
     }
 }
