@@ -1,59 +1,68 @@
 package com.example.EcoTS.Services.RewardItem;
 
-import com.example.EcoTS.DTOs.RewardItemRequestImportDTO;
-import com.example.EcoTS.DTOs.RewardItemRequestImportDetailDTO;
+import com.example.EcoTS.DTOs.Response.RewardItemImportDetailResponse;
+import com.example.EcoTS.DTOs.Response.RewardItemImportResponse;
 import com.example.EcoTS.Enum.ImportStatus;
 import com.example.EcoTS.Models.Locations;
 import com.example.EcoTS.Models.Reward.*;
 import com.example.EcoTS.Repositories.*;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class RewardImportService {
-    private final RewardItemRequestImportRepository requestRepo;
-    private final RewardItemRequestImportDetailRepository detailRepo;
-    private final RewardItemLocationRepository locationRepo;
-    private final LocationRepository locationRepository;
+
+    @Autowired
+    public RewardItemLocationRepository rewardItemLocationRepository;
+    @Autowired
+    public LocationRepository locationRepository;
+    @Autowired
+    public RewardItemRepository rewardItemRepository;
+    @Autowired
+    public RewardItemImportRepository rewardItemImportRepository;
+    @Autowired
+    public RewardItemImportDetailRepository rewardItemImportDetailRepository;
 
     @Transactional
-    public void createImportRequest(Long locationId, List<RewardItemRequestImportDetail> details) {
+    public void createImport(Long locationId, List<RewardItemImportDetail> details) {
         Locations location = locationRepository.findById(locationId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy địa điểm"));
 
-        RewardItemRequestImport request = RewardItemRequestImport.builder()
+        RewardItemImport rewardItemImport = RewardItemImport.builder()
                 .location(location)
                 .importStatus(ImportStatus.IMPORTING)
                 .build();
-        requestRepo.save(request);
+        rewardItemImportRepository.save(rewardItemImport);
 
-        for (RewardItemRequestImportDetail detail : details) {
-            detail.setRequestImport(request);
-            detailRepo.save(detail);
+        for (RewardItemImportDetail detail : details) {
+            detail.setRequestImport(rewardItemImport);
+            rewardItemImportDetailRepository.save(detail);
         }
     }
 
     @Transactional
     public void confirmImport(Long requestId) {
-        RewardItemRequestImport request = requestRepo.findById(requestId)
+        RewardItemImport rewardItemImport = rewardItemImportRepository.findById(requestId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy yêu cầu nhập hàng"));
 
-        if (request.getImportStatus() != ImportStatus.IMPORTING)
+        if (rewardItemImport.getImportStatus() != ImportStatus.IMPORTING)
             throw new RuntimeException("Yêu cầu chưa đến bước xác nhận");
 
-        List<RewardItemRequestImportDetail> items = detailRepo.findByRequestImport(request);
+        List<RewardItemImportDetail> items = rewardItemImportDetailRepository.findByRequestImport(rewardItemImport);
 
-        for (RewardItemRequestImportDetail detail : items) {
+        for (RewardItemImportDetail detail : items) {
             RewardItem reward = detail.getRewardItem();
-            Locations location = request.getLocation();
+            Locations location = rewardItemImport.getLocation();
 
-            RewardItemLocation ril = locationRepo.findByRewardItemAndLocation(reward, location)
+            RewardItemLocation ril = rewardItemLocationRepository.findByRewardItemAndLocation(reward, location)
                     .orElseGet(() -> RewardItemLocation.builder()
                             .location(location)
                             .rewardItem(reward)
@@ -62,45 +71,66 @@ public class RewardImportService {
                             .build());
 
             ril.setStock(ril.getStock() + detail.getNumberOfItem());
-            locationRepo.save(ril);
+            rewardItemLocationRepository.save(ril);
         }
 
-        request.setImportStatus(ImportStatus.CONFIRMED);
-        requestRepo.save(request);
+        rewardItemImport.setImportStatus(ImportStatus.CONFIRMED);
+        rewardItemImportRepository.save(rewardItemImport);
     }
 
     @Transactional
-    public List<RewardItemRequestImportDTO> getRequestsByLocationDto(Long locationId) {
-        return requestRepo.findByLocationId(locationId).stream().map(request -> {
-            // Lấy danh sách chi tiết từng reward trong đơn
-            List<RewardItemRequestImportDetailDTO> itemDtos = detailRepo.findByRequestImport(request).stream().map(detail ->
-                    RewardItemRequestImportDetailDTO.builder()
-                            .id(detail.getId())
-                            .rewardItemId(detail.getRewardItem().getId())
-                            .numberOfItem(detail.getNumberOfItem())
-                            .build()
-            ).toList();
+    public List<RewardItemImportResponse> getRequestsByLocationDTO(Long locationId) {
+        Locations location = locationRepository.findById(locationId)
+                .orElseThrow(() -> new RuntimeException("Location is not found"));
 
-            // Tạo DTO chính cho đơn nhập
-            return RewardItemRequestImportDTO.builder()
-                    .id(request.getId())
-                    .importStatus(request.getImportStatus().name())
-                    .createdAt(request.getCreatedAt())
-                    .items(itemDtos)
-                    .build();
-        }).toList();
+        List<RewardItemImport> rewardItemImportList = rewardItemImportRepository.findByLocation(location);
+        List<RewardItemImportResponse> rewardItemImportResponseList = new ArrayList<>();
+
+        for (RewardItemImport rewardItemImport : rewardItemImportList) {
+            List<RewardItemImportDetail> rewardItemImportDetailList =
+                    rewardItemImportDetailRepository.findByRequestImport(rewardItemImport);
+
+            List<RewardItemImportDetailResponse> detailResponses = new ArrayList<>();
+            for (RewardItemImportDetail detail : rewardItemImportDetailList) {
+                RewardItem rewardItem = detail.getRewardItem();
+
+                // Lấy URL đầu tiên nếu có
+                String imageUrl = (rewardItem.getRewardItemUrl() != null && !rewardItem.getRewardItemUrl().isEmpty())
+                        ? rewardItem.getRewardItemUrl().get(0)
+                        : null;
+
+                detailResponses.add(RewardItemImportDetailResponse.builder()
+                        .rewardItemId(rewardItem.getId())
+                        .rewardItemName(rewardItem.getItemName())
+                        .numberOfItem(detail.getNumberOfItem())
+                        .itemImageUrl(imageUrl)
+                        .build());
+            }
+
+            rewardItemImportResponseList.add(RewardItemImportResponse.builder()
+                    .id(rewardItemImport.getId())
+                    .locationName(location.getLocationName())
+                    .importStatus(rewardItemImport.getImportStatus().toString())
+                    .createdAt(rewardItemImport.getCreatedAt())
+                    .items(detailResponses)
+                    .build());
+        }
+
+        return rewardItemImportResponseList;
     }
-
-
     @Transactional
     public void cancelStaleImports() {
+        // Tính thời điểm cách đây 3 ngày
         Timestamp expiredTime = Timestamp.valueOf(LocalDateTime.now().minusDays(3));
-        List<RewardItemRequestImport> expiredRequests =
-                requestRepo.findByImportStatusAndCreatedAtBefore(ImportStatus.IMPORTING, expiredTime);
 
-        for (RewardItemRequestImport req : expiredRequests) {
-            req.setImportStatus(ImportStatus.CANCELLED);
-            requestRepo.save(req);
+        // Lấy các yêu cầu ở trạng thái IMPORTING và đã tạo trước expiredTime
+        List<RewardItemImport> expiredRequests = rewardItemImportRepository
+                .findByImportStatusAndCreatedAtBefore(ImportStatus.IMPORTING, expiredTime);
+
+        for (RewardItemImport request : expiredRequests) {
+            request.setImportStatus(ImportStatus.CANCELLED);
+            rewardItemImportRepository.save(request);
         }
     }
+
 }

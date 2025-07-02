@@ -20,24 +20,24 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @NoArgsConstructor
 @AllArgsConstructor
-public class RewardItemRequestImport {
+public class RewardItemImport {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long id;
+    private Long id;
 
     @Enumerated(EnumType.STRING)
-    ImportStatus importStatus; // WAITING, IMPORTING, CONFIRMED, CANCELLED
+    private ImportStatus importStatus; // WAITING, IMPORTING, CONFIRMED, CANCELLED
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "location_id", nullable = false)
-    Locations location;
+    private Locations location;
 
     @OneToMany(mappedBy = "requestImport", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    List<RewardItemRequestImportDetail> items;
+    private List<RewardItemImportDetail> items;
 
     @CreationTimestamp
-    Timestamp createdAt;
+    private Timestamp createdAt;
 
     @UpdateTimestamp
-    Timestamp updatedAt;
+    private Timestamp updatedAt;
 }

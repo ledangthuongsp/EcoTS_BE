@@ -13,14 +13,14 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @NoArgsConstructor
 @AllArgsConstructor
-public class RewardItemRequestImportDetail {
+public class RewardItemImportDetail {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "request_import_id", nullable = false)
-    RewardItemRequestImport requestImport;
+    RewardItemImport requestImport;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "reward_item_id", nullable = false)

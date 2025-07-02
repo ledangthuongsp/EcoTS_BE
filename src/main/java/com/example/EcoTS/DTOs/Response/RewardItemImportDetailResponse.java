@@ -1,4 +1,4 @@
-package com.example.EcoTS.DTOs;
+package com.example.EcoTS.DTOs.Response;
 
 import lombok.*;
 
@@ -7,7 +7,7 @@ import lombok.*;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class RewardItemRequestImportDetailDTO {
+public class RewardItemImportDetailResponse {
     private Long rewardItemId;
     private String rewardItemName;
     private Long numberOfItem;
