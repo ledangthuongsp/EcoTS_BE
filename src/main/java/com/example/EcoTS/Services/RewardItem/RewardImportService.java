@@ -45,6 +45,21 @@ public class RewardImportService {
         for (RewardItemImportDetail detail : details) {
             detail.setRequestImport(rewardItemImport);
             rewardItemImportDetailRepository.save(detail);
+
+            RewardItem reward = detail.getRewardItem();
+            RewardItemLocation ril = rewardItemLocationRepository
+                    .findByRewardItemAndLocation(reward, location)
+                    .orElseGet(() -> RewardItemLocation.builder()
+                            .location(location)
+                            .rewardItem(reward)
+                            .stock(0L)
+                            .importing(0L)
+                            .pending(0L)
+                            .build());
+
+            // Tăng pending (hàng đang nhập)
+            ril.setImporting(ril.getImporting() + detail.getNumberOfItem());
+            rewardItemLocationRepository.save(ril);
         }
     }
 
@@ -62,21 +77,22 @@ public class RewardImportService {
             RewardItem reward = detail.getRewardItem();
             Locations location = rewardItemImport.getLocation();
 
-            RewardItemLocation ril = rewardItemLocationRepository.findByRewardItemAndLocation(reward, location)
-                    .orElseGet(() -> RewardItemLocation.builder()
-                            .location(location)
-                            .rewardItem(reward)
-                            .stock(0L)
-                            .pending(0L)
-                            .build());
+            RewardItemLocation ril = rewardItemLocationRepository
+                    .findByRewardItemAndLocation(reward, location)
+                    .orElseThrow(() -> new RuntimeException("RewardItemLocation không tồn tại"));
 
-            ril.setStock(ril.getStock() + detail.getNumberOfItem());
+            Long quantity = detail.getNumberOfItem();
+
+            ril.setImporting(Math.max(0, ril.getImporting() - quantity));
+            ril.setStock(ril.getStock() + quantity);
+
             rewardItemLocationRepository.save(ril);
         }
 
         rewardItemImport.setImportStatus(ImportStatus.CONFIRMED);
         rewardItemImportRepository.save(rewardItemImport);
     }
+
 
     @Transactional
     public List<RewardItemImportResponse> getRequestsByLocationDTO(Long locationId) {

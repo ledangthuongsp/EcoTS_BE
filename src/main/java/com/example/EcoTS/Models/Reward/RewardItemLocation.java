@@ -33,6 +33,8 @@ public class RewardItemLocation {
 
     private Long stock;
 
+    private Long importing;
+
     private Long pending;
 
     @CreationTimestamp

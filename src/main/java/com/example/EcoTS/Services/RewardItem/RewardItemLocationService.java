@@ -1,6 +1,7 @@
 package com.example.EcoTS.Services.RewardItem;
 
 
+import com.example.EcoTS.DTOs.Response.RewardItemStockResponse;
 import com.example.EcoTS.Models.Locations;
 import com.example.EcoTS.Models.Reward.RewardItem;
 import com.example.EcoTS.Models.Reward.RewardItemLocation;
@@ -9,84 +10,48 @@ import com.example.EcoTS.Repositories.RewardItemLocationRepository;
 import com.example.EcoTS.Repositories.RewardItemRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class RewardItemLocationService {
 
-    private final RewardItemLocationRepository rewardItemLocationRepository;
-    private final RewardItemRepository rewardItemRepository;
-    private final LocationRepository locationsRepository;
+    @Autowired
+    private RewardItemLocationRepository rewardItemLocationRepository;
 
-    /**
-     * Thêm một reward item vào địa điểm cụ thể, nếu đã tồn tại thì cập nhật stock
-     */
+    @Autowired
+    private LocationRepository locationRepository;
 
     @Transactional
-    public RewardItemLocation addRewardToLocation(Long rewardItemId, Long locationId, Long stock) {
-        RewardItem rewardItem = rewardItemRepository.findById(rewardItemId)
-                .orElseThrow(() -> new RuntimeException("Reward Item not found"));
+    public List<RewardItemStockResponse> getStockByLocation(Long locationId) {
+        Locations location = locationRepository.findById(locationId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy địa điểm"));
 
-        Locations location = locationsRepository.findById(locationId)
-                .orElseThrow(() -> new RuntimeException("Location not found"));
+        List<RewardItemLocation> rilList = rewardItemLocationRepository.findByLocationId(locationId);
 
-        return rewardItemLocationRepository
-                .findByRewardItemAndLocation(rewardItem, location)
-                .map(existing -> {
-                    existing.setStock(existing.getStock() + stock);
-                    return rewardItemLocationRepository.save(existing);
-                })
-                .orElseGet(() -> rewardItemLocationRepository.save(
-                        RewardItemLocation.builder()
-                                .rewardItem(rewardItem)
-                                .location(location)
-                                .stock(stock)
-                                .pending(0L)
-                                .build()
-                ));
-    }
+        List<RewardItemStockResponse> responses = new ArrayList<>();
 
-    /**
-     * Cập nhật lại stock tại một location cho một reward cụ thể
-     */
-    @Transactional
-    public RewardItemLocation updateStock(Long rewardItemId, Long locationId, Long stock) {
-        RewardItem rewardItem = rewardItemRepository.findById(rewardItemId)
-                .orElseThrow(() -> new RuntimeException("Reward Item not found"));
+        for (RewardItemLocation ril : rilList) {
+            RewardItem rewardItem = ril.getRewardItem();
 
-        Locations location = locationsRepository.findById(locationId)
-                .orElseThrow(() -> new RuntimeException("Location not found"));
+            String imageUrl = (rewardItem.getRewardItemUrl() != null && !rewardItem.getRewardItemUrl().isEmpty())
+                    ? rewardItem.getRewardItemUrl().get(0)
+                    : null;
 
-        RewardItemLocation itemLocation = rewardItemLocationRepository
-                .findByRewardItemAndLocation(rewardItem, location)
-                .orElseThrow(() -> new RuntimeException("Reward Item not found at location"));
+            responses.add(RewardItemStockResponse.builder()
+                    .rewardItemId(rewardItem.getId())
+                    .rewardItemName(rewardItem.getItemName())
+                    .itemImageUrl(imageUrl)
+                    .stock(ril.getStock())
+                    .importing(ril.getImporting())
+                    .pending(ril.getPending())
+                    .build());
+        }
 
-        itemLocation.setStock(stock);
-        return rewardItemLocationRepository.save(itemLocation);
-    }
-
-    /**
-     * Lấy danh sách item tại 1 địa điểm
-     */
-    public List<RewardItemLocation> getByLocation(Long locationId) {
-        return rewardItemLocationRepository.findByLocationId(locationId);
-    }
-
-    /**
-     * Tìm 1 reward item location theo reward + location
-     */
-    public RewardItemLocation getByRewardAndLocation(Long rewardItemId, Long locationId) {
-        RewardItem rewardItem = rewardItemRepository.findById(rewardItemId)
-                .orElseThrow(() -> new RuntimeException("Reward Item not found"));
-
-        Locations location = locationsRepository.findById(locationId)
-                .orElseThrow(() -> new RuntimeException("Location not found"));
-
-        return rewardItemLocationRepository
-                .findByRewardItemAndLocation(rewardItem, location)
-                .orElseThrow(() -> new RuntimeException("Reward item not found at location"));
+        return responses;
     }
 }
