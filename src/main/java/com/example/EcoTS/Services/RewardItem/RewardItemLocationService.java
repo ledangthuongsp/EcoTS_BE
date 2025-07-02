@@ -38,14 +38,20 @@ public class RewardItemLocationService {
         for (RewardItemLocation ril : rilList) {
             RewardItem rewardItem = ril.getRewardItem();
 
-            String imageUrl = (rewardItem.getRewardItemUrl() != null && !rewardItem.getRewardItemUrl().isEmpty())
-                    ? rewardItem.getRewardItemUrl().get(0)
-                    : null;
+            List<String> imageUrls = rewardItem.getRewardItemUrl() != null
+                    ? rewardItem.getRewardItemUrl()
+                    : new ArrayList<>();
 
             responses.add(RewardItemStockResponse.builder()
                     .rewardItemId(rewardItem.getId())
                     .rewardItemName(rewardItem.getItemName())
-                    .itemImageUrl(imageUrl)
+                    .rewardItemImageUrl(imageUrls)
+                    .rewardItemDescription(rewardItem.getItemDescription())
+                    .humidity(rewardItem.getHumidity())
+                            .rewardItemType(rewardItem.getItemType())
+                            .height(rewardItem.getHeight())
+                            .size(rewardItem.getSize())
+                            .weight(rewardItem.getWeight())
                     .stock(ril.getStock())
                     .importing(ril.getImporting())
                     .pending(ril.getPending())
