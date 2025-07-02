@@ -1,8 +1,8 @@
 package com.example.EcoTS.Models.Reward;
 
+import com.example.EcoTS.Enum.RewardOrderStatus;
 import com.example.EcoTS.Models.Locations;
 import com.example.EcoTS.Models.Users;
-import com.example.EcoTS.Enum.RewardItemClaimStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -12,36 +12,38 @@ import org.hibernate.annotations.UpdateTimestamp;
 import java.sql.Timestamp;
 
 @Entity
-@Table(name = "reward_item_claim")
+@Table(name = "reward_order")
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
-@FieldDefaults(level = AccessLevel.PRIVATE)
-public class RewardItemClaim {
+public class RewardOrder {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long id;
+    private Long id;
+
+    private int quantity;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    Users user;
+    @JoinColumn(name = "user_id")
+    private Users user;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "reward_item_id", nullable = false)
-    RewardItem rewardItem;
+    @JoinColumn(name = "reward_item_id")
+    private RewardItem rewardItem;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "location_id", nullable = false)
-    Locations location;
+    @JoinColumn(name = "location_id")
+    private Locations location;
 
     @Enumerated(EnumType.STRING)
-    RewardItemClaimStatus status;
+    private RewardOrderStatus status;
 
     @CreationTimestamp
-    Timestamp createdAt;
+    private Timestamp createdAt;
 
     @UpdateTimestamp
-    Timestamp updatedAt;
+    private Timestamp updatedAt;
 }
+

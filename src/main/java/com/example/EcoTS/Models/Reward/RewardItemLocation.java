@@ -31,11 +31,15 @@ public class RewardItemLocation {
     @JoinColumn(name = "reward_item_id", referencedColumnName = "id")
     private RewardItem rewardItem;
 
-    private Long stock;
-
-    private Long importing;
-
-    private Long pending;
+    @Builder.Default
+    @Column(nullable = false)
+    private Long importing = 0L;
+    @Builder.Default
+    @Column(nullable = false)
+    private Long stock = 0L;
+    @Builder.Default
+    @Column(nullable = false)
+    private Long pending = 0L;
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)

@@ -57,7 +57,6 @@ public class RewardImportService {
                             .pending(0L)
                             .build());
 
-            // Tăng pending (hàng đang nhập)
             ril.setImporting(ril.getImporting() + detail.getNumberOfItem());
             rewardItemLocationRepository.save(ril);
         }
