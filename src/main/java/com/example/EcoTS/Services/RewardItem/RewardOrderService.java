@@ -2,12 +2,8 @@ package com.example.EcoTS.Services.RewardItem;
 
 import com.example.EcoTS.DTOs.Response.RewardOrderResponse;
 import com.example.EcoTS.Enum.RewardOrderStatus;
-import com.example.EcoTS.Models.Locations;
-import com.example.EcoTS.Models.Points;
-import com.example.EcoTS.Models.Reward.RewardItem;
-import com.example.EcoTS.Models.Reward.RewardItemLocation;
-import com.example.EcoTS.Models.Reward.RewardOrder;
-import com.example.EcoTS.Models.Users;
+import com.example.EcoTS.Models.*;
+import com.example.EcoTS.Models.Reward.*;
 import com.example.EcoTS.Repositories.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -33,7 +29,8 @@ public class RewardOrderService {
     public void redeemReward(Long userId, Long rewardItemId, Long locationId, int quantity) {
         Users user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
-        Points points = pointRepository.findByUser(user).orElseThrow(() -> new RuntimeException("Points not found with user"));
+        Points points = pointRepository.findByUser(user)
+                .orElseThrow(() -> new RuntimeException("Points not found with user"));
         RewardItem item = rewardItemRepository.findById(rewardItemId)
                 .orElseThrow(() -> new RuntimeException("Reward item not found"));
         Locations location = locationRepository.findById(locationId)
@@ -49,13 +46,10 @@ public class RewardOrderService {
         if (ril.getStock() < quantity)
             throw new RuntimeException("Not enough stock");
 
-        // Trừ điểm
         points.setPoint(points.getPoint() - totalCost);
-
-        // Trừ stock, tăng pending
         ril.setStock(ril.getStock() - quantity);
         ril.setPending(ril.getPending() + quantity);
-        // 3. Tạo đơn hàng
+
         RewardOrder order = RewardOrder.builder()
                 .user(user)
                 .rewardItem(item)
@@ -66,9 +60,7 @@ public class RewardOrderService {
         rewardOrderRepository.save(order);
 
         userRepository.save(user);
-
         rewardItemLocationRepository.save(ril);
-
         sendNotification(user.getUsername(), item.getItemName(), quantity);
     }
 
@@ -94,16 +86,12 @@ public class RewardOrderService {
                     .createdAt(order.getCreatedAt())
                     .build());
         }
-
         return response;
     }
-    private void sendNotification(String username, String itemName, int quantity) {
-        System.out.printf(" Notification: %s đã đổi %d x %s%n", username, quantity, itemName);
-    }
+
     public List<RewardOrderResponse> getOrdersByLocationId(Long locationId) {
         Locations location = locationRepository.findById(locationId)
                 .orElseThrow(() -> new RuntimeException("Location not found"));
-
         List<RewardOrder> orders = rewardOrderRepository.findByLocationOrderByCreatedAtDesc(location);
         List<RewardOrderResponse> response = new ArrayList<>();
 
@@ -123,82 +111,71 @@ public class RewardOrderService {
                     .createdAt(order.getCreatedAt())
                     .build());
         }
-
         return response;
     }
+
     @Transactional
-    public void confirmOrder(Long orderId) {
+    public void employeeConfirmOrder(Long orderId) {
         RewardOrder order = rewardOrderRepository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Order not found"));
+        if (order.getStatus() != RewardOrderStatus.PENDING)
+            throw new RuntimeException("Only PENDING orders can be confirmed by employee");
 
-        if (order.getStatus() != RewardOrderStatus.PENDING) {
-            throw new RuntimeException("Order is not in PENDING status");
-        }
+        order.setStatus(RewardOrderStatus.WAITING_FOR_USER);
+        rewardOrderRepository.save(order);
+    }
+
+    @Transactional
+    public void userConfirmOrder(Long orderId) {
+        RewardOrder order = rewardOrderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Order not found"));
+        if (order.getStatus() != RewardOrderStatus.WAITING_FOR_USER)
+            throw new RuntimeException("Only WAITING_FOR_USER orders can be confirmed by user");
 
         RewardItemLocation ril = rewardItemLocationRepository
                 .findByRewardItemAndLocation(order.getRewardItem(), order.getLocation())
                 .orElseThrow(() -> new RuntimeException("RewardItemLocation not found"));
 
-        int quantity = order.getQuantity();
-        Long currentPending = ril.getPending() != null ? ril.getPending() : 0L;
-
-        if (currentPending < quantity) {
+        if (ril.getPending() < order.getQuantity())
             throw new RuntimeException("Not enough pending stock to confirm order");
-        }
 
-        ril.setPending(currentPending - quantity);
+        ril.setPending(ril.getPending() - order.getQuantity());
+        order.setStatus(RewardOrderStatus.CONFIRMED);
+
         rewardItemLocationRepository.save(ril);
-
-        order.setStatus(RewardOrderStatus.CONFIRMED);
         rewardOrderRepository.save(order);
     }
-    @Transactional
-    public void userConfirmOrder(Long orderId) {
-        RewardOrder order = rewardOrderRepository.findById(orderId)
-                .orElseThrow(() -> new RuntimeException("Order not found"));
 
-        if (order.getStatus() != RewardOrderStatus.PENDING) {
-            throw new RuntimeException("Only PENDING orders can be confirmed");
-        }
-
-        order.setStatus(RewardOrderStatus.CONFIRMED);
-        rewardOrderRepository.save(order);
-    }
     @Transactional
     public void cancelOrderByUser(Long orderId) {
         RewardOrder order = rewardOrderRepository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Order not found"));
 
-        if (order.getStatus() != RewardOrderStatus.PENDING) {
+        if (order.getStatus() != RewardOrderStatus.PENDING && order.getStatus() != RewardOrderStatus.WAITING_FOR_USER)
             throw new RuntimeException("Order cannot be cancelled");
-        }
 
-        // Hoàn lại điểm
         Points points = pointRepository.findByUser(order.getUser())
                 .orElseThrow(() -> new RuntimeException("Points not found"));
-
         long refund = (long) (order.getRewardItem().getPointCharge() * order.getQuantity());
         points.setPoint(points.getPoint() + refund);
 
-        // Giảm pending
         RewardItemLocation ril = rewardItemLocationRepository
                 .findByRewardItemAndLocation(order.getRewardItem(), order.getLocation())
                 .orElseThrow(() -> new RuntimeException("RewardItemLocation not found"));
 
         ril.setPending(ril.getPending() - order.getQuantity());
 
-        // Cập nhật trạng thái
         order.setStatus(RewardOrderStatus.CANCELLED_BY_USER);
 
-        // Lưu
         pointRepository.save(points);
         rewardItemLocationRepository.save(ril);
         rewardOrderRepository.save(order);
     }
+
     @Transactional
     public void autoExpireOrders() {
-        Timestamp threshold = Timestamp.valueOf(LocalDateTime.now().minusDays(7));
-        List<RewardOrder> expiredOrders = rewardOrderRepository.findExpiredPendingOrders(threshold);
+        Timestamp threshold = Timestamp.valueOf(LocalDateTime.now().minusDays(3));
+        List<RewardOrder> expiredOrders = rewardOrderRepository.findWaitingOrdersBefore(threshold);
 
         for (RewardOrder order : expiredOrders) {
             Points points = pointRepository.findByUser(order.getUser())
@@ -219,4 +196,7 @@ public class RewardOrderService {
         }
     }
 
+    private void sendNotification(String username, String itemName, int quantity) {
+        System.out.printf("Notification: %s đã đổi %d x %s%n", username, quantity, itemName);
+    }
 }

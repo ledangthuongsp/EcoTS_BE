@@ -20,4 +20,7 @@ public interface RewardOrderRepository extends JpaRepository<RewardOrder, Long> 
     @Query("SELECT o FROM RewardOrder o WHERE o.status = 'PENDING' AND o.createdAt <= :threshold")
     List<RewardOrder> findExpiredPendingOrders(@Param("threshold") Timestamp threshold);
 
+    @Query("SELECT o FROM RewardOrder o WHERE o.status = 'WAITING_FOR_USER' AND o.updatedAt <= :threshold")
+    List<RewardOrder> findWaitingOrdersBefore(@Param("threshold") Timestamp threshold);
+
 }

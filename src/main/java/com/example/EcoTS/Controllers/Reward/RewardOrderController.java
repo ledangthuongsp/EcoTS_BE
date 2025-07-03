@@ -39,10 +39,11 @@ public class RewardOrderController {
     }
 
     @PutMapping("/employee/order/confirm")
-    public ResponseEntity<?> confirmOrder(@RequestParam Long orderId) {
-        rewardOrderService.confirmOrder(orderId);
-        return ResponseEntity.ok("Order confirmed successfully");
+    public ResponseEntity<?> employeeConfirmOrder(@RequestParam Long orderId) {
+        rewardOrderService.employeeConfirmOrder(orderId);
+        return ResponseEntity.ok("Order confirmed by employee (waiting for user pickup)");
     }
+
     @PutMapping("/user/order/confirm")
     public ResponseEntity<?> userConfirmOrder(@RequestParam Long orderId) {
         rewardOrderService.userConfirmOrder(orderId);

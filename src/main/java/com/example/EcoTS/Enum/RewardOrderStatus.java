@@ -2,8 +2,8 @@ package com.example.EcoTS.Enum;
 
 public enum RewardOrderStatus {
     PENDING,
+    WAITING_FOR_USER,  // mới
     CONFIRMED,
-    EXPIRED,
     CANCELLED_BY_USER,
-    REFUNDED
+    EXPIRED
 }
