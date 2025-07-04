@@ -46,11 +46,6 @@ public class RewardItemService {
                     reward.setPointCharge(updatedReward.getPointCharge());
                     reward.setItemName(updatedReward.getItemName());
                     reward.setItemDescription(updatedReward.getItemDescription());
-                    reward.setItemType(updatedReward.getItemType());
-                    reward.setHeight(updatedReward.getHeight());
-                    reward.setHumidity(updatedReward.getHumidity());
-                    reward.setSize(updatedReward.getSize());
-                    reward.setWeight(updatedReward.getWeight());
                     return rewardItemRepository.save(reward);
                 })
                 .orElseThrow(() -> new RuntimeException("Reward not found with id " + id));

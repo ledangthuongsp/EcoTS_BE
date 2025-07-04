@@ -21,13 +21,6 @@ public class RewardItem {
     private Long id;
     private List<String> rewardItemUrl;
     private double pointCharge;
-
     private String itemName;
     private String itemDescription;
-
-    private List<Long> itemType;
-    private double height;
-    private double humidity;
-    private String size;
-    private String weight;
 }
