@@ -12,4 +12,6 @@ import java.util.Optional;
 public interface RewardItemLocationRepository extends JpaRepository<RewardItemLocation, Long> {
     Optional<RewardItemLocation> findByRewardItemAndLocation(RewardItem rewardItem, Locations location);
     List<RewardItemLocation> findByLocationId(Long locationId);
+    List<RewardItemLocation> findByRewardItemId(Long rewardItemId);
+
 }

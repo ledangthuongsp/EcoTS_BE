@@ -22,9 +22,37 @@ public class RewardItemLocationService {
 
     @Autowired
     private RewardItemLocationRepository rewardItemLocationRepository;
-
+    @Autowired
+    private RewardItemRepository rewardItemRepository;
     @Autowired
     private LocationRepository locationRepository;
+
+    @Transactional
+    public List<RewardItemStockResponse> getLowStockItemsByLocation(Long locationId, Long threshold) {
+        Locations location = locationRepository.findById(locationId)
+                .orElseThrow(() -> new RuntimeException("Location not found"));
+
+        List<RewardItemLocation> rilList = rewardItemLocationRepository.findByLocationId(locationId);
+        List<RewardItemStockResponse> lowStockItems = new ArrayList<>();
+
+        for (RewardItemLocation ril : rilList) {
+            if (ril.getStock() < threshold) {
+                RewardItem rewardItem = ril.getRewardItem();
+                List<String> imageUrls = rewardItem.getRewardItemUrl() != null ? rewardItem.getRewardItemUrl() : new ArrayList<>();
+
+                lowStockItems.add(RewardItemStockResponse.builder()
+                        .rewardItemId(rewardItem.getId())
+                        .rewardItemName(rewardItem.getItemName())
+                        .rewardItemDescription(rewardItem.getItemDescription())
+                        .rewardItemImageUrl(imageUrls)
+                        .stock(ril.getStock())
+                        .importing(ril.getImporting())
+                        .pending(ril.getPending())
+                        .build());
+            }
+        }
+        return lowStockItems;
+    }
 
     @Transactional
     public List<RewardItemStockResponse> getStockByLocation(Long locationId) {
@@ -55,4 +83,63 @@ public class RewardItemLocationService {
 
         return responses;
     }
+    @Transactional
+    public List<RewardItemStockResponse> getAllStockAcrossLocations() {
+        List<RewardItemLocation> rilList = rewardItemLocationRepository.findAll();
+        List<RewardItemStockResponse> responses = new ArrayList<>();
+
+        for (RewardItemLocation ril : rilList) {
+            RewardItem rewardItem = ril.getRewardItem();
+            Locations location = ril.getLocation();
+
+            List<String> imageUrls = rewardItem.getRewardItemUrl() != null
+                    ? rewardItem.getRewardItemUrl()
+                    : new ArrayList<>();
+
+            responses.add(RewardItemStockResponse.builder()
+                    .rewardItemId(rewardItem.getId())
+                    .rewardItemName(rewardItem.getItemName())
+                    .rewardItemDescription(rewardItem.getItemDescription())
+                    .rewardItemImageUrl(imageUrls)
+                    .stock(ril.getStock())
+                    .importing(ril.getImporting())
+                    .pending(ril.getPending())
+                    .locationId(location.getId())
+                    .locationName(location.getLocationName())
+                    .build());
+        }
+
+        return responses;
+    }
+    @Transactional
+    public List<RewardItemStockResponse> getStockByRewardItem(Long rewardItemId) {
+        RewardItem rewardItem = rewardItemRepository.findById(rewardItemId)
+                .orElseThrow(() -> new RuntimeException("Reward item not found"));
+
+        List<RewardItemLocation> rilList = rewardItemLocationRepository.findByRewardItemId(rewardItemId);
+        List<RewardItemStockResponse> responses = new ArrayList<>();
+
+        for (RewardItemLocation ril : rilList) {
+            Locations location = ril.getLocation();
+            List<String> imageUrls = rewardItem.getRewardItemUrl() != null
+                    ? rewardItem.getRewardItemUrl()
+                    : new ArrayList<>();
+
+            responses.add(RewardItemStockResponse.builder()
+                    .rewardItemId(rewardItem.getId())
+                    .rewardItemName(rewardItem.getItemName())
+                    .rewardItemDescription(rewardItem.getItemDescription())
+                    .rewardItemImageUrl(imageUrls)
+                    .stock(ril.getStock())
+                    .importing(ril.getImporting())
+                    .pending(ril.getPending())
+                    .locationId(location.getId())
+                    .locationName(location.getLocationName())
+                    .build());
+        }
+
+        return responses;
+    }
+
+
 }

@@ -6,8 +6,11 @@ import com.example.EcoTS.Services.RewardItem.RewardItemService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Optional;
@@ -29,15 +32,20 @@ public class RewardController {
         return rewardItemService.createReward(rewardItem);
     }
 
-    @PutMapping("/update-reward/{id}")
-    public ResponseEntity<RewardItem> updateReward(@PathVariable Long id, @RequestBody RewardItem updatedReward) {
+    @PutMapping(value = "/update-reward/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<RewardItem> updateReward(
+            @PathVariable Long id,
+            @RequestPart("reward") RewardItem updatedReward,
+            @RequestPart(value = "files", required = false) List<MultipartFile> files
+    ) {
         try {
-            RewardItem rewardItem = rewardItemService.updateReward(id, updatedReward);
+            RewardItem rewardItem = rewardItemService.updateReward(id, updatedReward, files);
             return ResponseEntity.ok(rewardItem);
         } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
+
 
     @DeleteMapping("/delete-reward/{id}")
     public ResponseEntity<Void> deleteReward(@PathVariable Long id) {

@@ -28,4 +28,22 @@ public class RewardItemLocationController {
         List<RewardItemStockResponse> response = rewardItemLocationService.getStockByLocation(locationId);
         return ResponseEntity.ok(response);
     }
+
+    @GetMapping("/low-stock")
+    public ResponseEntity<List<RewardItemStockResponse>> getLowStockItems(
+            @RequestParam Long locationId,
+            @RequestParam(defaultValue = "3") Long threshold
+    ) {
+        return ResponseEntity.ok(rewardItemLocationService.getLowStockItemsByLocation(locationId, threshold));
+    }
+    @GetMapping("/stock/all")
+    public ResponseEntity<List<RewardItemStockResponse>> getAllStock() {
+        return ResponseEntity.ok(rewardItemLocationService.getAllStockAcrossLocations());
+    }
+    // [GET] /reward/stock/by-reward?rewardItemId=123
+    @GetMapping("/stock/by-reward")
+    public ResponseEntity<List<RewardItemStockResponse>> getStockByRewardItem(@RequestParam Long rewardItemId) {
+        return ResponseEntity.ok(rewardItemLocationService.getStockByRewardItem(rewardItemId));
+    }
+
 }

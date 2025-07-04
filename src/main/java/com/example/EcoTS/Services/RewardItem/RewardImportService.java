@@ -2,6 +2,8 @@ package com.example.EcoTS.Services.RewardItem;
 
 import com.example.EcoTS.DTOs.Response.RewardItemImportDetailResponse;
 import com.example.EcoTS.DTOs.Response.RewardItemImportResponse;
+import com.example.EcoTS.DTOs.RewardImportDetailDTO;
+import com.example.EcoTS.DTOs.RewardImportRequestDTO;
 import com.example.EcoTS.Enum.ImportStatus;
 import com.example.EcoTS.Models.Locations;
 import com.example.EcoTS.Models.Reward.*;
@@ -32,35 +34,47 @@ public class RewardImportService {
     public RewardItemImportDetailRepository rewardItemImportDetailRepository;
 
     @Transactional
-    public void createImport(Long locationId, List<RewardItemImportDetail> details) {
-        Locations location = locationRepository.findById(locationId)
+    public void createImport(RewardImportRequestDTO dto) {
+        Locations location = locationRepository.findById(dto.getLocationId())
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy địa điểm"));
 
+        // Tạo đơn nhập chính
         RewardItemImport rewardItemImport = RewardItemImport.builder()
                 .location(location)
                 .importStatus(ImportStatus.IMPORTING)
                 .build();
         rewardItemImportRepository.save(rewardItemImport);
 
-        for (RewardItemImportDetail detail : details) {
-            detail.setRequestImport(rewardItemImport);
+        // Xử lý từng item trong danh sách nhập
+        for (RewardImportDetailDTO itemDto : dto.getItemDetails()) {
+            RewardItem rewardItem = rewardItemRepository.findById(itemDto.getRewardItemId())
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy reward item với ID: " + itemDto.getRewardItemId()));
+
+            // Tạo chi tiết nhập hàng
+            RewardItemImportDetail detail = RewardItemImportDetail.builder()
+                    .requestImport(rewardItemImport)
+                    .rewardItem(rewardItem)
+                    .numberOfItem(itemDto.getNumberOfItem())
+                    .build();
+
             rewardItemImportDetailRepository.save(detail);
 
-            RewardItem reward = detail.getRewardItem();
+            // Cập nhật số lượng "đang nhập" vào RewardItemLocation
             RewardItemLocation ril = rewardItemLocationRepository
-                    .findByRewardItemAndLocation(reward, location)
+                    .findByRewardItemAndLocation(rewardItem, location)
                     .orElseGet(() -> RewardItemLocation.builder()
                             .location(location)
-                            .rewardItem(reward)
+                            .rewardItem(rewardItem)
                             .stock(0L)
                             .importing(0L)
                             .pending(0L)
                             .build());
 
-            ril.setImporting(ril.getImporting() + detail.getNumberOfItem());
+            ril.setImporting(ril.getImporting() + itemDto.getNumberOfItem());
             rewardItemLocationRepository.save(ril);
         }
     }
+
 
     @Transactional
     public void confirmImport(Long requestId) {

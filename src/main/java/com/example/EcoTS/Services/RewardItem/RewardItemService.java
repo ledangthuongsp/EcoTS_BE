@@ -4,10 +4,14 @@ import com.example.EcoTS.Models.*;
 import com.example.EcoTS.Models.Reward.RewardHistory;
 import com.example.EcoTS.Models.Reward.RewardItem;
 import com.example.EcoTS.Repositories.*;
+import com.example.EcoTS.Services.CloudinaryService.CloudinaryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -23,7 +27,8 @@ public class RewardItemService {
     private UserRankRepository userRankRepository;
     @Autowired
     private RewardHistoryRepository rewardHistoryRepository;
-
+    @Autowired
+    private CloudinaryService cloudinaryService;
     @Autowired
     private RewardItemLocationRepository rewardItemLocationRepository;
 
@@ -39,10 +44,26 @@ public class RewardItemService {
         return rewardItemRepository.save(rewardItem);
     }
 
-    public RewardItem updateReward(Long id, RewardItem updatedReward) {
+    public RewardItem updateReward(Long id, RewardItem updatedReward, List<MultipartFile> newFiles) {
         return rewardItemRepository.findById(id)
                 .map(reward -> {
-                    reward.setRewardItemUrl(updatedReward.getRewardItemUrl());
+                    List<String> existingUrls = updatedReward.getRewardItemUrl(); // ảnh cũ từ frontend
+                    List<String> newUploadedUrls = new ArrayList<>();
+
+                    if (newFiles != null && !newFiles.isEmpty()) {
+                        try {
+                            newUploadedUrls = cloudinaryService.updateMultipleRewardImage(newFiles);
+                        } catch (IOException e) {
+                            throw new RuntimeException("Upload to Cloudinary failed", e);
+                        }
+                    }
+
+                    // Gộp cả ảnh cũ và ảnh mới
+                    List<String> finalUrls = new ArrayList<>();
+                    if (existingUrls != null) finalUrls.addAll(existingUrls);
+                    finalUrls.addAll(newUploadedUrls);
+
+                    reward.setRewardItemUrl(finalUrls);
                     reward.setPointCharge(updatedReward.getPointCharge());
                     reward.setItemName(updatedReward.getItemName());
                     reward.setItemDescription(updatedReward.getItemDescription());
@@ -50,6 +71,7 @@ public class RewardItemService {
                 })
                 .orElseThrow(() -> new RuntimeException("Reward not found with id " + id));
     }
+
 
     public void deleteReward(Long id) {
         rewardItemRepository.deleteById(id);

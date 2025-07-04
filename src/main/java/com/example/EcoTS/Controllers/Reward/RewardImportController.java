@@ -19,8 +19,8 @@ public class RewardImportController {
     private final RewardImportService rewardImportService;
 
     @PostMapping("admin/request")
-    public ResponseEntity<String> createImportRequest(@RequestBody RewardImportRequestDTO dto) {
-
+    public ResponseEntity<String> createImport(@RequestBody RewardImportRequestDTO dto) {
+        rewardImportService.createImport(dto); // phải gọi service để xử lý
         return ResponseEntity.ok("Đã gửi yêu cầu nhập hàng.");
     }
 

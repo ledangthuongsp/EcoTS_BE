@@ -16,13 +16,10 @@ public class RewardItemStockResponse {
     private double pointCharge;
     private String rewardItemDescription;
 
-    private List<Long> rewardItemType;
-    private double height;
-    private double humidity;
-
-    private String size;
-    private String weight;
     private List<String> rewardItemImageUrl;
+
+    private Long locationId;
+    private String locationName;
 
     private Long stock;
     private Long importing;
