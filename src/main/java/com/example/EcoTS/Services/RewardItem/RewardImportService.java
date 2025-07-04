@@ -62,15 +62,21 @@ public class RewardImportService {
             // Cập nhật số lượng "đang nhập" vào RewardItemLocation
             RewardItemLocation ril = rewardItemLocationRepository
                     .findByRewardItemAndLocation(rewardItem, location)
-                    .orElseGet(() -> RewardItemLocation.builder()
-                            .location(location)
-                            .rewardItem(rewardItem)
-                            .stock(0L)
-                            .importing(0L)
-                            .pending(0L)
-                            .build());
+                    .orElse(null);
 
-            ril.setImporting(ril.getImporting() + itemDto.getNumberOfItem());
+            if (ril == null) {
+                // Nếu chưa có, tạo bản ghi mới
+                ril = RewardItemLocation.builder()
+                        .location(location)
+                        .rewardItem(rewardItem)
+                        .stock(0L)
+                        .importing(itemDto.getNumberOfItem())
+                        .pending(0L)
+                        .build();
+            } else {
+                // Nếu đã có, chỉ cần cập nhật "importing"
+                ril.setImporting(ril.getImporting() + itemDto.getNumberOfItem());
+            }
             rewardItemLocationRepository.save(ril);
         }
     }

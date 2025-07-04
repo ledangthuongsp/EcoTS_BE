@@ -49,16 +49,21 @@ public class LocationController {
             throw new RuntimeException(e);
         }
     }
-    @PutMapping(value = "/update-location", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE})
-    public ResponseEntity<Locations> updateLocationById(@RequestParam Long locationId,
-                                                        @RequestParam String description,
-                                                        @RequestParam String address,
-                                                        @RequestParam double latitude,
-                                                        @RequestParam double longitude,
-                                                        @RequestPart(required = false) MultipartFile backGroundImage,
-                                                        @RequestPart(required = false) List<MultipartFile> imageDetails) {
+    @PutMapping(value = "/update-location", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
+    public ResponseEntity<Locations> updateLocationById(
+            @RequestParam Long locationId,
+            @RequestParam String locationName, // <-- THÊM VÀO
+            @RequestParam String description,
+            @RequestParam String address,
+            @RequestParam double latitude,
+            @RequestParam double longitude,
+            @RequestPart(required = false) MultipartFile backGroundImage,
+            @RequestPart(required = false) List<MultipartFile> imageDetails) {
         try {
-            Locations updatedLocation = locationService.updateInfoLocation(locationId, description, address, latitude, longitude, backGroundImage, imageDetails);
+            Locations updatedLocation = locationService.updateInfoLocation(
+                    locationId, locationName, description, address,
+                    latitude, longitude, backGroundImage, imageDetails
+            );
             return ResponseEntity.ok(updatedLocation);
         } catch (RuntimeException e) {
             return ResponseEntity.status(404).body(null);
@@ -66,4 +71,5 @@ public class LocationController {
             throw new RuntimeException(e);
         }
     }
+
 }

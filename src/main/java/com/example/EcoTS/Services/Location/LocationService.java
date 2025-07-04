@@ -51,9 +51,13 @@ public class LocationService {
     }
 
     @Transactional
-    public Locations updateInfoLocation(Long locationId, String description, String address, double latitude, double longitude, MultipartFile backGroundImage, List<MultipartFile> imageDetails) throws IOException {
-        Locations updateLocation = locationRepository.findById(locationId).orElseThrow(() -> new IllegalArgumentException("Location not found"));
+    public Locations updateInfoLocation(Long locationId, String locationName, String description,
+                                        String address, double latitude, double longitude,
+                                        MultipartFile backGroundImage, List<MultipartFile> imageDetails) throws IOException {
+        Locations updateLocation = locationRepository.findById(locationId)
+                .orElseThrow(() -> new IllegalArgumentException("Location not found"));
 
+        updateLocation.setLocationName(locationName); // <-- THÊM DÒNG NÀY
         updateLocation.setDescription(description);
         updateLocation.setTypeOfLocation(address);
         updateLocation.setLatitude(latitude);
@@ -71,6 +75,7 @@ public class LocationService {
 
         return locationRepository.save(updateLocation);
     }
+
 
     @Transactional(readOnly = true)
     public Locations addEmployeeToLocation(Long employeeId, Long locationId) {
