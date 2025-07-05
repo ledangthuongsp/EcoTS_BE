@@ -9,7 +9,7 @@ import java.util.List;
 @Builder
 public class UpdateScheduleRequest {
     private Long locationId;
-    private Long id;
+    private Long scheduleId;
     private String dayOfWeek; // optional update
     private List<UpdateTimeSlotRequest> timeSlots;
 }

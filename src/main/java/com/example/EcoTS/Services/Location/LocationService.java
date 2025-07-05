@@ -19,8 +19,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+
 import io.swagger.annotations.Api;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
@@ -156,15 +156,6 @@ public class LocationService {
     }
 
     @Transactional
-    public void assignMaterialsToLocation(Long locationId, List<Long> materialIds) {
-        Locations location = locationRepository.findById(locationId)
-                .orElseThrow(() -> new RuntimeException("Location not found"));
-        List<Materials> materials = materialRepository.findAllById(materialIds);
-        location.setMaterials(materials);
-        locationRepository.save(location);
-    }
-
-    @Transactional
     public void updateMaterialsForLocation(Long locationId, List<Long> materialIds) {
         Locations location = locationRepository.findById(locationId)
                 .orElseThrow(() -> new RuntimeException("Location not found"));
@@ -182,55 +173,131 @@ public class LocationService {
     }
 
     @Transactional
-    public void addOpeningSchedule(Long locationId, String dayOfWeekStr, List<UpdateTimeSlotRequest> timeSlots) {
-        Locations location = locationRepository.findById(locationId)
-                .orElseThrow(() -> new RuntimeException("Location not found"));
-        DayOfWeek day = DayOfWeek.valueOf(dayOfWeekStr.toUpperCase());
+    public LocationResponseDTO upsertOpeningSchedule(UpdateScheduleRequest request) {
+        // 1. Tìm Location
+        Locations location = locationRepository.findById(request.getLocationId())
+                .orElseThrow(() -> new RuntimeException("Location not found with ID: " + request.getLocationId()));
 
-        OpeningSchedule schedule = OpeningSchedule.builder()
-                .location(location)
-                .dayOfWeek(day)
-                .build();
-
-        List<TimeSlot> slots = timeSlots.stream().map(ts ->
-                TimeSlot.builder()
-                        .startTime(LocalTime.parse(ts.getStartTime()))
-                        .endTime(LocalTime.parse(ts.getEndTime()))
-                        .openingSchedule(schedule)
-                        .build()
-        ).collect(Collectors.toList());
-
-        schedule.setTimeSlots(slots);
-        scheduleRepository.save(schedule);
-    }
-
-    @Transactional
-    public void updateOpeningSchedule(UpdateScheduleRequest request) {
-        OpeningSchedule schedule = scheduleRepository.findById(request.getId())
-                .orElseThrow(() -> new RuntimeException("Opening schedule not found"));
-
-        if (request.getDayOfWeek() != null) {
+        // 2. Tìm hoặc Tạo OpeningSchedule
+        OpeningSchedule schedule;
+        if (request.getScheduleId() != null) { // Nếu có scheduleId, tìm schedule hiện có
+            schedule = scheduleRepository.findById(request.getScheduleId())
+                    .orElseThrow(() -> new RuntimeException("Opening schedule not found with ID: " + request.getScheduleId()));
+            // Nếu dayOfWeek được cung cấp trong request và khác với ngày hiện tại của schedule
+            if (request.getDayOfWeek() != null && !schedule.getDayOfWeek().name().equalsIgnoreCase(request.getDayOfWeek())) {
+                schedule.setDayOfWeek(DayOfWeek.valueOf(request.getDayOfWeek().toUpperCase()));
+            }
+        } else { // Nếu không có scheduleId, kiểm tra xem đã có schedule cho ngày này chưa
+            if (request.getDayOfWeek() == null) {
+                throw new IllegalArgumentException("Day of week must be provided to create a new schedule.");
+            }
             DayOfWeek newDay = DayOfWeek.valueOf(request.getDayOfWeek().toUpperCase());
-            schedule.setDayOfWeek(newDay);
+
+            // Tìm schedule hiện có cho ngày này tại location này
+            schedule = location.getOpeningSchedules().stream()
+                    .filter(s -> s.getDayOfWeek() == newDay)
+                    .findFirst()
+                    .orElse(null);
+
+            if (schedule == null) { // Nếu chưa có, tạo mới
+                schedule = OpeningSchedule.builder()
+                        .location(location)
+                        .dayOfWeek(newDay)
+                        .timeSlots(new ArrayList<>()) // Khởi tạo danh sách TimeSlots rỗng
+                        .build();
+                // Liên kết schedule mới với location để đảm bảo nó được quản lý bởi JPA
+                location.getOpeningSchedules().add(schedule);
+            }
+            // Nếu đã tồn tại, chúng ta sẽ cập nhật schedule đó
         }
 
-        if (request.getTimeSlots() != null) {
-            for (UpdateTimeSlotRequest slotDTO : request.getTimeSlots()) {
-                TimeSlot slot = timeSlotRepository.findById(slotDTO.getId())
-                        .orElseThrow(() -> new RuntimeException("Time slot not found: " + slotDTO.getId()));
-                if (slotDTO.getStartTime() != null) {
-                    slot.setStartTime(LocalTime.parse(slotDTO.getStartTime()));
+        // Đảm bảo TimeSlots của schedule không null để tránh NullPointerException
+        if (schedule.getTimeSlots() == null) {
+            schedule.setTimeSlots(new ArrayList<>());
+        }
+
+        // 3. Xử lý TimeSlots: Xác định các TimeSlot để xóa, cập nhật, và thêm mới
+        // Danh sách ID TimeSlot hiện tại trong DB cho schedule này
+        Map<Long, TimeSlot> existingTimeSlotsMap = schedule.getTimeSlots().stream()
+                .filter(ts -> ts.getId() != null) // Chỉ lấy các TimeSlot đã có ID
+                .collect(Collectors.toMap(TimeSlot::getId, ts -> ts));
+
+        // Danh sách ID TimeSlot nhận được từ request
+        List<Long> requestedTimeSlotIds = request.getTimeSlots().stream()
+                .filter(ts -> ts.getId() != null && ts.getId() != 0)
+                .map(UpdateTimeSlotRequest::getId)
+                .collect(Collectors.toList());
+
+        // Lọc ra các TimeSlot cần xóa (có trong DB nhưng không có trong request)
+        List<TimeSlot> timeSlotsToDelete = existingTimeSlotsMap.values().stream()
+                .filter(ts -> !requestedTimeSlotIds.contains(ts.getId()))
+                .collect(Collectors.toList());
+
+        // Xóa các TimeSlot khỏi schedule và database
+        if (!timeSlotsToDelete.isEmpty()) {
+            schedule.getTimeSlots().removeAll(timeSlotsToDelete);
+            // JPA với orphanRemoval = true sẽ tự động xóa các TimeSlot bị remove khỏi collection
+            // timeSlotRepository.deleteAll(timeSlotsToDelete); // Không cần gọi tường minh nếu orphanRemoval = true
+        }
+
+        // Danh sách TimeSlot mới sẽ được gán cho schedule
+        List<TimeSlot> newOrUpdatedTimeSlots = new ArrayList<>();
+
+        // Duyệt qua các TimeSlot từ request để cập nhật hoặc thêm mới
+        for (UpdateTimeSlotRequest slotDTO : request.getTimeSlots()) {
+            LocalTime startTime = LocalTime.parse(slotDTO.getStartTime());
+            LocalTime endTime = LocalTime.parse(slotDTO.getEndTime());
+
+            // 4. Logic kiểm tra trùng lặp và đè lên nhau trong một DayOfWeek
+            // Cần kiểm tra với tất cả các TimeSlot đã tồn tại (trừ chính nó nếu là cập nhật)
+            // và các TimeSlot mới được thêm vào trong cùng request này.
+
+            // Tạo một danh sách tổng hợp các TimeSlot để kiểm tra, bao gồm cả các slot cũ chưa bị xóa
+            // và các slot mới được thêm vào trong cùng request này.
+            List<TimeSlot> allSlotsForOverlapCheck = new ArrayList<>(newOrUpdatedTimeSlots); // Các slot đã được xử lý trong request này
+            allSlotsForOverlapCheck.addAll(schedule.getTimeSlots().stream() // Các slot hiện có trong schedule (chưa bị xóa)
+                    .filter(ts -> !timeSlotsToDelete.contains(ts)) // Loại bỏ các slot sẽ bị xóa
+                    .collect(Collectors.toList()));
+
+
+            for (TimeSlot existingSlot : allSlotsForOverlapCheck) {
+                // Điều kiện để so sánh: không phải là cùng một slot đang được cập nhật
+                boolean isSameSlot = (slotDTO.getId() != null && slotDTO.getId().equals(existingSlot.getId()));
+                if (!isSameSlot && (startTime.isBefore(existingSlot.getEndTime()) && endTime.isAfter(existingSlot.getStartTime()))) {
+                    throw new RuntimeException("Time slots overlap detected: " + slotDTO.getStartTime() + "-" + slotDTO.getEndTime() +
+                            " overlaps with " + existingSlot.getStartTime() + "-" + existingSlot.getEndTime());
                 }
-                if (slotDTO.getEndTime() != null) {
-                    slot.setEndTime(LocalTime.parse(slotDTO.getEndTime()));
-                }
-                timeSlotRepository.save(slot);
+            }
+
+            if (slotDTO.getId() != null && slotDTO.getId() != 0 && existingTimeSlotsMap.containsKey(slotDTO.getId())) {
+                // Cập nhật TimeSlot đã tồn tại
+                TimeSlot slotToUpdate = existingTimeSlotsMap.get(slotDTO.getId());
+                slotToUpdate.setStartTime(startTime);
+                slotToUpdate.setEndTime(endTime);
+                newOrUpdatedTimeSlots.add(slotToUpdate);
+            } else {
+                // Thêm mới TimeSlot
+                TimeSlot newSlot = TimeSlot.builder()
+                        .startTime(startTime)
+                        .endTime(endTime)
+                        .openingSchedule(schedule) // Gán mối quan hệ
+                        .build();
+                newOrUpdatedTimeSlots.add(newSlot);
             }
         }
+        // Gán danh sách TimeSlot đã được xử lý (thêm mới/cập nhật) vào schedule
+        schedule.setTimeSlots(newOrUpdatedTimeSlots);
 
-        scheduleRepository.save(schedule);
+        // 5. Lưu OpeningSchedule và Location
+        // JPA sẽ xử lý các TimeSlot mới/cập nhật/xóa do CascadeType.ALL và orphanRemoval
+        scheduleRepository.save(schedule); // Lưu schedule (và các timeSlot liên quan)
+        locationRepository.save(location); // Lưu location để đảm bảo mối quan hệ ngược lại (nếu schedule là mới)
+
+        return mapper.toDTO(location);
     }
 
+    // --- Các phương thức đã có (giữ nguyên) ---
+    // Phương thức deleteScheduleByDay vẫn có thể giữ lại nếu bạn muốn một API riêng chỉ để xóa toàn bộ lịch trình của một ngày.
     @Transactional
     public void deleteSchedule(Long locationId, String dayOfWeek) {
         Locations location = locationRepository.findById(locationId)
@@ -239,17 +306,22 @@ public class LocationService {
         DayOfWeek day = DayOfWeek.valueOf(dayOfWeek.toUpperCase());
         List<OpeningSchedule> schedules = location.getOpeningSchedules();
 
-        schedules.removeIf(s -> {
-            boolean match = s.getDayOfWeek() == day;
-            if (match) {
-                scheduleRepository.delete(s);
+        // Sử dụng Iterator hoặc tạo list tạm để tránh ConcurrentModificationException
+        List<OpeningSchedule> schedulesToRemove = new ArrayList<>();
+        for (OpeningSchedule s : schedules) {
+            if (s.getDayOfWeek() == day) {
+                schedulesToRemove.add(s);
             }
-            return match;
-        });
+        }
 
-        location.setOpeningSchedules(schedules);
-        locationRepository.save(location);
+        for (OpeningSchedule s : schedulesToRemove) {
+            location.getOpeningSchedules().remove(s); // Xóa khỏi danh sách của location
+            scheduleRepository.delete(s); // Xóa khỏi database (orphanRemoval sẽ xóa TimeSlots)
+        }
+
+        locationRepository.save(location); // Lưu lại location sau khi cập nhật danh sách schedule
     }
+
 
     public List<LocationResponseDTO> findLocationsByDayOfWeek(String day) {
         try {

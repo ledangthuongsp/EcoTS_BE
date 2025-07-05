@@ -99,12 +99,6 @@ public class LocationController {
         return ResponseEntity.ok(locationService.findNearbyLocations(lat, lng, radiusKm));
     }
 
-    @PostMapping("/assign-materials")
-    public ResponseEntity<String> assignMaterialsToLocation(@RequestBody AssignMaterialsRequest request) {
-        locationService.assignMaterialsToLocation(request.getLocationId(), request.getMaterialIds());
-        return ResponseEntity.ok("Materials assigned successfully.");
-    }
-
     @PutMapping("/update-materials")
     public ResponseEntity<String> updateMaterialsForLocation(@RequestBody AssignMaterialsRequest request) {
         locationService.updateMaterialsForLocation(request.getLocationId(), request.getMaterialIds());
@@ -119,16 +113,9 @@ public class LocationController {
 
     // SCHEDULES
 
-    @PutMapping("/update-open-schedule")
-    public ResponseEntity<String> updateOpeningSchedule(@RequestBody UpdateScheduleRequest request) {
-        locationService.updateOpeningSchedule(request);
-        return ResponseEntity.ok("Opening schedule updated successfully.");
-    }
-
-    @PostMapping("/add-schedule")
-    public ResponseEntity<String> addOpeningSchedule(@RequestBody UpdateScheduleRequest request) {
-        locationService.addOpeningSchedule(request.getLocationId(), request.getDayOfWeek(), request.getTimeSlots());
-        return ResponseEntity.ok("Opening schedule added successfully.");
+    @PostMapping("/upsert-open-schedule") // Đổi sang POST/PUT tùy theo ngữ nghĩa chính của bạn
+    public ResponseEntity<LocationResponseDTO> upsertOpeningSchedule(@RequestBody UpdateScheduleRequest request) {
+        return ResponseEntity.ok(locationService.upsertOpeningSchedule(request));
     }
 
     @DeleteMapping("/{locationId}/delete-schedule")
