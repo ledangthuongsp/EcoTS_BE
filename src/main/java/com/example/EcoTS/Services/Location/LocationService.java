@@ -2,8 +2,9 @@ package com.example.EcoTS.Services.Location;
 
 import com.example.EcoTS.DTOs.Request.Location.LocationDTO;
 import com.example.EcoTS.DTOs.Response.Location.LocationResponseDTO;
-import com.example.EcoTS.Models.Locations;
-import com.example.EcoTS.Models.Sponsor;
+import com.example.EcoTS.DTOs.Response.Location.TimeSlotDTO;
+import com.example.EcoTS.Enum.DayOfWeek;
+import com.example.EcoTS.Models.*;
 import com.example.EcoTS.Repositories.LocationRepository;
 
 import com.example.EcoTS.Repositories.MaterialRepository;
@@ -16,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.io.IOException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import io.swagger.annotations.Api;
@@ -151,6 +153,43 @@ public class LocationService {
     private List<String> uploadList(List<MultipartFile> files) throws IOException {
         return (files != null && !files.isEmpty()) ? cloudinaryService.uploadMultipleFilesLocations(files) : new ArrayList<>();
     }
+
+    @Transactional
+    public void assignMaterialsToLocation(Long locationId, List<Long> materialIds) {
+        Locations location = locationRepository.findById(locationId)
+                .orElseThrow(() -> new RuntimeException("Location not found"));
+        List<Materials> materials = materialRepository.findAllById(materialIds);
+        location.setMaterials(materials);
+        locationRepository.save(location);
+    }
+
+    @Transactional
+    public void addOpeningSchedule(Long locationId, String dayOfWeek, List<TimeSlotDTO> timeSlots) {
+        Locations location = locationRepository.findById(locationId)
+                .orElseThrow(() -> new RuntimeException("Location not found"));
+
+        OpeningSchedule schedule = OpeningSchedule.builder()
+                .location(location)
+                .dayOfWeek(DayOfWeek.valueOf(dayOfWeek.toUpperCase()))
+                .timeSlots(new ArrayList<>())
+                .build();
+
+        for (TimeSlotDTO slotDTO : timeSlots) {
+            TimeSlot slot = TimeSlot.builder()
+                    .startTime(Timestamp.valueOf(slotDTO.getStartTime()))
+                    .endTime(Timestamp.valueOf(slotDTO.getEndTime()))
+                    .openingSchedule(schedule)
+                    .build();
+            schedule.getTimeSlots().add(slot);
+        }
+
+        if (location.getOpeningSchedules() == null) {
+            location.setOpeningSchedules(new ArrayList<>());
+        }
+        location.getOpeningSchedules().add(schedule);
+        locationRepository.save(location);
+    }
+
 }
 
 

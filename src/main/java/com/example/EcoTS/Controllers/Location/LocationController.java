@@ -1,5 +1,7 @@
 package com.example.EcoTS.Controllers.Location;
 
+import com.example.EcoTS.DTOs.Request.Location.AddScheduleRequest;
+import com.example.EcoTS.DTOs.Request.Location.AssignMaterialsRequest;
 import com.example.EcoTS.DTOs.Request.Location.LocationDTO;
 import com.example.EcoTS.DTOs.Response.Location.LocationResponseDTO;
 import com.example.EcoTS.Models.Locations;
@@ -95,5 +97,18 @@ public class LocationController {
     ) {
         return ResponseEntity.ok(locationService.findNearbyLocations(lat, lng, radiusKm));
     }
+
+    @PostMapping("/assign-materials")
+    public ResponseEntity<String> assignMaterialsToLocation(@RequestBody AssignMaterialsRequest request) {
+        locationService.assignMaterialsToLocation(request.getLocationId(), request.getMaterialIds());
+        return ResponseEntity.ok("Materials assigned successfully.");
+    }
+
+    @PostMapping("/add-schedule")
+    public ResponseEntity<String> addOpeningSchedule(@RequestBody AddScheduleRequest request) {
+        locationService.addOpeningSchedule(request.getLocationId(), request.getDayOfWeek(), request.getTimeSlots());
+        return ResponseEntity.ok("Opening schedule added successfully.");
+    }
+
 }
 
