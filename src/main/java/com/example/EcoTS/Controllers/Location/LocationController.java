@@ -129,7 +129,7 @@ public class LocationController {
         return ResponseEntity.ok("Schedule deleted successfully.");
     }
     @GetMapping("/search")
-    public ResponseEntity<List<LocationResponseDTO>> searchLocations(@Valid LocationSearchRequest request) {
+    public ResponseEntity<List<LocationResponseDTO>> searchLocations(@RequestBody LocationSearchRequest request) {
         return ResponseEntity.ok(locationService.searchLocationsByMultipleCriteria(request));
     }
 
