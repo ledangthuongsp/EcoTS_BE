@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.util.List;
+
 @Entity
 @Table(name = "sponsor")
 @Data
@@ -25,4 +27,10 @@ public class Sponsor {
     private String companyDirectorName;
     private String companyTaxNumber;
     private double companyPoints;
+
+    @OneToMany(mappedBy = "sponsor", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Locations> locations;
+
+    @OneToMany(mappedBy = "sponsor", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Donations> donations;
 }

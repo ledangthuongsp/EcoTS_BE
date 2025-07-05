@@ -71,5 +71,4 @@ public class LocationController {
             throw new RuntimeException(e);
         }
     }
-
 }

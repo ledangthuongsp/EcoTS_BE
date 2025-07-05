@@ -1,5 +1,6 @@
 package com.example.EcoTS.Models;
 
+import jakarta.persistence.*;
 import net.bytebuddy.asm.Advice;
 
 import org.hibernate.annotations.CreationTimestamp;
@@ -10,12 +11,6 @@ import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.util.List;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -50,6 +45,10 @@ public class Donations {
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private Timestamp createdAt;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "sponsor_id")
+    private Sponsor sponsor;
 
     @UpdateTimestamp
     @Column(name = "updated_at")

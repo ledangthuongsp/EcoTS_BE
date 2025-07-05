@@ -46,7 +46,6 @@ public class RewardController {
         }
     }
 
-
     @DeleteMapping("/delete-reward/{id}")
     public ResponseEntity<Void> deleteReward(@PathVariable Long id) {
         rewardItemService.deleteReward(id);

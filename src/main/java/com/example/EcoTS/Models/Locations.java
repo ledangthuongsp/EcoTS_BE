@@ -1,5 +1,6 @@
 package com.example.EcoTS.Models;
 
+import com.example.EcoTS.Enum.DayOfWeek;
 import io.swagger.v3.oas.annotations.Hidden;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -35,13 +36,20 @@ public class Locations {
     private String description;
     private String locationName;
     private String typeOfLocation;
-    private double latitude; // Vĩ độ
-    private double longitude; // Kinh độ
+    private double latitude;
+    private double longitude;
     private String backGroundImgUrl;
     private List<String> imgDetailsUrl;
 
     @ElementCollection (fetch = FetchType.EAGER)
     private List<Long> employeeId;
+
+    @OneToMany(mappedBy = "location", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    private List<OpeningSchedule> openingSchedules;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "sponsor_id")
+    private Sponsor sponsor;
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
