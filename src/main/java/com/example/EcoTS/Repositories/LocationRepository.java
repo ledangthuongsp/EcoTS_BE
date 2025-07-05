@@ -16,4 +16,6 @@ import java.util.Optional;
 public interface LocationRepository extends JpaRepository<Locations, Long> {
     List<Locations> findByTypeOfLocation(String type);
     Optional<Locations> findByEmployeeId(Long employeeId);
+    List<Locations> findByMaterials_Id(Long materialId);
+    List<Locations> findByOpeningSchedules_DayOfWeek(String dayOfWeek);
 }

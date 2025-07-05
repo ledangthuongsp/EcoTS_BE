@@ -1,9 +1,11 @@
 package com.example.EcoTS.Controllers.Location;
 
 import com.example.EcoTS.DTOs.Request.Location.LocationDTO;
+import com.example.EcoTS.DTOs.Response.Location.LocationResponseDTO;
 import com.example.EcoTS.Models.Locations;
 import com.example.EcoTS.Services.Location.LocationService;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -19,56 +21,79 @@ import org.springframework.web.multipart.MultipartFile;
 @CrossOrigin
 @RequestMapping("/location")
 @Tag(name = "Location APIs", description = "Apis for get location and show it to front-end")
+@RequiredArgsConstructor
+
 public class LocationController {
 
-    @Autowired
-    private LocationService locationService;
-    @GetMapping("/get-by-type")
-    public List<Locations> getLocationsByType(@RequestParam("type") String type) {
-        return locationService.getLocationsByType(type);
-    }
-    @GetMapping("/get-all")
-    public List<Locations> getAllLocations() {
-        return locationService.getAllLocations();
+    private final LocationService locationService;
+
+    @PostMapping(value = "/sponsor/{sponsorId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<LocationResponseDTO> createLocation(
+            @PathVariable Long sponsorId,
+            @RequestParam String locationName,
+            @RequestParam String description,
+            @RequestParam String address,
+            @RequestParam double latitude,
+            @RequestParam double longitude,
+            @RequestPart MultipartFile backGroundImage,
+            @RequestPart(required = false) List<MultipartFile> imageDetails
+    ) throws IOException {
+        return ResponseEntity.ok(locationService.createLocation(
+                sponsorId, locationName, description, address,
+                latitude, longitude, backGroundImage, imageDetails
+        ));
     }
 
-    @PostMapping( value = "/create-new-location", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE})
-    public ResponseEntity<Locations> createNewLocation(@RequestParam String locationName,
-                                                       @RequestParam String description,
-                                                       @RequestParam String address,
-                                                       @RequestParam double latitude,
-                                                       @RequestParam double longitude,
-                                                       @RequestPart MultipartFile backGroundImage,
-                                                       @RequestPart List<MultipartFile> imageDetails) {
-        try {
-            Locations newLocation = locationService.createNewLocation(locationName, description,address,latitude,longitude, backGroundImage, imageDetails);
-            return ResponseEntity.ok(newLocation);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(404).body(null);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-    @PutMapping(value = "/update-location", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
-    public ResponseEntity<Locations> updateLocationById(
-            @RequestParam Long locationId,
-            @RequestParam String locationName, // <-- THÊM VÀO
+    @PutMapping(value = "/{locationId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<LocationResponseDTO> updateLocation(
+            @PathVariable Long locationId,
+            @RequestParam String locationName,
             @RequestParam String description,
             @RequestParam String address,
             @RequestParam double latitude,
             @RequestParam double longitude,
             @RequestPart(required = false) MultipartFile backGroundImage,
-            @RequestPart(required = false) List<MultipartFile> imageDetails) {
-        try {
-            Locations updatedLocation = locationService.updateInfoLocation(
-                    locationId, locationName, description, address,
-                    latitude, longitude, backGroundImage, imageDetails
-            );
-            return ResponseEntity.ok(updatedLocation);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(404).body(null);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+            @RequestPart(required = false) List<MultipartFile> imageDetails
+    ) throws IOException {
+        return ResponseEntity.ok(locationService.updateLocation(
+                locationId, locationName, description, address,
+                latitude, longitude, backGroundImage, imageDetails
+        ));
+    }
+
+    @DeleteMapping("/{locationId}")
+    public ResponseEntity<Void> deleteLocation(@PathVariable Long locationId) {
+        locationService.deleteLocation(locationId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping
+    public ResponseEntity<List<LocationResponseDTO>> getAllLocations() {
+        return ResponseEntity.ok(locationService.getAllLocations());
+    }
+
+    @GetMapping("/{locationId}")
+    public ResponseEntity<LocationResponseDTO> getLocationById(@PathVariable Long locationId) {
+        return ResponseEntity.ok(locationService.getLocationById(locationId));
+    }
+
+    @GetMapping("/search/by-material")
+    public ResponseEntity<List<LocationResponseDTO>> getByMaterial(@RequestParam Long materialId) {
+        return ResponseEntity.ok(locationService.findLocationsByMaterial(materialId));
+    }
+
+    @GetMapping("/search/by-date")
+    public ResponseEntity<List<LocationResponseDTO>> getByOpenDay(@RequestParam String day) {
+        return ResponseEntity.ok(locationService.findLocationsByDayOfWeek(day));
+    }
+
+    @GetMapping("/nearby")
+    public ResponseEntity<List<LocationResponseDTO>> getNearbyLocations(
+            @RequestParam double lat,
+            @RequestParam double lng,
+            @RequestParam(defaultValue = "5") double radiusKm
+    ) {
+        return ResponseEntity.ok(locationService.findNearbyLocations(lat, lng, radiusKm));
     }
 }
+
