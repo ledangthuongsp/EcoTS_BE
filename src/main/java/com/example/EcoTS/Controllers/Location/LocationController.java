@@ -104,10 +104,39 @@ public class LocationController {
         return ResponseEntity.ok("Materials assigned successfully.");
     }
 
+    @PutMapping("/update-materials")
+    public ResponseEntity<String> updateMaterialsForLocation(@RequestBody AssignMaterialsRequest request) {
+        locationService.updateMaterialsForLocation(request.getLocationId(), request.getMaterialIds());
+        return ResponseEntity.ok("Materials updated successfully.");
+    }
+
+    @DeleteMapping("/{locationId}/remove-materials")
+    public ResponseEntity<String> removeAllMaterials(@PathVariable Long locationId) {
+        locationService.removeAllMaterials(locationId);
+        return ResponseEntity.ok("All materials removed.");
+    }
+
+    // SCHEDULES
+
     @PostMapping("/add-schedule")
     public ResponseEntity<String> addOpeningSchedule(@RequestBody AddScheduleRequest request) {
         locationService.addOpeningSchedule(request.getLocationId(), request.getDayOfWeek(), request.getTimeSlots());
         return ResponseEntity.ok("Opening schedule added successfully.");
+    }
+
+    @PutMapping("/update-open-schedule")
+    public ResponseEntity<String> updateOpeningSchedule(@RequestBody AddScheduleRequest request) {
+        locationService.updateOpeningSchedule(request.getLocationId(), request.getDayOfWeek(), request.getTimeSlots());
+        return ResponseEntity.ok("Opening schedule updated successfully.");
+    }
+
+    @DeleteMapping("/{locationId}/delete-schedule")
+    public ResponseEntity<String> deleteScheduleByDay(
+            @PathVariable Long locationId,
+            @RequestParam String dayOfWeek
+    ) {
+        locationService.deleteSchedule(locationId, dayOfWeek);
+        return ResponseEntity.ok("Schedule deleted successfully.");
     }
 
 }
