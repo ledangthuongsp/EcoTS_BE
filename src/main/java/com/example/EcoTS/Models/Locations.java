@@ -51,6 +51,15 @@ public class Locations {
     @JoinColumn(name = "sponsor_id")
     private Sponsor sponsor;
 
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "location_materials",
+            joinColumns = @JoinColumn(name = "location_id"),
+            inverseJoinColumns = @JoinColumn(name = "material_id")
+    )
+    private List<Materials> materials;
+
+
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private Timestamp createdAt;
