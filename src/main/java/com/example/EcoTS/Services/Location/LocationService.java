@@ -1,9 +1,8 @@
 package com.example.EcoTS.Services.Location;
 
-import com.example.EcoTS.DTOs.Request.Location.LocationDTO;
-import com.example.EcoTS.DTOs.Request.Location.UpdateScheduleRequest;
-import com.example.EcoTS.DTOs.Request.Location.UpdateTimeSlotRequest;
+import com.example.EcoTS.DTOs.Request.Location.*;
 import com.example.EcoTS.DTOs.Response.Location.LocationResponseDTO;
+import com.example.EcoTS.DTOs.Response.Location.LocationWithDistanceDTO;
 import com.example.EcoTS.DTOs.Response.Location.TimeSlotDTO;
 import com.example.EcoTS.Enum.DayOfWeek;
 import com.example.EcoTS.Models.*;
@@ -113,10 +112,15 @@ public class LocationService {
         return locationRepository.findByMaterials_Id(materialId).stream().map(mapper::toDTO).toList();
     }
 
-    public List<LocationResponseDTO> findNearbyLocations(double lat, double lng, double radiusKm) {
+    public List<LocationWithDistanceDTO> findNearbyLocations(double lat, double lng, double radiusKm) {
         return locationRepository.findAll().stream()
-                .filter(loc -> haversine(lat, lng, loc.getLatitude(), loc.getLongitude()) <= radiusKm)
-                .map(mapper::toDTO).toList();
+                .map(loc -> {
+                    double distance = haversine(lat, lng, loc.getLatitude(), loc.getLongitude());
+                    return new LocationWithDistanceDTO(mapper.toDTO(loc), distance);
+                })
+                .filter(locWithDistance -> locWithDistance.getDistanceKm() <= radiusKm)
+                .sorted(Comparator.comparingDouble(LocationWithDistanceDTO::getDistanceKm)) // Sắp xếp theo khoảng cách
+                .toList();
     }
 
     private double haversine(double lat1, double lon1, double lat2, double lon2) {
@@ -173,127 +177,196 @@ public class LocationService {
     }
 
     @Transactional
-    public LocationResponseDTO upsertOpeningSchedule(UpdateScheduleRequest request) {
-        // 1. Tìm Location
+    public LocationResponseDTO addOpeningSchedule(AddScheduleRequest request) {
         Locations location = locationRepository.findById(request.getLocationId())
                 .orElseThrow(() -> new RuntimeException("Location not found with ID: " + request.getLocationId()));
 
-        // 2. Tìm hoặc Tạo OpeningSchedule
-        OpeningSchedule schedule;
-        if (request.getScheduleId() != null) { // Nếu có scheduleId, tìm schedule hiện có
-            schedule = scheduleRepository.findById(request.getScheduleId())
-                    .orElseThrow(() -> new RuntimeException("Opening schedule not found with ID: " + request.getScheduleId()));
-            // Nếu dayOfWeek được cung cấp trong request và khác với ngày hiện tại của schedule
-            if (request.getDayOfWeek() != null && !schedule.getDayOfWeek().name().equalsIgnoreCase(request.getDayOfWeek())) {
-                schedule.setDayOfWeek(DayOfWeek.valueOf(request.getDayOfWeek().toUpperCase()));
-            }
-        } else { // Nếu không có scheduleId, kiểm tra xem đã có schedule cho ngày này chưa
-            if (request.getDayOfWeek() == null) {
-                throw new IllegalArgumentException("Day of week must be provided to create a new schedule.");
-            }
-            DayOfWeek newDay = DayOfWeek.valueOf(request.getDayOfWeek().toUpperCase());
+        DayOfWeek day = DayOfWeek.valueOf(request.getDayOfWeek().toUpperCase());
 
-            // Tìm schedule hiện có cho ngày này tại location này
-            schedule = location.getOpeningSchedules().stream()
-                    .filter(s -> s.getDayOfWeek() == newDay)
-                    .findFirst()
-                    .orElse(null);
-
-            if (schedule == null) { // Nếu chưa có, tạo mới
-                schedule = OpeningSchedule.builder()
-                        .location(location)
-                        .dayOfWeek(newDay)
-                        .timeSlots(new ArrayList<>()) // Khởi tạo danh sách TimeSlots rỗng
-                        .build();
-                // Liên kết schedule mới với location để đảm bảo nó được quản lý bởi JPA
-                location.getOpeningSchedules().add(schedule);
-            }
-            // Nếu đã tồn tại, chúng ta sẽ cập nhật schedule đó
+        // Check if a schedule for this day already exists for this location
+        boolean scheduleExists = location.getOpeningSchedules().stream()
+                .anyMatch(s -> s.getDayOfWeek() == day);
+        if (scheduleExists) {
+            throw new RuntimeException("An opening schedule for " + day + " already exists at this location. Use update if you want to modify.");
         }
 
-        // Đảm bảo TimeSlots của schedule không null để tránh NullPointerException
-        if (schedule.getTimeSlots() == null) {
-            schedule.setTimeSlots(new ArrayList<>());
-        }
+        OpeningSchedule schedule = OpeningSchedule.builder()
+                .location(location)
+                .dayOfWeek(day)
+                .timeSlots(new ArrayList<>()) // Initialize for new time slots
+                .build();
 
-        // 3. Xử lý TimeSlots: Xác định các TimeSlot để xóa, cập nhật, và thêm mới
-        // Danh sách ID TimeSlot hiện tại trong DB cho schedule này
-        Map<Long, TimeSlot> existingTimeSlotsMap = schedule.getTimeSlots().stream()
-                .filter(ts -> ts.getId() != null) // Chỉ lấy các TimeSlot đã có ID
-                .collect(Collectors.toMap(TimeSlot::getId, ts -> ts));
-
-        // Danh sách ID TimeSlot nhận được từ request
-        List<Long> requestedTimeSlotIds = request.getTimeSlots().stream()
-                .filter(ts -> ts.getId() != null && ts.getId() != 0)
-                .map(UpdateTimeSlotRequest::getId)
-                .collect(Collectors.toList());
-
-        // Lọc ra các TimeSlot cần xóa (có trong DB nhưng không có trong request)
-        List<TimeSlot> timeSlotsToDelete = existingTimeSlotsMap.values().stream()
-                .filter(ts -> !requestedTimeSlotIds.contains(ts.getId()))
-                .collect(Collectors.toList());
-
-        // Xóa các TimeSlot khỏi schedule và database
-        if (!timeSlotsToDelete.isEmpty()) {
-            schedule.getTimeSlots().removeAll(timeSlotsToDelete);
-            // JPA với orphanRemoval = true sẽ tự động xóa các TimeSlot bị remove khỏi collection
-            // timeSlotRepository.deleteAll(timeSlotsToDelete); // Không cần gọi tường minh nếu orphanRemoval = true
-        }
-
-        // Danh sách TimeSlot mới sẽ được gán cho schedule
-        List<TimeSlot> newOrUpdatedTimeSlots = new ArrayList<>();
-
-        // Duyệt qua các TimeSlot từ request để cập nhật hoặc thêm mới
+        // Add initial time slots, performing overlap check
+        List<TimeSlot> newTimeSlots = new ArrayList<>();
         for (UpdateTimeSlotRequest slotDTO : request.getTimeSlots()) {
             LocalTime startTime = LocalTime.parse(slotDTO.getStartTime());
             LocalTime endTime = LocalTime.parse(slotDTO.getEndTime());
 
-            // 4. Logic kiểm tra trùng lặp và đè lên nhau trong một DayOfWeek
-            // Cần kiểm tra với tất cả các TimeSlot đã tồn tại (trừ chính nó nếu là cập nhật)
-            // và các TimeSlot mới được thêm vào trong cùng request này.
-
-            // Tạo một danh sách tổng hợp các TimeSlot để kiểm tra, bao gồm cả các slot cũ chưa bị xóa
-            // và các slot mới được thêm vào trong cùng request này.
-            List<TimeSlot> allSlotsForOverlapCheck = new ArrayList<>(newOrUpdatedTimeSlots); // Các slot đã được xử lý trong request này
-            allSlotsForOverlapCheck.addAll(schedule.getTimeSlots().stream() // Các slot hiện có trong schedule (chưa bị xóa)
-                    .filter(ts -> !timeSlotsToDelete.contains(ts)) // Loại bỏ các slot sẽ bị xóa
-                    .collect(Collectors.toList()));
-
-
-            for (TimeSlot existingSlot : allSlotsForOverlapCheck) {
-                // Điều kiện để so sánh: không phải là cùng một slot đang được cập nhật
-                boolean isSameSlot = (slotDTO.getId() != null && slotDTO.getId().equals(existingSlot.getId()));
-                if (!isSameSlot && (startTime.isBefore(existingSlot.getEndTime()) && endTime.isAfter(existingSlot.getStartTime()))) {
-                    throw new RuntimeException("Time slots overlap detected: " + slotDTO.getStartTime() + "-" + slotDTO.getEndTime() +
+            // Check for overlaps within the new time slots being added
+            for (TimeSlot existingSlot : newTimeSlots) {
+                if (startTime.isBefore(existingSlot.getEndTime()) && endTime.isAfter(existingSlot.getStartTime())) {
+                    throw new RuntimeException("New time slots overlap detected: " + slotDTO.getStartTime() + "-" + slotDTO.getEndTime() +
                             " overlaps with " + existingSlot.getStartTime() + "-" + existingSlot.getEndTime());
                 }
             }
 
-            if (slotDTO.getId() != null && slotDTO.getId() != 0 && existingTimeSlotsMap.containsKey(slotDTO.getId())) {
-                // Cập nhật TimeSlot đã tồn tại
-                TimeSlot slotToUpdate = existingTimeSlotsMap.get(slotDTO.getId());
-                slotToUpdate.setStartTime(startTime);
-                slotToUpdate.setEndTime(endTime);
-                newOrUpdatedTimeSlots.add(slotToUpdate);
-            } else {
-                // Thêm mới TimeSlot
-                TimeSlot newSlot = TimeSlot.builder()
-                        .startTime(startTime)
-                        .endTime(endTime)
-                        .openingSchedule(schedule) // Gán mối quan hệ
-                        .build();
-                newOrUpdatedTimeSlots.add(newSlot);
-            }
+            TimeSlot newSlot = TimeSlot.builder()
+                    .startTime(startTime)
+                    .endTime(endTime)
+                    .openingSchedule(schedule)
+                    .build();
+            newTimeSlots.add(newSlot);
         }
-        // Gán danh sách TimeSlot đã được xử lý (thêm mới/cập nhật) vào schedule
-        schedule.setTimeSlots(newOrUpdatedTimeSlots);
+        schedule.setTimeSlots(newTimeSlots);
 
-        // 5. Lưu OpeningSchedule và Location
-        // JPA sẽ xử lý các TimeSlot mới/cập nhật/xóa do CascadeType.ALL và orphanRemoval
-        scheduleRepository.save(schedule); // Lưu schedule (và các timeSlot liên quan)
-        locationRepository.save(location); // Lưu location để đảm bảo mối quan hệ ngược lại (nếu schedule là mới)
+        location.getOpeningSchedules().add(schedule); // Link new schedule to location
+        scheduleRepository.save(schedule); // Save schedule (and time slots via cascade)
+        locationRepository.save(location); // Ensure location relationship is updated
 
         return mapper.toDTO(location);
+    }
+
+    @Transactional
+    public LocationResponseDTO updateOpeningScheduleDayOfWeek(UpdateExistingScheduleRequest request) {
+        OpeningSchedule schedule = scheduleRepository.findById(request.getScheduleId())
+                .orElseThrow(() -> new RuntimeException("Opening schedule not found with ID: " + request.getScheduleId()));
+
+        if (request.getDayOfWeek() != null) {
+            DayOfWeek newDay = DayOfWeek.valueOf(request.getDayOfWeek().toUpperCase());
+
+            // Check if another schedule for this new day already exists at the same location
+            Locations location = schedule.getLocation();
+            boolean dayExistsForOtherSchedule = location.getOpeningSchedules().stream()
+                    .filter(s -> !s.getId().equals(schedule.getId())) // Exclude the current schedule
+                    .anyMatch(s -> s.getDayOfWeek() == newDay);
+
+            if (dayExistsForOtherSchedule) {
+                throw new RuntimeException("An opening schedule for " + newDay + " already exists at this location.");
+            }
+
+            schedule.setDayOfWeek(newDay);
+            scheduleRepository.save(schedule); // Save the updated schedule
+        }
+        return mapper.toDTO(schedule.getLocation());
+    }
+
+    @Transactional
+    public LocationResponseDTO addTimeSlotsToSchedule(ManageTimeSlotRequest request) {
+        OpeningSchedule schedule = scheduleRepository.findById(request.getScheduleId())
+                .orElseThrow(() -> new RuntimeException("Opening schedule not found with ID: " + request.getScheduleId()));
+
+        // Ensure timeSlots list is initialized
+        if (schedule.getTimeSlots() == null) {
+            schedule.setTimeSlots(new ArrayList<>());
+        }
+
+        List<TimeSlot> currentScheduleTimeSlots = new ArrayList<>(schedule.getTimeSlots());
+        List<TimeSlot> timeSlotsToAdd = new ArrayList<>();
+
+        for (UpdateTimeSlotRequest slotDTO : request.getTimeSlots()) {
+            if (slotDTO.getId() != null && slotDTO.getId() != 0) {
+                throw new IllegalArgumentException("Cannot add a time slot with an existing ID. Use update for existing slots.");
+            }
+
+            LocalTime startTime = LocalTime.parse(slotDTO.getStartTime());
+            LocalTime endTime = LocalTime.parse(slotDTO.getEndTime());
+
+            // Check for overlaps with existing slots in the schedule and newly added slots in this request
+            for (TimeSlot existingSlot : currentScheduleTimeSlots) {
+                if (startTime.isBefore(existingSlot.getEndTime()) && endTime.isAfter(existingSlot.getStartTime())) {
+                    throw new RuntimeException("Time slot overlap detected: " + slotDTO.getStartTime() + "-" + slotDTO.getEndTime() +
+                            " overlaps with " + existingSlot.getStartTime() + "-" + existingSlot.getEndTime());
+                }
+            }
+            for (TimeSlot newlyAddedSlot : timeSlotsToAdd) { // Check against other slots being added in this request
+                if (startTime.isBefore(newlyAddedSlot.getEndTime()) && endTime.isAfter(newlyAddedSlot.getStartTime())) {
+                    throw new RuntimeException("Time slot overlap detected: " + slotDTO.getStartTime() + "-" + slotDTO.getEndTime() +
+                            " overlaps with " + newlyAddedSlot.getStartTime() + "-" + newlyAddedSlot.getEndTime() + " (within current batch)");
+                }
+            }
+
+            TimeSlot newSlot = TimeSlot.builder()
+                    .startTime(startTime)
+                    .endTime(endTime)
+                    .openingSchedule(schedule)
+                    .build();
+            timeSlotsToAdd.add(newSlot);
+        }
+
+        schedule.getTimeSlots().addAll(timeSlotsToAdd); // Add all new slots to the schedule's list
+        scheduleRepository.save(schedule); // Save schedule (time slots will be cascaded)
+
+        return mapper.toDTO(schedule.getLocation());
+    }
+
+    @Transactional
+    public LocationResponseDTO updateTimeSlotsInSchedule(ManageTimeSlotRequest request) {
+        OpeningSchedule schedule = scheduleRepository.findById(request.getScheduleId())
+                .orElseThrow(() -> new RuntimeException("Opening schedule not found with ID: " + request.getScheduleId()));
+
+        Map<Long, TimeSlot> existingTimeSlotsMap = schedule.getTimeSlots().stream()
+                .filter(ts -> ts.getId() != null)
+                .collect(Collectors.toMap(TimeSlot::getId, ts -> ts));
+
+        List<TimeSlot> updatedSlots = new ArrayList<>();
+
+        for (UpdateTimeSlotRequest slotDTO : request.getTimeSlots()) {
+            if (slotDTO.getId() == null || slotDTO.getId() == 0) {
+                throw new IllegalArgumentException("Time slot ID must be provided for update operations.");
+            }
+
+            TimeSlot slotToUpdate = existingTimeSlotsMap.get(slotDTO.getId());
+            if (slotToUpdate == null) {
+                throw new RuntimeException("Time slot not found with ID: " + slotDTO.getId() + " in schedule " + request.getScheduleId());
+            }
+
+            LocalTime newStartTime = LocalTime.parse(slotDTO.getStartTime());
+            LocalTime newEndTime = LocalTime.parse(slotDTO.getEndTime());
+
+            // Check for overlaps with other existing slots in the schedule
+            // Filter out the slot currently being updated from the overlap check
+            List<TimeSlot> otherExistingSlots = schedule.getTimeSlots().stream()
+                    .filter(ts -> !ts.getId().equals(slotToUpdate.getId()))
+                    .collect(Collectors.toList());
+
+            for (TimeSlot existingSlot : otherExistingSlots) {
+                if (newStartTime.isBefore(existingSlot.getEndTime()) && newEndTime.isAfter(existingSlot.getStartTime())) {
+                    throw new RuntimeException("Time slot overlap detected: " + slotDTO.getStartTime() + "-" + slotDTO.getEndTime() +
+                            " overlaps with " + existingSlot.getStartTime() + "-" + existingSlot.getEndTime());
+                }
+            }
+
+            slotToUpdate.setStartTime(newStartTime);
+            slotToUpdate.setEndTime(newEndTime);
+            updatedSlots.add(slotToUpdate); // Collect updated slots, though not strictly needed for cascade update
+        }
+        // Save the schedule; updated slots will be persisted via transactional context
+        scheduleRepository.save(schedule);
+        return mapper.toDTO(schedule.getLocation());
+    }
+
+    @Transactional
+    public LocationResponseDTO removeTimeSlotsFromSchedule(Long scheduleId, List<Long> timeSlotIds) {
+        OpeningSchedule schedule = scheduleRepository.findById(scheduleId)
+                .orElseThrow(() -> new RuntimeException("Opening schedule not found with ID: " + scheduleId));
+
+        if (schedule.getTimeSlots() == null) {
+            schedule.setTimeSlots(new ArrayList<>());
+        }
+
+        List<TimeSlot> slotsToRemove = schedule.getTimeSlots().stream()
+                .filter(ts -> timeSlotIds.contains(ts.getId()))
+                .collect(Collectors.toList());
+
+        if (slotsToRemove.isEmpty()) {
+            throw new RuntimeException("No time slots found with provided IDs to remove from schedule " + scheduleId);
+        }
+
+        schedule.getTimeSlots().removeAll(slotsToRemove); // Remove from collection
+        timeSlotRepository.deleteAll(slotsToRemove); // Explicitly delete from DB (orphanRemoval would also work)
+
+        scheduleRepository.save(schedule); // Save schedule to persist changes in collection
+        return mapper.toDTO(schedule.getLocation());
     }
 
     // --- Các phương thức đã có (giữ nguyên) ---

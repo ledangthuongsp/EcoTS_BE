@@ -1,11 +1,12 @@
 package com.example.EcoTS.DTOs.Request.Auth;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-@Getter
-@Setter
-
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class SignInDTO {
     private String username;
     private String password;

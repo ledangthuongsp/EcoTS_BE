@@ -1,10 +1,8 @@
 package com.example.EcoTS.Controllers.Location;
 
-import com.example.EcoTS.DTOs.Request.Location.AddScheduleRequest;
-import com.example.EcoTS.DTOs.Request.Location.AssignMaterialsRequest;
-import com.example.EcoTS.DTOs.Request.Location.LocationDTO;
-import com.example.EcoTS.DTOs.Request.Location.UpdateScheduleRequest;
+import com.example.EcoTS.DTOs.Request.Location.*;
 import com.example.EcoTS.DTOs.Response.Location.LocationResponseDTO;
+import com.example.EcoTS.DTOs.Response.Location.LocationWithDistanceDTO;
 import com.example.EcoTS.Models.Locations;
 import com.example.EcoTS.Services.Location.LocationService;
 
@@ -91,7 +89,7 @@ public class LocationController {
     }
 
     @GetMapping("/nearby")
-    public ResponseEntity<List<LocationResponseDTO>> getNearbyLocations(
+    public ResponseEntity<List<LocationWithDistanceDTO>> getNearbyLocations(
             @RequestParam double lat,
             @RequestParam double lng,
             @RequestParam(defaultValue = "5") double radiusKm
@@ -112,21 +110,42 @@ public class LocationController {
     }
 
     // SCHEDULES
-
-    @PostMapping("/upsert-open-schedule") // Đổi sang POST/PUT tùy theo ngữ nghĩa chính của bạn
-    public ResponseEntity<LocationResponseDTO> upsertOpeningSchedule(@RequestBody UpdateScheduleRequest request) {
-        return ResponseEntity.ok(locationService.upsertOpeningSchedule(request));
+    @PostMapping("/schedules")
+    public ResponseEntity<LocationResponseDTO> addOpeningSchedule(@RequestBody AddScheduleRequest request) {
+        return ResponseEntity.ok(locationService.addOpeningSchedule(request));
     }
 
-    @DeleteMapping("/{locationId}/delete-schedule")
+    @PutMapping("/schedules/dayOfWeek")
+    public ResponseEntity<LocationResponseDTO> updateOpeningScheduleDayOfWeek(@RequestBody UpdateExistingScheduleRequest request) {
+        return ResponseEntity.ok(locationService.updateOpeningScheduleDayOfWeek(request));
+    }
+
+    @PostMapping("/schedules/time-slots")
+    public ResponseEntity<LocationResponseDTO> addTimeSlotsToSchedule(@RequestBody ManageTimeSlotRequest request) {
+        return ResponseEntity.ok(locationService.addTimeSlotsToSchedule(request));
+    }
+
+    @PutMapping("/schedules/time-slots")
+    public ResponseEntity<LocationResponseDTO> updateTimeSlotsInSchedule(@RequestBody ManageTimeSlotRequest request) {
+        return ResponseEntity.ok(locationService.updateTimeSlotsInSchedule(request));
+    }
+
+    @DeleteMapping("/schedules/{scheduleId}/time-slots")
+    public ResponseEntity<LocationResponseDTO> removeTimeSlotsFromSchedule(
+            @PathVariable Long scheduleId,
+            @RequestBody List<Long> timeSlotIds) {
+        return ResponseEntity.ok(locationService.removeTimeSlotsFromSchedule(scheduleId, timeSlotIds));
+    }
+
+
+    @DeleteMapping("/schedules/{locationId}/{dayOfWeek}") // Sử dụng PathVariable cho dayOfWeek
     public ResponseEntity<String> deleteScheduleByDay(
             @PathVariable Long locationId,
-            @RequestParam String dayOfWeek
+            @PathVariable String dayOfWeek
     ) {
         locationService.deleteSchedule(locationId, dayOfWeek);
         return ResponseEntity.ok("Schedule deleted successfully.");
     }
-
 
 }
 

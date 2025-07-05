@@ -12,5 +12,5 @@ import java.util.List;
 public class AddScheduleRequest {
     Long locationId;
     String dayOfWeek; // "MONDAY", "TUESDAY", ...
-    List<TimeSlotDTO> timeSlots;
+    List<UpdateTimeSlotRequest> timeSlots;
 }
