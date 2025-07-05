@@ -5,6 +5,7 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.sql.Timestamp;
+import java.time.LocalTime;
 
 @Entity
 @Table(name = "time_slots")
@@ -19,8 +20,8 @@ public class TimeSlot {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
 
-    Timestamp startTime;
-    Timestamp endTime;
+    LocalTime startTime;
+    LocalTime endTime;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "opening_schedule_id")

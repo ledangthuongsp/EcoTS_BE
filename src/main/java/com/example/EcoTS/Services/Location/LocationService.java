@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import java.io.IOException;
 import java.sql.Timestamp;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import io.swagger.annotations.Api;
@@ -176,8 +177,8 @@ public class LocationService {
 
         for (TimeSlotDTO slotDTO : timeSlots) {
             TimeSlot slot = TimeSlot.builder()
-                    .startTime(Timestamp.valueOf(slotDTO.getStartTime()))
-                    .endTime(Timestamp.valueOf(slotDTO.getEndTime()))
+                    .startTime(LocalTime.parse(slotDTO.getStartTime())) // "07:00"
+                    .endTime(LocalTime.parse(slotDTO.getEndTime()))
                     .openingSchedule(schedule)
                     .build();
             schedule.getTimeSlots().add(slot);
