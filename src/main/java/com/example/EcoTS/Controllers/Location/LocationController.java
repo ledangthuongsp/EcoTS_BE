@@ -6,6 +6,7 @@ import com.example.EcoTS.DTOs.Response.Location.LocationWithDistanceDTO;
 import com.example.EcoTS.Models.Locations;
 import com.example.EcoTS.Services.Location.LocationService;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -78,25 +79,6 @@ public class LocationController {
         return ResponseEntity.ok(locationService.getLocationById(locationId));
     }
 
-    @GetMapping("/search/by-material")
-    public ResponseEntity<List<LocationResponseDTO>> getByMaterial(@RequestParam Long materialId) {
-        return ResponseEntity.ok(locationService.findLocationsByMaterial(materialId));
-    }
-
-    @GetMapping("/search/by-date")
-    public ResponseEntity<List<LocationResponseDTO>> getByOpenDay(@RequestParam String day) {
-        return ResponseEntity.ok(locationService.findLocationsByDayOfWeek(day));
-    }
-
-    @GetMapping("/nearby")
-    public ResponseEntity<List<LocationWithDistanceDTO>> getNearbyLocations(
-            @RequestParam double lat,
-            @RequestParam double lng,
-            @RequestParam(defaultValue = "5") double radiusKm
-    ) {
-        return ResponseEntity.ok(locationService.findNearbyLocations(lat, lng, radiusKm));
-    }
-
     @PutMapping("/update-materials")
     public ResponseEntity<String> updateMaterialsForLocation(@RequestBody AssignMaterialsRequest request) {
         locationService.updateMaterialsForLocation(request.getLocationId(), request.getMaterialIds());
@@ -111,7 +93,7 @@ public class LocationController {
 
     // SCHEDULES
     @PostMapping("/schedules")
-    public ResponseEntity<LocationResponseDTO> addOpeningSchedule(@RequestBody AddScheduleRequest request) {
+    public ResponseEntity<LocationResponseDTO> addOpeningSchedule(@Valid @RequestBody AddScheduleRequest request) {
         return ResponseEntity.ok(locationService.addOpeningSchedule(request));
     }
 
@@ -145,6 +127,10 @@ public class LocationController {
     ) {
         locationService.deleteSchedule(locationId, dayOfWeek);
         return ResponseEntity.ok("Schedule deleted successfully.");
+    }
+    @GetMapping("/search")
+    public ResponseEntity<List<LocationResponseDTO>> searchLocations(@Valid LocationSearchRequest request) {
+        return ResponseEntity.ok(locationService.searchLocationsByMultipleCriteria(request));
     }
 
 }

@@ -9,6 +9,7 @@ import com.example.EcoTS.Services.SecurityService.AuthenticationService;
 import com.example.EcoTS.Services.SecurityService.JwtRefreshService;
 import com.example.EcoTS.Services.SecurityService.JwtService;
 
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -37,7 +38,7 @@ public class SignInController {
         this.tokenRepository = tokenRepository;
     }
     @PostMapping("/auth/signin")
-    public ResponseEntity<LoginResponse> authenticate(@RequestBody SignInDTO loginUserDto) {
+    public ResponseEntity<LoginResponse> authenticate(@RequestBody @Valid SignInDTO loginUserDto) {
         Users authenticatedUser = authenticationService.authenticate(loginUserDto);
 
         String jwtTokenAccess = jwtService.generateToken(authenticatedUser);

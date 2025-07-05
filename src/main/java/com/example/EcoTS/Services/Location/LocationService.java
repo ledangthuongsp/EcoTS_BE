@@ -108,20 +108,6 @@ public class LocationService {
                 .orElseThrow(() -> new RuntimeException("Location not found")));
     }
 
-    public List<LocationResponseDTO> findLocationsByMaterial(Long materialId) {
-        return locationRepository.findByMaterials_Id(materialId).stream().map(mapper::toDTO).toList();
-    }
-
-    public List<LocationWithDistanceDTO> findNearbyLocations(double lat, double lng, double radiusKm) {
-        return locationRepository.findAll().stream()
-                .map(loc -> {
-                    double distance = haversine(lat, lng, loc.getLatitude(), loc.getLongitude());
-                    return new LocationWithDistanceDTO(mapper.toDTO(loc), distance);
-                })
-                .filter(locWithDistance -> locWithDistance.getDistanceKm() <= radiusKm)
-                .sorted(Comparator.comparingDouble(LocationWithDistanceDTO::getDistanceKm)) // Sắp xếp theo khoảng cách
-                .toList();
-    }
 
     private double haversine(double lat1, double lon1, double lat2, double lon2) {
         final int R = 6371;
@@ -395,18 +381,40 @@ public class LocationService {
         locationRepository.save(location); // Lưu lại location sau khi cập nhật danh sách schedule
     }
 
+    public List<LocationResponseDTO> searchLocationsByMultipleCriteria(LocationSearchRequest req) {
+        List<Locations> all = locationRepository.findAll();
 
-    public List<LocationResponseDTO> findLocationsByDayOfWeek(String day) {
-        try {
-            DayOfWeek enumDay = DayOfWeek.valueOf(day.toUpperCase());
-            return locationRepository.findByOpeningSchedules_DayOfWeek(enumDay)
-                    .stream()
-                    .map(mapper::toDTO)
-                    .toList();
-        } catch (IllegalArgumentException e) {
-            throw new RuntimeException("Invalid day of week: " + day);
-        }
+        return all.stream()
+                .filter(loc -> {
+                    if (req.getMaterialId() != null) {
+                        boolean hasMaterial = loc.getMaterials().stream()
+                                .anyMatch(mat -> mat.getId().equals(req.getMaterialId()));
+                        if (!hasMaterial) return false;
+                    }
+
+                    if (req.getDay() != null) {
+                        try {
+                            DayOfWeek day = DayOfWeek.valueOf(req.getDay().toUpperCase());
+                            boolean hasSchedule = loc.getOpeningSchedules().stream()
+                                    .anyMatch(s -> s.getDayOfWeek() == day);
+                            if (!hasSchedule) return false;
+                        } catch (IllegalArgumentException e) {
+                            return false;
+                        }
+                    }
+
+                    if (req.getLat() != null && req.getLng() != null) {
+                        double distance = haversine(req.getLat(), req.getLng(), loc.getLatitude(), loc.getLongitude());
+                        if (distance > req.getRadiusKm()) return false;
+                    }
+
+                    return true;
+                })
+                .map(mapper::toDTO)
+                .toList();
     }
+
+
 }
 
 
