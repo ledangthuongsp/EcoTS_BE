@@ -1,14 +1,14 @@
 package com.example.EcoTS.Services.Location;
 
 import com.example.EcoTS.DTOs.Request.Location.LocationDTO;
+import com.example.EcoTS.DTOs.Request.Location.UpdateScheduleRequest;
+import com.example.EcoTS.DTOs.Request.Location.UpdateTimeSlotRequest;
 import com.example.EcoTS.DTOs.Response.Location.LocationResponseDTO;
 import com.example.EcoTS.DTOs.Response.Location.TimeSlotDTO;
 import com.example.EcoTS.Enum.DayOfWeek;
 import com.example.EcoTS.Models.*;
-import com.example.EcoTS.Repositories.LocationRepository;
+import com.example.EcoTS.Repositories.*;
 
-import com.example.EcoTS.Repositories.MaterialRepository;
-import com.example.EcoTS.Repositories.SponsorRepository;
 import com.example.EcoTS.Services.CloudinaryService.CloudinaryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,14 +40,18 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class LocationService {
 
+
     private final LocationRepository locationRepository;
     private final SponsorRepository sponsorRepository;
     private final MaterialRepository materialRepository;
+    private final OpeningScheduleRepository scheduleRepository;
+    private final TimeSlotRepository timeSlotRepository;
     private final LocationMapper mapper;
     private final CloudinaryService cloudinaryService;
 
@@ -109,20 +113,6 @@ public class LocationService {
         return locationRepository.findByMaterials_Id(materialId).stream().map(mapper::toDTO).toList();
     }
 
-    public List<LocationResponseDTO> findLocationsByDayOfWeek(String day) {
-        try {
-            DayOfWeek enumDay = DayOfWeek.valueOf(day.toUpperCase());
-            return locationRepository.findByOpeningSchedules_DayOfWeek(enumDay)
-                    .stream()
-                    .map(mapper::toDTO)
-                    .toList();
-        } catch (IllegalArgumentException e) {
-            throw new RuntimeException("Invalid day of week: " + day);
-        }
-    }
-
-
-
     public List<LocationResponseDTO> findNearbyLocations(double lat, double lng, double radiusKm) {
         return locationRepository.findAll().stream()
                 .filter(loc -> haversine(lat, lng, loc.getLatitude(), loc.getLongitude()) <= radiusKm)
@@ -167,7 +157,8 @@ public class LocationService {
 
     @Transactional
     public void assignMaterialsToLocation(Long locationId, List<Long> materialIds) {
-        Locations location = getLocationOrThrow(locationId);
+        Locations location = locationRepository.findById(locationId)
+                .orElseThrow(() -> new RuntimeException("Location not found"));
         List<Materials> materials = materialRepository.findAllById(materialIds);
         location.setMaterials(materials);
         locationRepository.save(location);
@@ -175,62 +166,102 @@ public class LocationService {
 
     @Transactional
     public void updateMaterialsForLocation(Long locationId, List<Long> materialIds) {
-        assignMaterialsToLocation(locationId, materialIds); // logic giống nhau
+        Locations location = locationRepository.findById(locationId)
+                .orElseThrow(() -> new RuntimeException("Location not found"));
+        List<Materials> newMaterials = materialRepository.findAllById(materialIds);
+        location.setMaterials(newMaterials);
+        locationRepository.save(location);
     }
 
     @Transactional
     public void removeAllMaterials(Long locationId) {
-        Locations location = getLocationOrThrow(locationId);
-        location.getMaterials().clear();
+        Locations location = locationRepository.findById(locationId)
+                .orElseThrow(() -> new RuntimeException("Location not found"));
+        location.setMaterials(new ArrayList<>());
         locationRepository.save(location);
     }
 
     @Transactional
-    public void addOpeningSchedule(Long locationId, String dayOfWeekStr, List<TimeSlotDTO> timeSlots) {
-        Locations location = getLocationOrThrow(locationId);
-        DayOfWeek dayOfWeek = DayOfWeek.valueOf(dayOfWeekStr.toUpperCase());
+    public void addOpeningSchedule(Long locationId, String dayOfWeekStr, List<UpdateTimeSlotRequest> timeSlots) {
+        Locations location = locationRepository.findById(locationId)
+                .orElseThrow(() -> new RuntimeException("Location not found"));
+        DayOfWeek day = DayOfWeek.valueOf(dayOfWeekStr.toUpperCase());
 
         OpeningSchedule schedule = OpeningSchedule.builder()
-                .dayOfWeek(dayOfWeek)
                 .location(location)
-                .timeSlots(timeSlots.stream()
-                        .map(ts -> TimeSlot.builder()
-                                .startTime(LocalTime.parse(ts.getStartTime()))
-                                .endTime(LocalTime.parse(ts.getEndTime()))
-                                .build())
-                        .toList())
+                .dayOfWeek(day)
                 .build();
 
-        schedule.getTimeSlots().forEach(slot -> slot.setOpeningSchedule(schedule));
-        location.getOpeningSchedules().add(schedule);
-        locationRepository.save(location);
+        List<TimeSlot> slots = timeSlots.stream().map(ts ->
+                TimeSlot.builder()
+                        .startTime(LocalTime.parse(ts.getStartTime()))
+                        .endTime(LocalTime.parse(ts.getEndTime()))
+                        .openingSchedule(schedule)
+                        .build()
+        ).collect(Collectors.toList());
+
+        schedule.setTimeSlots(slots);
+        scheduleRepository.save(schedule);
     }
 
     @Transactional
-    public void updateOpeningSchedule(Long locationId, String dayOfWeekStr, List<TimeSlotDTO> timeSlots) {
-        Locations location = getLocationOrThrow(locationId);
-        DayOfWeek dayOfWeek = DayOfWeek.valueOf(dayOfWeekStr.toUpperCase());
+    public void updateOpeningSchedule(UpdateScheduleRequest request) {
+        OpeningSchedule schedule = scheduleRepository.findById(request.getId())
+                .orElseThrow(() -> new RuntimeException("Opening schedule not found"));
 
-        location.getOpeningSchedules().removeIf(s -> s.getDayOfWeek() == dayOfWeek);
+        if (request.getDayOfWeek() != null) {
+            DayOfWeek newDay = DayOfWeek.valueOf(request.getDayOfWeek().toUpperCase());
+            schedule.setDayOfWeek(newDay);
+        }
 
-        addOpeningSchedule(locationId, dayOfWeekStr, timeSlots);
+        if (request.getTimeSlots() != null) {
+            for (UpdateTimeSlotRequest slotDTO : request.getTimeSlots()) {
+                TimeSlot slot = timeSlotRepository.findById(slotDTO.getId())
+                        .orElseThrow(() -> new RuntimeException("Time slot not found: " + slotDTO.getId()));
+                if (slotDTO.getStartTime() != null) {
+                    slot.setStartTime(LocalTime.parse(slotDTO.getStartTime()));
+                }
+                if (slotDTO.getEndTime() != null) {
+                    slot.setEndTime(LocalTime.parse(slotDTO.getEndTime()));
+                }
+                timeSlotRepository.save(slot);
+            }
+        }
+
+        scheduleRepository.save(schedule);
     }
 
     @Transactional
-    public void deleteSchedule(Long locationId, String dayOfWeekStr) {
-        Locations location = getLocationOrThrow(locationId);
-        DayOfWeek dayOfWeek = DayOfWeek.valueOf(dayOfWeekStr.toUpperCase());
-
-        location.getOpeningSchedules().removeIf(s -> s.getDayOfWeek() == dayOfWeek);
-        locationRepository.save(location);
-    }
-
-    private Locations getLocationOrThrow(Long id) {
-        return locationRepository.findById(id)
+    public void deleteSchedule(Long locationId, String dayOfWeek) {
+        Locations location = locationRepository.findById(locationId)
                 .orElseThrow(() -> new RuntimeException("Location not found"));
+
+        DayOfWeek day = DayOfWeek.valueOf(dayOfWeek.toUpperCase());
+        List<OpeningSchedule> schedules = location.getOpeningSchedules();
+
+        schedules.removeIf(s -> {
+            boolean match = s.getDayOfWeek() == day;
+            if (match) {
+                scheduleRepository.delete(s);
+            }
+            return match;
+        });
+
+        location.setOpeningSchedules(schedules);
+        locationRepository.save(location);
     }
 
-
+    public List<LocationResponseDTO> findLocationsByDayOfWeek(String day) {
+        try {
+            DayOfWeek enumDay = DayOfWeek.valueOf(day.toUpperCase());
+            return locationRepository.findByOpeningSchedules_DayOfWeek(enumDay)
+                    .stream()
+                    .map(mapper::toDTO)
+                    .toList();
+        } catch (IllegalArgumentException e) {
+            throw new RuntimeException("Invalid day of week: " + day);
+        }
+    }
 }
 
 

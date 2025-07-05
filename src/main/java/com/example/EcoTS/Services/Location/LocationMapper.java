@@ -44,9 +44,11 @@ public class LocationMapper {
 
         return schedules == null ? null : schedules.stream().map(schedule ->
                 OpeningScheduleDTO.builder()
+                        .id(schedule.getId())
                         .dayOfWeek(schedule.getDayOfWeek().name()) // enum → String
                         .timeSlots(schedule.getTimeSlots().stream().map(slot ->
                                 TimeSlotDTO.builder()
+                                        .id(slot.getId())
                                         .startTime(slot.getStartTime().format(formatter)) //  LocalDateTime → String
                                         .endTime(slot.getEndTime().format(formatter))
                                         .build()

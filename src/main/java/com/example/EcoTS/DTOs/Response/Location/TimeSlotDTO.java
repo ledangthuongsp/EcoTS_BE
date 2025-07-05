@@ -7,6 +7,7 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class TimeSlotDTO {
+    Long id;
     String startTime; // or LocalTime
     String endTime;
 }

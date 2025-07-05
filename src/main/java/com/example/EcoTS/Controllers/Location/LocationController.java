@@ -3,6 +3,7 @@ package com.example.EcoTS.Controllers.Location;
 import com.example.EcoTS.DTOs.Request.Location.AddScheduleRequest;
 import com.example.EcoTS.DTOs.Request.Location.AssignMaterialsRequest;
 import com.example.EcoTS.DTOs.Request.Location.LocationDTO;
+import com.example.EcoTS.DTOs.Request.Location.UpdateScheduleRequest;
 import com.example.EcoTS.DTOs.Response.Location.LocationResponseDTO;
 import com.example.EcoTS.Models.Locations;
 import com.example.EcoTS.Services.Location.LocationService;
@@ -118,16 +119,16 @@ public class LocationController {
 
     // SCHEDULES
 
-    @PostMapping("/add-schedule")
-    public ResponseEntity<String> addOpeningSchedule(@RequestBody AddScheduleRequest request) {
-        locationService.addOpeningSchedule(request.getLocationId(), request.getDayOfWeek(), request.getTimeSlots());
-        return ResponseEntity.ok("Opening schedule added successfully.");
+    @PutMapping("/update-open-schedule")
+    public ResponseEntity<String> updateOpeningSchedule(@RequestBody UpdateScheduleRequest request) {
+        locationService.updateOpeningSchedule(request);
+        return ResponseEntity.ok("Opening schedule updated successfully.");
     }
 
-    @PutMapping("/update-open-schedule")
-    public ResponseEntity<String> updateOpeningSchedule(@RequestBody AddScheduleRequest request) {
-        locationService.updateOpeningSchedule(request.getLocationId(), request.getDayOfWeek(), request.getTimeSlots());
-        return ResponseEntity.ok("Opening schedule updated successfully.");
+    @PostMapping("/add-schedule")
+    public ResponseEntity<String> addOpeningSchedule(@RequestBody UpdateScheduleRequest request) {
+        locationService.addOpeningSchedule(request.getLocationId(), request.getDayOfWeek(), request.getTimeSlots());
+        return ResponseEntity.ok("Opening schedule added successfully.");
     }
 
     @DeleteMapping("/{locationId}/delete-schedule")
@@ -138,6 +139,7 @@ public class LocationController {
         locationService.deleteSchedule(locationId, dayOfWeek);
         return ResponseEntity.ok("Schedule deleted successfully.");
     }
+
 
 }
 
