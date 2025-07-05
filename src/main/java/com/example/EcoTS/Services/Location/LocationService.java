@@ -122,6 +122,7 @@ public class LocationService {
     }
 
 
+
     public List<LocationResponseDTO> findNearbyLocations(double lat, double lng, double radiusKm) {
         return locationRepository.findAll().stream()
                 .filter(loc -> haversine(lat, lng, loc.getLatitude(), loc.getLongitude()) <= radiusKm)

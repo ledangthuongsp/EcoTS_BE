@@ -1,5 +1,6 @@
 package com.example.EcoTS.Repositories;
 
+import com.example.EcoTS.Enum.DayOfWeek;
 import com.example.EcoTS.Models.Locations;
 
 import io.swagger.v3.oas.annotations.Hidden;
@@ -17,5 +18,5 @@ public interface LocationRepository extends JpaRepository<Locations, Long> {
     List<Locations> findByTypeOfLocation(String type);
     Optional<Locations> findByEmployeeId(Long employeeId);
     List<Locations> findByMaterials_Id(Long materialId);
-    List<Locations> findByOpeningSchedules_DayOfWeek(String dayOfWeek);
+    List<Locations> findByOpeningSchedules_DayOfWeek(DayOfWeek dayOfWeek);
 }
