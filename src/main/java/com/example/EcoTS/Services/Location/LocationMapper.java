@@ -47,8 +47,8 @@ public class LocationMapper {
                         .dayOfWeek(schedule.getDayOfWeek().name()) // enum → String
                         .timeSlots(schedule.getTimeSlots().stream().map(slot ->
                                 TimeSlotDTO.builder()
-                                        .startTime(slot.getStartTime().toLocalDateTime().format(formatter)) // Timestamp → LocalDateTime → String
-                                        .endTime(slot.getEndTime().toLocalDateTime().format(formatter))
+                                        .startTime(slot.getStartTime().format(formatter)) //  LocalDateTime → String
+                                        .endTime(slot.getEndTime().format(formatter))
                                         .build()
                         ).collect(Collectors.toList()))
                         .build()
