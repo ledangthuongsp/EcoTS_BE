@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.time.LocalTime;
 import java.util.List;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -129,9 +130,21 @@ public class LocationController {
         return ResponseEntity.ok("Schedule deleted successfully.");
     }
     @GetMapping("/search")
-    public ResponseEntity<List<LocationResponseDTO>> searchLocations(@RequestBody @Valid LocationSearchRequest request) {
-        return ResponseEntity.ok(locationService.searchLocationsByMultipleCriteria(request));
+    public ResponseEntity<List<LocationResponseDTO>> searchLocations(
+            @RequestParam(required = false) Long materialId,
+            @RequestParam(required = false) String dayOfWeek,
+            @RequestParam(required = false) LocalTime startTime,
+            @RequestParam(required = false) LocalTime endTime,
+            @RequestParam(required = false) Double latitude,
+            @RequestParam(required = false) Double longitude,
+            @RequestParam(required = false) Double radius) {
+
+        List<LocationResponseDTO> results = locationService.searchLocationsByMultipleCriteria(
+                materialId, dayOfWeek, startTime, endTime, latitude, longitude, radius
+        );
+        return ResponseEntity.ok(results);
     }
+
 
 }
 

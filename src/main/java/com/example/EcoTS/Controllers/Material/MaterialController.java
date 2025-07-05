@@ -1,6 +1,8 @@
 package com.example.EcoTS.Controllers.Material;
 
 
+import com.example.EcoTS.DTOs.Response.Material.MaterialResponseDTO;
+import com.example.EcoTS.Mappers.MaterialMapper;
 import com.example.EcoTS.Models.Materials;
 import com.example.EcoTS.Repositories.MaterialRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,45 +17,47 @@ import lombok.Getter;
 
 @RestController
 @CrossOrigin
-@Tag(name ="Material CRUD", description = "this apis for changing and updating, adding material. About optional for save co2 and give point for user")
+@Tag(name ="Material CRUD", description = "APIs for adding, updating, and deleting materials. Used to assign points and CO2 savings.")
 @RequestMapping("/materials")
 public class MaterialController {
 
     @Autowired
     private MaterialRepository materialRepository;
 
-    // Lấy hết tất cả các vật liệu
+    @Autowired
+    private MaterialMapper materialMapper;
+
     @GetMapping("/get-all-materials")
-    public  ResponseEntity<List<Materials>> getAllMaterials()
-    {
-        List<Materials> materialsList = materialRepository.findAll();
-        return  ResponseEntity.ok(materialsList);
+    public ResponseEntity<List<MaterialResponseDTO>> getAllMaterials() {
+        List<MaterialResponseDTO> materialDTOs = materialRepository.findAll().stream()
+                .map(materialMapper::toDTO)
+                .toList();
+        return ResponseEntity.ok(materialDTOs);
     }
-    // Thêm một vật liệu mới
+
     @PostMapping("/add")
     public ResponseEntity<String> addMaterial(@RequestBody Materials material) {
         materialRepository.save(material);
         return new ResponseEntity<>("Material added successfully", HttpStatus.CREATED);
     }
 
-    // Xóa một vật liệu dựa trên id
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<String> deleteMaterial(@PathVariable Long id) {
         materialRepository.deleteById(id);
         return new ResponseEntity<>("Material deleted successfully", HttpStatus.OK);
     }
 
-    // Cập nhật thông tin về một vật liệu
     @PutMapping("/update")
-    public ResponseEntity<String> updateMaterial(@RequestParam Long id, @RequestParam double pointPerKg, @RequestParam double saveCo2perKg ) {
+    public ResponseEntity<String> updateMaterial(@RequestParam Long id,
+                                                 @RequestParam double pointPerKg,
+                                                 @RequestParam double saveCo2perKg) {
         Materials existingMaterial = materialRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Material not found"));
         existingMaterial.setPointsPerKg(pointPerKg);
         existingMaterial.setCo2SavedPerKg(saveCo2perKg);
-
         materialRepository.save(existingMaterial);
         return new ResponseEntity<>("Material updated successfully", HttpStatus.OK);
-
     }
 }
+
 

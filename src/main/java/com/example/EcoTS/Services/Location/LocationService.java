@@ -381,31 +381,56 @@ public class LocationService {
         locationRepository.save(location); // Lưu lại location sau khi cập nhật danh sách schedule
     }
 
-    public List<LocationResponseDTO> searchLocationsByMultipleCriteria(LocationSearchRequest req) {
+    @Transactional
+    public List<LocationResponseDTO> searchLocationsByMultipleCriteria(
+            Long materialId,
+            String dayOfWeek,
+            LocalTime startTime,
+            LocalTime endTime,
+            Double latitude,
+            Double longitude,
+            Double radiusKm) {
+
         List<Locations> all = locationRepository.findAll();
 
         return all.stream()
                 .filter(loc -> {
-                    if (req.getMaterialId() != null) {
+                    // Filter by material
+                    if (materialId != null) {
                         boolean hasMaterial = loc.getMaterials().stream()
-                                .anyMatch(mat -> mat.getId().equals(req.getMaterialId()));
+                                .anyMatch(mat -> mat.getId().equals(materialId));
                         if (!hasMaterial) return false;
                     }
 
-                    if (req.getDay() != null) {
+                    // Filter by opening schedule day and time
+                    if (dayOfWeek != null) {
                         try {
-                            DayOfWeek day = DayOfWeek.valueOf(req.getDay().toUpperCase());
-                            boolean hasSchedule = loc.getOpeningSchedules().stream()
-                                    .anyMatch(s -> s.getDayOfWeek() == day);
-                            if (!hasSchedule) return false;
+                            DayOfWeek day = DayOfWeek.valueOf(dayOfWeek.toUpperCase());
+
+                            Optional<OpeningSchedule> optionalSchedule = loc.getOpeningSchedules().stream()
+                                    .filter(s -> s.getDayOfWeek() == day)
+                                    .findFirst();
+
+                            if (optionalSchedule.isEmpty()) return false;
+
+                            if (startTime != null && endTime != null) {
+                                boolean isOpenDuringTime = optionalSchedule.get().getTimeSlots().stream()
+                                        .anyMatch(slot ->
+                                                !slot.getStartTime().isAfter(startTime) &&
+                                                        !slot.getEndTime().isBefore(endTime)
+                                        );
+                                if (!isOpenDuringTime) return false;
+                            }
+
                         } catch (IllegalArgumentException e) {
                             return false;
                         }
                     }
 
-                    if (req.getLat() != null && req.getLng() != null) {
-                        double distance = haversine(req.getLat(), req.getLng(), loc.getLatitude(), loc.getLongitude());
-                        if (distance > req.getRadiusKm()) return false;
+                    // Filter by radius
+                    if (latitude != null && longitude != null && radiusKm != null) {
+                        double distance = haversine(latitude, longitude, loc.getLatitude(), loc.getLongitude());
+                        if (distance > radiusKm) return false;
                     }
 
                     return true;
@@ -413,8 +438,6 @@ public class LocationService {
                 .map(mapper::toDTO)
                 .toList();
     }
-
-
 }
 
 
