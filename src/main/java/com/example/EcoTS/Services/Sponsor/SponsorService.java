@@ -1,6 +1,8 @@
 package com.example.EcoTS.Services.Sponsor;
 
 
+import com.example.EcoTS.DTOs.Response.Sponsor.SponsorResponse;
+import com.example.EcoTS.Mappers.SponsorMapper;
 import com.example.EcoTS.Models.Sponsor;
 import com.example.EcoTS.Models.SponsorQRCode;
 import com.example.EcoTS.Models.Users;
@@ -24,41 +26,46 @@ public class SponsorService {
 
     @Autowired
     private SponsorRepository sponsorRepository;
+
+    @Autowired
+    private SponsorMapper sponsorMapper;
     // Tạo mới sponsor
     @Transactional
-    public Sponsor createSponsor(Sponsor sponsor) {
-        return sponsorRepository.save(sponsor);
+    public SponsorResponse createSponsor(Sponsor sponsor) {
+        Sponsor saved = sponsorRepository.save(sponsor);
+        return sponsorMapper.toDTO(saved);
     }
 
     // Cập nhật thông tin sponsor
     @Transactional
-    public Sponsor updateSponsor(Long id, Sponsor sponsorDetails) {
-        Optional<Sponsor> sponsorOptional = sponsorRepository.findById(id);
-        if (sponsorOptional.isPresent()) {
-            Sponsor sponsor = sponsorOptional.get();
-            sponsor.setCompanyUsername(sponsorDetails.getCompanyUsername());
-            sponsor.setCompanyPassword(sponsorDetails.getCompanyPassword());
-            sponsor.setAvatarUrl(sponsorDetails.getAvatarUrl());
-            sponsor.setCompanyName(sponsorDetails.getCompanyName());
-            sponsor.setCompanyPhoneNumberContact(sponsorDetails.getCompanyPhoneNumberContact());
-            sponsor.setCompanyEmailContact(sponsorDetails.getCompanyEmailContact());
-            sponsor.setCompanyAddress(sponsorDetails.getCompanyAddress());
-            sponsor.setBusinessDescription(sponsorDetails.getBusinessDescription());
-            sponsor.setCompanyDirectorName(sponsorDetails.getCompanyDirectorName());
-            sponsor.setCompanyTaxNumber(sponsorDetails.getCompanyTaxNumber());
-            sponsor.setCompanyPoints(sponsorDetails.getCompanyPoints());
+    public SponsorResponse updateSponsor(Long id, Sponsor sponsorDetails) {
+        Sponsor sponsor = sponsorRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Sponsor không tồn tại với id: " + id));
 
-            return sponsorRepository.save(sponsor); // Lưu lại sponsor sau khi cập nhật
-        } else {
-            throw new RuntimeException("Sponsor không tồn tại với id: " + id);
-        }
+        // Cập nhật các trường (không động chạm đến quan hệ locations/donations)
+        sponsor.setCompanyUsername(sponsorDetails.getCompanyUsername());
+        sponsor.setCompanyPassword(sponsorDetails.getCompanyPassword());
+        sponsor.setAvatarUrl(sponsorDetails.getAvatarUrl());
+        sponsor.setCompanyName(sponsorDetails.getCompanyName());
+        sponsor.setCompanyPhoneNumberContact(sponsorDetails.getCompanyPhoneNumberContact());
+        sponsor.setCompanyEmailContact(sponsorDetails.getCompanyEmailContact());
+        sponsor.setCompanyAddress(sponsorDetails.getCompanyAddress());
+        sponsor.setBusinessDescription(sponsorDetails.getBusinessDescription());
+        sponsor.setCompanyDirectorName(sponsorDetails.getCompanyDirectorName());
+        sponsor.setCompanyTaxNumber(sponsorDetails.getCompanyTaxNumber());
+        sponsor.setCompanyPoints(sponsorDetails.getCompanyPoints());
+
+        Sponsor updated = sponsorRepository.save(sponsor);
+        return sponsorMapper.toDTO(updated);
     }
 
     // Lấy thông tin sponsor theo id
-    public Sponsor getSponsorById(Long id) {
-        return sponsorRepository.findById(id)
+    public SponsorResponse getSponsorById(Long id) {
+        Sponsor sponsor = sponsorRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Sponsor không tồn tại với id: " + id));
+        return sponsorMapper.toDTO(sponsor);
     }
+
 
     // Xóa sponsor
     @Transactional

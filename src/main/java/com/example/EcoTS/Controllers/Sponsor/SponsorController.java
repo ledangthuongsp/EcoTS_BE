@@ -1,5 +1,6 @@
 package com.example.EcoTS.Controllers.Sponsor;
 
+import com.example.EcoTS.DTOs.Response.Sponsor.SponsorResponse;
 import com.example.EcoTS.Models.Newsfeed.Newsfeed;
 import com.example.EcoTS.Models.Sponsor;
 import com.example.EcoTS.Models.SponsorQRCode;
@@ -40,22 +41,22 @@ public class SponsorController {
 
     // API tạo mới sponsor
     @PostMapping("/create")
-    public ResponseEntity<Sponsor> createSponsor(@RequestBody Sponsor sponsor) {
-        Sponsor createdSponsor = sponsorService.createSponsor(sponsor);
+    public ResponseEntity<SponsorResponse> createSponsor(@RequestBody Sponsor sponsor) {
+        SponsorResponse createdSponsor = sponsorService.createSponsor(sponsor);
         return ResponseEntity.ok(createdSponsor);
     }
 
     // API cập nhật sponsor
     @PutMapping("/update/{id}")
-    public ResponseEntity<Sponsor> updateSponsor(@PathVariable Long id, @RequestBody Sponsor sponsorDetails) {
-        Sponsor updatedSponsor = sponsorService.updateSponsor(id, sponsorDetails);
+    public ResponseEntity<SponsorResponse> updateSponsor(@PathVariable Long id, @RequestBody Sponsor sponsorDetails) {
+        SponsorResponse updatedSponsor = sponsorService.updateSponsor(id, sponsorDetails);
         return ResponseEntity.ok(updatedSponsor);
     }
 
     // API lấy thông tin sponsor theo id
     @GetMapping("/{id}")
-    public ResponseEntity<Sponsor> getSponsorById(@PathVariable Long id) {
-        Sponsor sponsor = sponsorService.getSponsorById(id);
+    public ResponseEntity<SponsorResponse> getSponsorById(@PathVariable Long id) {
+        SponsorResponse sponsor = sponsorService.getSponsorById(id);
         return ResponseEntity.ok(sponsor);
     }
 
