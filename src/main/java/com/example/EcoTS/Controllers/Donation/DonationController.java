@@ -1,5 +1,6 @@
 package com.example.EcoTS.Controllers.Donation;
 
+import com.example.EcoTS.DTOs.Response.Donation.DonationResponseDTO;
 import com.example.EcoTS.Models.Donations;
 import com.example.EcoTS.Repositories.DonationRepository;
 import com.example.EcoTS.Services.DonationService.DonationService;
@@ -26,9 +27,9 @@ public class DonationController {
     private DonationService donationService;
 
     @GetMapping("/get-all-donations")
-    public ResponseEntity<List<Donations>> donationGetAll()
+    public ResponseEntity<List<DonationResponseDTO>> donationGetAll()
     {
-        List<Donations> donationsList= donationService.getAllDonation();
+        List<DonationResponseDTO> donationsList= donationService.getAllDonations();
         if(donationsList.isEmpty())
         {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -36,25 +37,25 @@ public class DonationController {
         return new ResponseEntity<>(donationsList, HttpStatus.OK);
     }
     @GetMapping("/get-donation-by-id")
-    public ResponseEntity<Donations> donationGetById(@RequestParam  Long id)
+    public ResponseEntity<DonationResponseDTO> donationGetById(@RequestParam  Long id)
     {
         return new ResponseEntity<>(donationService.getDonationById(id), HttpStatus.OK);
     }
     @GetMapping("/ended")
-    public ResponseEntity<List<Donations>> getPastDonations() {
-        List<Donations> donations = donationService.getPastDonations();
+    public ResponseEntity<List<DonationResponseDTO>> getPastDonations() {
+        List<DonationResponseDTO> donations = donationService.getPastDonations();
         return ResponseEntity.ok().body(donations);
     }
 
     @GetMapping("/ongoing")
-    public ResponseEntity<List<Donations>> getOngoingDonations() {
-        List<Donations> donations = donationService.getOngoingDonations();
+    public ResponseEntity<List<DonationResponseDTO>> getOngoingDonations() {
+        List<DonationResponseDTO> donations = donationService.getOngoingDonations();
         return ResponseEntity.ok().body(donations);
     }
 
     @GetMapping("/upcoming")
-    public ResponseEntity<List<Donations>> getUpcomingDonations() {
-        List<Donations> donations = donationService.getUpcomingDonations();
+    public ResponseEntity<List<DonationResponseDTO>> getUpcomingDonations() {
+        List<DonationResponseDTO> donations = donationService.getUpcomingDonations();
         return ResponseEntity.ok().body(donations);
     }
 }

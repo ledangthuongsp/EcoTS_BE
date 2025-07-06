@@ -1,10 +1,12 @@
 package com.example.EcoTS.Services.DonationService;
 
+import com.example.EcoTS.DTOs.Response.Donation.DonationResponseDTO;
+import com.example.EcoTS.Mappers.DonationMapper;
 import com.example.EcoTS.Models.*;
 import com.example.EcoTS.Repositories.*;
 import com.example.EcoTS.Services.CloudinaryService.CloudinaryService;
 import com.example.EcoTS.Services.Notification.NotificationService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,69 +18,40 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class DonationService {
 
-    @Autowired
-    private DonationRepository donationRepository;
-
-    @Autowired
-    private SponsorRepository sponsorRepository;        // ← thêm repository cho Sponsor
-
-    @Autowired
-    private CloudinaryService cloudinaryService;
-
-    @Autowired
-    private PointRepository pointRepository;
-
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private DonationHistoryRepository donationHistoryRepository;
-
-    @Autowired
-    private NotificationService notificationService;
-
-    @Autowired
-    private NotificationRepository notificationRepository;
-
-    @Autowired
-    private ResultRepository resultRepository;
-
+    private final DonationRepository donationRepository;
+    private final SponsorRepository sponsorRepository;
+    private final CloudinaryService cloudinaryService;
+    private final NotificationService notificationService;
+    private final NotificationRepository notificationRepository;
+    private final PointRepository pointRepository;
+    private final UserRepository userRepository;
+    private final ResultRepository resultRepository;
+    private final DonationHistoryRepository donationHistoryRepository;
+    private final DonationMapper donationMapper;
 
     /**
      * Sponsor tạo mới một Donation
-     *
-     * @param title           tiêu đề
-     * @param name            tên hiển thị
-     * @param description     mô tả
-     * @param coverImages     ảnh cover
-     * @param sponsorImages   ảnh tài trợ thêm
-     * @param startDate       thời gian bắt đầu
-     * @param endDate         thời gian kết thúc
-     * @param sponsorUsername username của Sponsor
-     * @return Donation đã lưu
      */
     @Transactional
-    public Donations createDonation(
+    public DonationResponseDTO createDonation(
+            Long sponsorId,
             String title,
             String name,
             String description,
             List<MultipartFile> coverImages,
             List<MultipartFile> sponsorImages,
             Timestamp startDate,
-            Timestamp endDate,
-            String sponsorUsername
+            Timestamp endDate
     ) throws IOException {
-        // 1. Lấy Sponsor từ DB
-        Sponsor sponsor = sponsorRepository
-                .findByCompanyUsername(sponsorUsername);
+        Sponsor sponsor = sponsorRepository.findById(sponsorId)
+                .orElseThrow(() -> new ResourceNotFoundException("Sponsor không tồn tại: " + sponsorId));
 
-        // 2. Upload ảnh lên Cloudinary
-        List<String> coverUrls = cloudinaryService.uploadMultipleFilesDonations(coverImages);
+        List<String> coverUrls   = cloudinaryService.uploadMultipleFilesDonations(coverImages);
         List<String> sponsorUrls = cloudinaryService.uploadMultipleFilesDonations(sponsorImages);
 
-        // 3. Build Donations entity (khởi tạo totalDonations = 0)
         Donations donation = Donations.builder()
                 .title(title)
                 .name(name)
@@ -91,34 +64,33 @@ public class DonationService {
                 .sponsor(sponsor)
                 .build();
 
-        // 4. Save donation
         Donations saved = donationRepository.save(donation);
 
-        // 5. Cập nhật quan hệ 2 chiều (nếu cần)
+        // Cập nhật quan hệ hai chiều (nếu cần)
         sponsor.getDonations().add(saved);
         sponsorRepository.save(sponsor);
 
-        // 6. Tạo notification
-        Notifications notification = Notifications.builder()
+        // Tạo và gửi notification
+        Notifications notif = Notifications.builder()
                 .title("New Donation Created")
                 .description("A new donation has been created: " + title)
                 .build();
-        notificationRepository.save(notification);
-
-        // 7. Gửi notification đến tất cả người dùng
+        notificationRepository.save(notif);
         notificationService.notifyAllUsers(
-                notification.getTitle(),
-                notification.getDescription(),
-                sponsorUsername
+                notif.getTitle(),
+                notif.getDescription(),
+                sponsor.getCompanyUsername()
         );
 
-        return saved;
+        return donationMapper.toDTO(saved);
     }
 
-
+    /**
+     * Cập nhật Donation
+     */
     @Transactional
-    public Donations updateDonation(
-            Long id,
+    public DonationResponseDTO updateDonation(
+            Long donationId,
             String title,
             String name,
             String description,
@@ -128,44 +100,33 @@ public class DonationService {
             Timestamp endDate,
             Double totalDonations
     ) throws IOException {
-        Donations donation = donationRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Donation không tồn tại"));
+        Donations donation = donationRepository.findById(donationId)
+                .orElseThrow(() -> new ResourceNotFoundException("Donation không tồn tại: " + donationId));
 
         if (coverImages != null && !coverImages.isEmpty()) {
-            donation.setCoverImageUrl(
-                    cloudinaryService.uploadMultipleFilesDonations(coverImages));
+            donation.setCoverImageUrl(cloudinaryService.uploadMultipleFilesDonations(coverImages));
         }
         if (sponsorImages != null && !sponsorImages.isEmpty()) {
-            donation.setSponsorImages(
-                    cloudinaryService.uploadMultipleFilesDonations(sponsorImages));
+            donation.setSponsorImages(cloudinaryService.uploadMultipleFilesDonations(sponsorImages));
         }
-        if (title != null && !title.isEmpty()) {
-            donation.setTitle(title);
-        }
-        if (name != null && !name.isEmpty()) {
-            donation.setName(name);
-        }
-        if (description != null && !description.isEmpty()) {
-            donation.setDescription(description);
-        }
-        if (startDate != null) {
-            donation.setStartDate(startDate);
-        }
-        if (endDate != null) {
-            donation.setEndDate(endDate);
-        }
-        if (totalDonations != null) {
-            donation.setTotalDonations(totalDonations);
-        }
+        if (title           != null) donation.setTitle(title);
+        if (name            != null) donation.setName(name);
+        if (description     != null) donation.setDescription(description);
+        if (startDate       != null) donation.setStartDate(startDate);
+        if (endDate         != null) donation.setEndDate(endDate);
+        if (totalDonations  != null) donation.setTotalDonations(totalDonations);
 
-        return donationRepository.save(donation);
+        Donations updated = donationRepository.save(donation);
+        return donationMapper.toDTO(updated);
     }
 
-
+    /**
+     * Người dùng donate points vào một Donation
+     */
     @Transactional
     public void donatePoints(String username, Long donationId, double donationPoints) {
         Users user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new IllegalArgumentException("User không tồn tại"));
+                .orElseThrow(() -> new IllegalArgumentException("User không tồn tại: " + username));
 
         Points userPoints = pointRepository.findByUser(user)
                 .orElseThrow(() -> new IllegalArgumentException("User points không tồn tại"));
@@ -187,11 +148,11 @@ public class DonationService {
 
         // Cập nhật tổng donation
         Donations donation = donationRepository.findById(donationId)
-                .orElseThrow(() -> new IllegalArgumentException("Donation không tồn tại"));
+                .orElseThrow(() -> new IllegalArgumentException("Donation không tồn tại: " + donationId));
         donation.setTotalDonations(donation.getTotalDonations() + donationPoints);
         donationRepository.save(donation);
 
-        // Lưu lịch sử
+        // Lưu lịch sử donate
         DonationHistory history = DonationHistory.builder()
                 .userId(user.getId())
                 .points(donationPoints)
@@ -200,34 +161,65 @@ public class DonationService {
         donationHistoryRepository.save(history);
     }
 
-
-    public List<Donations> getAllDonation() {
-        return donationRepository.findAll();
+    /**
+     * Lấy tất cả Donation ở dạng DTO
+     */
+    public List<DonationResponseDTO> getAllDonations() {
+        return donationRepository.findAll().stream()
+                .map(donationMapper::toDTO)
+                .toList();
     }
 
-    public Donations getDonationById(Long id) {
-        return donationRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Donation không tồn tại"));
+    /**
+     * Lấy Donation theo ID
+     */
+    public DonationResponseDTO getDonationById(Long id) {
+        Donations donation = donationRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Donation không tồn tại: " + id));
+        return donationMapper.toDTO(donation);
     }
 
-    public List<Donations> getPastDonations() {
+    /**
+     * Lấy tất cả Donation của một Sponsor
+     */
+    public List<DonationResponseDTO> getDonationsBySponsorId(Long sponsorId) {
+        sponsorRepository.findById(sponsorId)
+                .orElseThrow(() -> new ResourceNotFoundException("Sponsor không tồn tại: " + sponsorId));
+        return donationRepository.findBySponsorId(sponsorId).stream()
+                .map(donationMapper::toDTO)
+                .toList();
+    }
+
+    /**
+     * Lấy các Donation đã kết thúc
+     */
+    public List<DonationResponseDTO> getPastDonations() {
         Timestamp now = Timestamp.valueOf(LocalDateTime.now());
         return donationRepository.findAll().stream()
                 .filter(d -> d.getEndDate().before(now))
+                .map(donationMapper::toDTO)
                 .toList();
     }
 
-    public List<Donations> getOngoingDonations() {
+    /**
+     * Lấy các Donation đang diễn ra
+     */
+    public List<DonationResponseDTO> getOngoingDonations() {
         Timestamp now = Timestamp.valueOf(LocalDateTime.now());
         return donationRepository.findAll().stream()
                 .filter(d -> d.getStartDate().before(now) && d.getEndDate().after(now))
+                .map(donationMapper::toDTO)
                 .toList();
     }
 
-    public List<Donations> getUpcomingDonations() {
+    /**
+     * Lấy các Donation sắp diễn ra
+     */
+    public List<DonationResponseDTO> getUpcomingDonations() {
         Timestamp now = Timestamp.valueOf(LocalDateTime.now());
         return donationRepository.findAll().stream()
                 .filter(d -> d.getStartDate().after(now))
+                .map(donationMapper::toDTO)
                 .toList();
     }
 }
