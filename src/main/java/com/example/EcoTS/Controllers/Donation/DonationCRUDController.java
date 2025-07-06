@@ -54,10 +54,11 @@ public class DonationCRUDController {
             @RequestPart("sponsorImages") List<MultipartFile> sponsorImages,
             @RequestParam("startDate") Timestamp startDate,
             @RequestParam("endDate") Timestamp endDate,
-            @RequestParam("totalDonations") double totalDonations) throws IOException {
+            @RequestParam("sponsorUsername") String sponsorUsername
+    ) throws IOException {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();
-        Donations volunteer = donationService.createVolunteer(title, name, description, coverImage, sponsorImages, startDate, endDate, totalDonations, username);
+        Donations volunteer = donationService.createDonation(title, name, description, coverImage, sponsorImages, startDate, endDate, sponsorUsername);
         return ResponseEntity.ok(volunteer);
     }
 

@@ -11,6 +11,7 @@ import com.example.EcoTS.Repositories.*;
 import com.example.EcoTS.Services.CloudinaryService.CloudinaryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -437,6 +438,17 @@ public class LocationService {
                 })
                 .map(mapper::toDTO)
                 .toList();
+    }
+    @Transactional
+    public List<LocationResponseDTO> getLocationsBySponsorId(Long sponsorId) {
+        sponsorRepository.findById(sponsorId)
+                .orElseThrow(() -> new ResourceNotFoundException("Sponsor không tồn tại: " + sponsorId));
+
+        List<Locations> entities = locationRepository.findBySponsorId(sponsorId);
+
+        return entities.stream()
+                .map(mapper::toDTO)
+                .collect(Collectors.toList());
     }
 }
 

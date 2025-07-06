@@ -3,6 +3,7 @@ package com.example.EcoTS.Repositories;
 import com.example.EcoTS.Enum.DayOfWeek;
 import com.example.EcoTS.Models.Locations;
 
+import com.example.EcoTS.Models.Sponsor;
 import io.swagger.v3.oas.annotations.Hidden;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
@@ -19,4 +20,5 @@ public interface LocationRepository extends JpaRepository<Locations, Long> {
     Optional<Locations> findByEmployeeId(Long employeeId);
     List<Locations> findByMaterials_Id(Long materialId);
     List<Locations> findByOpeningSchedules_DayOfWeek(DayOfWeek dayOfWeek);
+    List<Locations> findBySponsorId(Long sponsorId);
 }

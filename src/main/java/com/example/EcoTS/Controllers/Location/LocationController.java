@@ -145,6 +145,12 @@ public class LocationController {
         return ResponseEntity.ok(results);
     }
 
-
+    @GetMapping("/sponsor/{sponsorId}")
+    public ResponseEntity<List<LocationResponseDTO>> getLocationsBySponsor(
+            @PathVariable Long sponsorId
+    ) {
+        List<LocationResponseDTO> dtos = locationService.getLocationsBySponsorId(sponsorId);
+        return ResponseEntity.ok(dtos);
+    }
 }
 
