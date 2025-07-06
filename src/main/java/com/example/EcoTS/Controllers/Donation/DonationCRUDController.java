@@ -2,6 +2,7 @@ package com.example.EcoTS.Controllers.Donation;
 
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
+import com.example.EcoTS.DTOs.Response.Donation.DonationResponseDTO;
 import com.example.EcoTS.Models.Donations;
 import com.example.EcoTS.Repositories.DonationHistoryRepository;
 import com.example.EcoTS.Repositories.DonationRepository;
@@ -45,37 +46,54 @@ public class DonationCRUDController {
     private Cloudinary cloudinary;
     @Autowired
     private DonationRepository donationRepository;
-    @PostMapping(value = "/admin/donate/create-donation", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
-    public ResponseEntity<Donations> createVolunteer(
-            @RequestParam("title") String title,
-            @RequestParam("name") String name,
+    /**
+     * Sponsor (admin) tạo mới donation
+     */
+    @PostMapping(value = "/admin/create/{sponsorId}",
+            consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
+    public ResponseEntity<DonationResponseDTO> createDonation(
+            @PathVariable Long sponsorId,
+            @RequestParam("title")       String title,
+            @RequestParam("name")        String name,
             @RequestParam("description") String description,
-            @RequestPart("coverImage") List<MultipartFile> coverImage,
-            @RequestPart("sponsorImages") List<MultipartFile> sponsorImages,
-            @RequestParam("startDate") Timestamp startDate,
-            @RequestParam("endDate") Timestamp endDate,
-            @RequestParam("sponsorUsername") String sponsorUsername
+            @RequestPart("coverImages")  List<MultipartFile> coverImages,
+            @RequestPart("sponsorImages")List<MultipartFile> sponsorImages,
+            @RequestParam("startDate")   Timestamp startDate,
+            @RequestParam("endDate")     Timestamp endDate
     ) throws IOException {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String username = authentication.getName();
-        Donations volunteer = donationService.createDonation(title, name, description, coverImage, sponsorImages, startDate, endDate, sponsorUsername);
-        return ResponseEntity.ok(volunteer);
+        DonationResponseDTO dto = donationService.createDonation(
+                sponsorId, title, name, description,
+                coverImages, sponsorImages, startDate, endDate
+        );
+        return ResponseEntity.ok(dto);
     }
 
-    @PutMapping(value = "/admin/donate/update-donation/{id}", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
-    public ResponseEntity<Donations> updateDonation(
+    /**
+     * Cập nhật donation
+     */
+    @PutMapping(value = "/admin/update/{id}",
+            consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
+    public ResponseEntity<DonationResponseDTO> updateDonation(
             @PathVariable Long id,
-            @RequestParam(value = "title", required = false) String title,
-            @RequestParam(value = "name", required = false) String name,
-            @RequestParam(value = "description", required = false) String description,
-            @RequestPart(value = "coverImage", required = false) List<MultipartFile> coverImage,
+            @RequestParam(value = "title",        required = false) String title,
+            @RequestParam(value = "name",         required = false) String name,
+            @RequestParam(value = "description",  required = false) String description,
+            @RequestPart(value = "coverImages",   required = false) List<MultipartFile> coverImages,
             @RequestPart(value = "sponsorImages", required = false) List<MultipartFile> sponsorImages,
-            @RequestParam(value = "startDate", required = false) Timestamp startDate,
-            @RequestParam(value = "endDate", required = false) Timestamp endDate,
-            @RequestParam(value = "totalDonations", required = false) Double totalDonations) throws IOException {
-        Donations updatedDonation = donationService.updateDonation(id, title, name, description, coverImage, sponsorImages, startDate, endDate, totalDonations != null ? totalDonations : 0.0);
-        return ResponseEntity.ok(updatedDonation);
+            @RequestParam(value = "startDate",    required = false) Timestamp startDate,
+            @RequestParam(value = "endDate",      required = false) Timestamp endDate,
+            @RequestParam(value = "totalDonations", required = false) Double totalDonations
+    ) throws IOException {
+        DonationResponseDTO dto = donationService.updateDonation(
+                id, title, name, description,
+                coverImages, sponsorImages, startDate, endDate, totalDonations
+        );
+        return ResponseEntity.ok(dto);
     }
+
+    /**
+     * Xóa donation
+     */
 
     @DeleteMapping("/admin/donate/delete-donation-by-id")
     public ResponseEntity<String> deleteDonation(@RequestParam Long donationId) {
