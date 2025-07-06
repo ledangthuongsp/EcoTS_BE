@@ -7,6 +7,7 @@ import com.example.EcoTS.Repositories.*;
 import com.example.EcoTS.Services.CloudinaryService.CloudinaryService;
 import com.example.EcoTS.Services.Notification.NotificationService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,7 +31,9 @@ public class DonationService {
     private final UserRepository userRepository;
     private final ResultRepository resultRepository;
     private final DonationHistoryRepository donationHistoryRepository;
-    private final DonationMapper donationMapper;
+
+    @Autowired
+    private DonationMapper donationMapper;
 
     /**
      * Sponsor tạo mới một Donation
