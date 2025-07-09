@@ -10,7 +10,7 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 public class PollOptionResponse {
-    public Long id;
-    public String type;
-    public List<VoteResponse> votes;
+    private Long id;
+    private String type;
+    private List<VoteResponse> votes;
 }

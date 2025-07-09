@@ -11,7 +11,7 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 public class PollResponse {
-    public Long id;
-    public String title;
-    public List<PollOptionResponse> pollOptions;
+    private Long id;
+    private String title;
+    private List<PollOptionResponse> pollOptions;
 }

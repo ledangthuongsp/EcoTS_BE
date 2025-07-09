@@ -10,7 +10,7 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 public class ReactResponse {
-    public Long id;
-    public Long userId;
-    public boolean status;
+    private Long id;
+    private Long userId;
+    private boolean status;
 }

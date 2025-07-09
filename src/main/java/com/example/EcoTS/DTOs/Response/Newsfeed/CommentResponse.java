@@ -11,8 +11,8 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 public class CommentResponse {
-    public Long id;
-    public Long userId;
-    public String message;
-    public List<String> imgUrls;
+    private Long id;
+    private Long userId;
+    private String message;
+    private List<String> imgUrls;
 }
