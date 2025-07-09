@@ -1,6 +1,7 @@
 package com.example.EcoTS.Controllers.Sponsor;
 
 import com.example.EcoTS.DTOs.Response.Sponsor.SponsorResponse;
+import com.example.EcoTS.Mappers.SponsorMapper;
 import com.example.EcoTS.Models.Newsfeed.Newsfeed;
 import com.example.EcoTS.Models.Sponsor;
 import com.example.EcoTS.Models.SponsorQRCode;
@@ -38,7 +39,8 @@ public class SponsorController {
     private SponsorRepository sponsorRepository;
     @Autowired
     private NewsfeedRepository newsfeedRepository;
-
+    @Autowired
+    private SponsorMapper sponsorMapper;
     // API tạo mới sponsor
     @PostMapping("/create")
     public ResponseEntity<SponsorResponse> createSponsor(@RequestBody Sponsor sponsor) {
@@ -154,13 +156,15 @@ public class SponsorController {
 
     // Get Sponsor by Username
     @GetMapping("/get-by-username")
-    public ResponseEntity<Sponsor> getSponsorByUsername(@RequestParam String username) {
+    public ResponseEntity<SponsorResponse> getSponsorByUsername(@RequestParam String username) {
         Sponsor sponsor = sponsorRepository.findByCompanyUsername(username);
         if (sponsor != null) {
-            return ResponseEntity.ok(sponsor);
+            SponsorResponse dto = sponsorMapper.toDTO(sponsor);
+            return ResponseEntity.ok(dto);
         }
         return ResponseEntity.status(404).body(null);
     }
+
     @GetMapping("/get-newsfeed-by-sponsor-id")
     public ResponseEntity<Double> getSponsorPoints (@RequestParam Long sponsorId) {
 

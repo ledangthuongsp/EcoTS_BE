@@ -58,30 +58,27 @@ public class PredictionController {
             ResponseEntity<String> response = restTemplate.postForEntity(flaskApiUrl, entity, String.class);
             logger.info("Received response from Flask API: {}", response.getBody());
 
-            // Extract class name from response
+            // --- SỬA ĐOẠN NÀY ---
             String responseBody = response.getBody();
             JSONObject jsonResponse = new JSONObject(responseBody);
-            JSONArray predictions = jsonResponse.getJSONArray("predictions");
 
             JSONObject result = new JSONObject();
+            result.put("class", jsonResponse.optString("predicted_class", "Unknown"));
+            result.put("confidence", jsonResponse.optDouble("confidence", 0.0));
+            result.put("all_scores", jsonResponse.optJSONObject("all_scores"));
 
-            if (predictions.length() > 0) {
-                JSONObject firstPrediction = predictions.getJSONObject(0);
-                String className = firstPrediction.getString("class");
-                result.put("class", className);
-            } else {
-                result.put("class", "No predictions found.");
-            }
             Users users = userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("User not found"));
             Results results = resultRepository.findByUser(users).orElseThrow(() -> new IllegalArgumentException("Results not found"));
             results.setNumberOfTimeDetect(results.getNumberOfTimeDetect()+1);
             resultRepository.save(results);
+
             return ResponseEntity.ok(result.toString());
         } catch (IOException | JSONException e) {
             logger.error("Error during the request to Flask API", e);
             return ResponseEntity.status(500).body("{\"error\": \"Error processing file.\"}");
         }
     }
+
 
     private static class MultipartInputStreamFileResource extends InputStreamResource {
         private final String filename;

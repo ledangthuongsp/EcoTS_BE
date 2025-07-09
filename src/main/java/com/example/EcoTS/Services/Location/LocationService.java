@@ -242,12 +242,10 @@ public class LocationService {
         OpeningSchedule schedule = scheduleRepository.findById(request.getScheduleId())
                 .orElseThrow(() -> new RuntimeException("Opening schedule not found with ID: " + request.getScheduleId()));
 
-        // Ensure timeSlots list is initialized
         if (schedule.getTimeSlots() == null) {
             schedule.setTimeSlots(new ArrayList<>());
         }
 
-        List<TimeSlot> currentScheduleTimeSlots = new ArrayList<>(schedule.getTimeSlots());
         List<TimeSlot> timeSlotsToAdd = new ArrayList<>();
 
         for (UpdateTimeSlotRequest slotDTO : request.getTimeSlots()) {
@@ -258,18 +256,9 @@ public class LocationService {
             LocalTime startTime = LocalTime.parse(slotDTO.getStartTime());
             LocalTime endTime = LocalTime.parse(slotDTO.getEndTime());
 
-            // Check for overlaps with existing slots in the schedule and newly added slots in this request
-            for (TimeSlot existingSlot : currentScheduleTimeSlots) {
-                if (startTime.isBefore(existingSlot.getEndTime()) && endTime.isAfter(existingSlot.getStartTime())) {
-                    throw new RuntimeException("Time slot overlap detected: " + slotDTO.getStartTime() + "-" + slotDTO.getEndTime() +
-                            " overlaps with " + existingSlot.getStartTime() + "-" + existingSlot.getEndTime());
-                }
-            }
-            for (TimeSlot newlyAddedSlot : timeSlotsToAdd) { // Check against other slots being added in this request
-                if (startTime.isBefore(newlyAddedSlot.getEndTime()) && endTime.isAfter(newlyAddedSlot.getStartTime())) {
-                    throw new RuntimeException("Time slot overlap detected: " + slotDTO.getStartTime() + "-" + slotDTO.getEndTime() +
-                            " overlaps with " + newlyAddedSlot.getStartTime() + "-" + newlyAddedSlot.getEndTime() + " (within current batch)");
-                }
+            // CHỈ KIỂM TRA GIỜ HỢP LỆ
+            if (!startTime.isBefore(endTime)) {
+                throw new IllegalArgumentException("Start time must be before end time: " + slotDTO.getStartTime() + " - " + slotDTO.getEndTime());
             }
 
             TimeSlot newSlot = TimeSlot.builder()
@@ -280,8 +269,8 @@ public class LocationService {
             timeSlotsToAdd.add(newSlot);
         }
 
-        schedule.getTimeSlots().addAll(timeSlotsToAdd); // Add all new slots to the schedule's list
-        scheduleRepository.save(schedule); // Save schedule (time slots will be cascaded)
+        schedule.getTimeSlots().addAll(timeSlotsToAdd);
+        scheduleRepository.save(schedule);
 
         return mapper.toDTO(schedule.getLocation());
     }
