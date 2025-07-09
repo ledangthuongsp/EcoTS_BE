@@ -1,5 +1,6 @@
 package com.example.EcoTS.Services.RewardItem;
 
+import com.example.EcoTS.DTOs.Response.RewardNotificationDTO;
 import com.example.EcoTS.DTOs.Response.RewardOrderResponse;
 import com.example.EcoTS.Enum.RewardOrderStatus;
 import com.example.EcoTS.Models.*;
@@ -24,6 +25,7 @@ public class RewardOrderService {
     private final RewardOrderRepository rewardOrderRepository;
     private final RewardItemLocationRepository rewardItemLocationRepository;
     private final PointRepository pointRepository;
+    private final RewardNotificationRepository rewardNotificationRepository;
 
     @Transactional
     public void redeemReward(Long userId, Long rewardItemId, Long locationId, int quantity) {
@@ -59,59 +61,23 @@ public class RewardOrderService {
                 .build();
         rewardOrderRepository.save(order);
 
+        // Create notification for reward redemption
+        RewardNotification notification = RewardNotification.builder()
+                .userId(user.getId())
+                .rewardItem(item)
+                .quantity(quantity)
+                .location(location)
+                .status(RewardOrderStatus.PENDING)
+                .title("Đơn hàng của bạn đang được chuẩn bị")
+                .description("Đơn hàng của bạn với số lượng " + quantity + " x " + item.getItemName() + " được chuẩn bị tại địa điểm " + location.getLocationName() + ".")
+                .isRead(false)
+                .createdAt(Timestamp.valueOf(LocalDateTime.now()))
+                .updatedAt(Timestamp.valueOf(LocalDateTime.now()))
+                .build();
+
+        rewardNotificationRepository.save(notification);
         userRepository.save(user);
         rewardItemLocationRepository.save(ril);
-        sendNotification(user.getUsername(), item.getItemName(), quantity);
-    }
-
-    public List<RewardOrderResponse> getUserRewardHistory(Long userId) {
-        Users user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-        List<RewardOrder> orders = rewardOrderRepository.findByUserOrderByCreatedAtDesc(user);
-        List<RewardOrderResponse> response = new ArrayList<>();
-
-        for (RewardOrder order : orders) {
-            RewardItem item = order.getRewardItem();
-            String imageUrl = item.getRewardItemUrl() != null && !item.getRewardItemUrl().isEmpty()
-                    ? item.getRewardItemUrl().get(0)
-                    : null;
-
-            response.add(RewardOrderResponse.builder()
-                    .orderId(order.getId())
-                    .rewardItemName(item.getItemName())
-                    .rewardItemImage(imageUrl)
-                    .quantity(order.getQuantity())
-                    .locationName(order.getLocation().getLocationName())
-                    .status(order.getStatus().toString())
-                    .createdAt(order.getCreatedAt())
-                    .build());
-        }
-        return response;
-    }
-
-    public List<RewardOrderResponse> getOrdersByLocationId(Long locationId) {
-        Locations location = locationRepository.findById(locationId)
-                .orElseThrow(() -> new RuntimeException("Location not found"));
-        List<RewardOrder> orders = rewardOrderRepository.findByLocationOrderByCreatedAtDesc(location);
-        List<RewardOrderResponse> response = new ArrayList<>();
-
-        for (RewardOrder order : orders) {
-            RewardItem item = order.getRewardItem();
-            String imageUrl = item.getRewardItemUrl() != null && !item.getRewardItemUrl().isEmpty()
-                    ? item.getRewardItemUrl().get(0)
-                    : null;
-
-            response.add(RewardOrderResponse.builder()
-                    .orderId(order.getId())
-                    .rewardItemName(item.getItemName())
-                    .rewardItemImage(imageUrl)
-                    .quantity(order.getQuantity())
-                    .locationName(location.getLocationName())
-                    .status(order.getStatus().toString())
-                    .createdAt(order.getCreatedAt())
-                    .build());
-        }
-        return response;
     }
 
     @Transactional
@@ -123,6 +89,22 @@ public class RewardOrderService {
 
         order.setStatus(RewardOrderStatus.WAITING_FOR_USER);
         rewardOrderRepository.save(order);
+
+        // Create notification for employee confirmation
+        RewardNotification notification = RewardNotification.builder()
+                .userId(order.getUser().getId())
+                .rewardItem(order.getRewardItem())
+                .quantity(order.getQuantity())
+                .location(order.getLocation())
+                .status(RewardOrderStatus.WAITING_FOR_USER)
+                .title("Đơn hàng của bạn đã được chuẩn bị thành công !")
+                .description("Đơn hàng của bạn với số lượng " + order.getQuantity() + " x " + order.getRewardItem().getItemName() + " đang chờ bạn đến lấy.")
+                .isRead(false)
+                .createdAt(Timestamp.valueOf(LocalDateTime.now()))
+                .updatedAt(Timestamp.valueOf(LocalDateTime.now()))
+                .build();
+
+        rewardNotificationRepository.save(notification);
     }
 
     @Transactional
@@ -144,8 +126,110 @@ public class RewardOrderService {
 
         rewardItemLocationRepository.save(ril);
         rewardOrderRepository.save(order);
+
+        // Create notification for user confirmation
+        RewardNotification notification = RewardNotification.builder()
+                .userId(order.getUser().getId())
+                .rewardItem(order.getRewardItem())
+                .quantity(order.getQuantity())
+                .location(order.getLocation())
+                .status(RewardOrderStatus.CONFIRMED)
+                .title("Đã nhận hàng thành công")
+                .description("Đơn hàng với số lượng " + order.getQuantity() + " x " + order.getRewardItem().getItemName() + " đã được người dùng nhận hàng thành công.")
+                .isRead(false)
+                .createdAt(Timestamp.valueOf(LocalDateTime.now()))
+                .updatedAt(Timestamp.valueOf(LocalDateTime.now()))
+                .build();
+
+        rewardNotificationRepository.save(notification);
     }
 
+    public List<RewardNotificationDTO> getUserNotifications(Long userId) {
+        List<RewardNotification> notifications = rewardNotificationRepository.findByUserIdOrderByCreatedAtDesc(userId);
+        List<RewardNotificationDTO> response = new ArrayList<>();
+
+        for (RewardNotification notification : notifications) {
+            RewardNotificationDTO dto = RewardNotificationDTO.builder()
+                    .id(notification.getId())
+                    .title(notification.getTitle())
+                    .description(notification.getDescription())
+                    .userId(notification.getUserId())
+                    .rewardItemName(notification.getRewardItem().getItemName())
+                    .quantity(notification.getQuantity())
+                    .locationName(notification.getLocation().getLocationName())
+                    .status(notification.getStatus())
+                    .isRead(notification.isRead())
+                    .createdAt(notification.getCreatedAt())
+                    .build();
+            response.add(dto);
+        }
+
+        return response;
+    }
+
+    @Transactional
+    public void markNotificationAsRead(Long notificationId) {
+        RewardNotification notification = rewardNotificationRepository.findById(notificationId)
+                .orElseThrow(() -> new RuntimeException("Notification not found"));
+
+        if (!notification.isRead()) {
+            notification.setRead(true);
+            rewardNotificationRepository.save(notification);
+        }
+    }
+    public List<RewardOrderResponse> getUserRewardHistory(Long userId) {
+        Users user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        List<RewardOrder> orders = rewardOrderRepository.findByUserOrderByCreatedAtDesc(user);
+
+        if (orders == null || orders.isEmpty()) {
+            throw new RuntimeException("No orders found for user");
+        }
+
+        List<RewardOrderResponse> response = new ArrayList<>();
+        for (RewardOrder order : orders) {
+            RewardItem item = order.getRewardItem();
+            String imageUrl = item.getRewardItemUrl() != null && !item.getRewardItemUrl().isEmpty()
+                    ? item.getRewardItemUrl().get(0)
+                    : null;
+
+            response.add(RewardOrderResponse.builder()
+                    .orderId(order.getId())
+                    .rewardItemName(item.getItemName())
+                    .rewardItemImage(imageUrl)
+                    .quantity(order.getQuantity())
+                    .locationName(order.getLocation().getLocationName())
+                    .status(order.getStatus().toString())
+                    .createdAt(order.getCreatedAt())
+                    .build());
+        }
+        return response;
+    }
+    public List<RewardOrderResponse> getOrdersByLocationId(Long locationId) {
+        Locations location = locationRepository.findById(locationId)
+                .orElseThrow(() -> new RuntimeException("Location not found"));
+
+        List<RewardOrder> orders = rewardOrderRepository.findByLocationOrderByCreatedAtDesc(location);
+        List<RewardOrderResponse> response = new ArrayList<>();
+
+        for (RewardOrder order : orders) {
+            RewardItem item = order.getRewardItem();
+            String imageUrl = item.getRewardItemUrl() != null && !item.getRewardItemUrl().isEmpty()
+                    ? item.getRewardItemUrl().get(0)
+                    : null;
+
+            response.add(RewardOrderResponse.builder()
+                    .orderId(order.getId())
+                    .rewardItemName(item.getItemName())
+                    .rewardItemImage(imageUrl)
+                    .quantity(order.getQuantity())
+                    .locationName(location.getLocationName())
+                    .status(order.getStatus().toString())
+                    .createdAt(order.getCreatedAt())
+                    .build());
+        }
+        return response;
+    }
     @Transactional
     public void cancelOrderByUser(Long orderId) {
         RewardOrder order = rewardOrderRepository.findById(orderId)
@@ -171,9 +255,9 @@ public class RewardOrderService {
         rewardItemLocationRepository.save(ril);
         rewardOrderRepository.save(order);
     }
-
     @Transactional
     public void autoExpireOrders() {
+        // Lấy tất cả các đơn hàng có trạng thái "WAITING_FOR_USER" và đã quá 3 ngày
         Timestamp threshold = Timestamp.valueOf(LocalDateTime.now().minusDays(3));
         List<RewardOrder> expiredOrders = rewardOrderRepository.findWaitingOrdersBefore(threshold);
 
@@ -188,15 +272,12 @@ public class RewardOrderService {
                     .orElseThrow(() -> new RuntimeException("RewardItemLocation not found"));
             ril.setPending(ril.getPending() - order.getQuantity());
 
-            order.setStatus(RewardOrderStatus.EXPIRED);
+            order.setStatus(RewardOrderStatus.EXPIRED);  // Set status as EXPIRED
 
+            // Lưu lại các thay đổi
             pointRepository.save(points);
             rewardItemLocationRepository.save(ril);
             rewardOrderRepository.save(order);
         }
-    }
-
-    private void sendNotification(String username, String itemName, int quantity) {
-        System.out.printf("Notification: %s đã đổi %d x %s%n", username, quantity, itemName);
     }
 }

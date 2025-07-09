@@ -1,5 +1,6 @@
 package com.example.EcoTS.Controllers.Reward;
 
+import com.example.EcoTS.DTOs.Response.RewardNotificationDTO;
 import com.example.EcoTS.DTOs.Response.RewardOrderResponse;
 import com.example.EcoTS.Services.RewardItem.RewardOrderService;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -56,4 +57,16 @@ public class RewardOrderController {
         return ResponseEntity.ok("Order cancelled and points refunded");
     }
 
+    // Lấy thông báo của người dùng
+    @GetMapping("/user/notifications/{userId}")
+    public ResponseEntity<List<RewardNotificationDTO>> getUserNotifications(@PathVariable Long userId) {
+        return ResponseEntity.ok(rewardOrderService.getUserNotifications(userId));
+    }
+
+    // Đánh dấu thông báo là đã đọc
+    @PostMapping("/user/notifications/mark-read/{notificationId}")
+    public ResponseEntity<?> markNotificationAsRead(@PathVariable Long notificationId) {
+        rewardOrderService.markNotificationAsRead(notificationId);
+        return ResponseEntity.ok("Notification marked as read");
+    }
 }
