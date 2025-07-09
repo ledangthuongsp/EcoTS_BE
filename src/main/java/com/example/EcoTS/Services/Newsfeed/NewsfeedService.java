@@ -1,7 +1,10 @@
 package com.example.EcoTS.Services.Newsfeed;
 
+import com.example.EcoTS.DTOs.Response.Newsfeed.*;
 import com.example.EcoTS.Models.Newsfeed.*;
+import com.example.EcoTS.Models.Users;
 import com.example.EcoTS.Repositories.Newsfeed.*;
+import com.example.EcoTS.Repositories.UserRepository;
 import com.example.EcoTS.Services.CloudinaryService.CloudinaryService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,9 +14,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class NewsfeedService {
@@ -32,7 +34,8 @@ public class NewsfeedService {
     private CommentRepository commentRepository;
     @Autowired
     private ReactRepository reactRepository;
-
+    @Autowired
+    private UserRepository userRepository;
     @Autowired
     private VoteRepository voteRepository;
     // CREATE: Add a new newsfeed
@@ -80,10 +83,81 @@ public class NewsfeedService {
         return newsfeedRepository.save(newsfeed);
     }
 
-    // READ: Get all newsfeeds
-    public List<Newsfeed> getAllNewsfeed() {
-        return newsfeedRepository.findAllByOrderByCreatedAtDesc();
+    public List<NewsfeedResponse> getAllNewsfeed() {
+        // Lấy danh sách tất cả Newsfeed từ database
+        List<Newsfeed> newsfeeds = newsfeedRepository.findAllByOrderByCreatedAtDesc();
+
+        List<NewsfeedResponse> newsfeedResponses = new ArrayList<>();
+
+        // Duyệt qua từng Newsfeed và tạo NewsfeedResponse
+        for (Newsfeed newsfeed : newsfeeds) {
+            // Lấy avatar của user từ userRepository
+            // Truy vấn Poll trực tiếp từ PollRepository
+            Poll poll = pollRepository.findById(newsfeed.getPollId()).orElse(null);
+            PollResponse pollResponse = null;
+            if (poll != null) {
+                // Lấy PollOption cho Poll này nếu có
+                List<PollOptionResponse> pollOptionResponses = poll.getPollOptionIds().stream()
+                        .map(optionId -> {
+                            PollOption pollOption = pollOptionRepository.findById(optionId).orElse(null);
+                            List<Long> voteIds = pollOption != null ? pollOption.getVoteIds() : null;
+                            List<VoteResponse> voteResponses = voteIds.stream()
+                                    .map(voteId -> {
+                                        // Lấy Vote từ VoteRepository (dựa trên voteId)
+                                        Vote vote = voteRepository.findById(voteId).orElse(null);
+
+                                        // Nếu tìm thấy vote, tạo VoteResponse, nếu không trả về null
+                                        if (vote != null) {
+                                            Users user = userRepository.findById(vote.getUserId()).orElse(null);
+                                            String avatarUrl = (user != null) ? user.getAvatarUrl() : null;
+                                            String fullName = (user != null) ? user.getFullName() : null;
+                                            return new VoteResponse(vote.getId(), vote.getUserId(), avatarUrl, fullName, vote.isStatus());
+                                        }
+                                        return null;  // Nếu không tìm thấy Vote, trả về null
+                                    })
+                                    .filter(Objects::nonNull)  // Loại bỏ các giá trị null
+                                    .collect(Collectors.toList());
+                            // Tạo PollOptionResponse với VoteResponse
+                            return new PollOptionResponse(pollOption.getId(), pollOption.getType(), voteResponses);
+                        })
+                        .collect(Collectors.toList());
+
+                pollResponse = new PollResponse(poll.getId(), poll.getTitle(), pollOptionResponses);
+            }
+
+            // Truy vấn Comment trực tiếp từ CommentRepository
+            List<Comment> comments = commentRepository.findAllById(newsfeed.getCommentIds());
+            List<CommentResponse> commentResponses = comments.stream()
+                    .map(comment -> new CommentResponse(comment.getId(), comment.getUserId(), comment.getMessage(), comment.getImgUrls()))
+                    .collect(Collectors.toList());
+
+            // Truy vấn React trực tiếp từ ReactRepository
+            List<React> reacts = reactRepository.findAllById(newsfeed.getReactIds());
+            List<ReactResponse> reactResponses = reacts.stream()
+                    .map(react -> new ReactResponse(react.getId(), react.getUserId(), react.isStatus()))
+                    .collect(Collectors.toList());
+
+            // Tạo NewsfeedResponse từ Newsfeed và các dữ liệu đã lấy
+            NewsfeedResponse newsfeedResponse = NewsfeedResponse.builder()
+                    .id(newsfeed.getId())
+                    .content(newsfeed.getContent())
+                    .mediaUrls(newsfeed.getMediaUrls())
+                    .sponsorId(newsfeed.getSponsorId())
+                    .pointForActivity(newsfeed.getPointForActivity())
+                    .userId(newsfeed.getUserId())
+                    .poll(pollResponse)
+                    .comments(commentResponses)
+                    .reacts(reactResponses)
+                    .build();
+
+            // Thêm NewsfeedResponse vào danh sách kết quả
+            newsfeedResponses.add(newsfeedResponse);
+        }
+
+        return newsfeedResponses;
     }
+
+
 
     // Get all newsfeeds for a specific user, ordered by createdAt (newest to oldest)
     public List<Newsfeed> getYourActivity(Long userId) {

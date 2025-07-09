@@ -16,7 +16,7 @@ import java.util.List;
 public class Poll {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-    private String title;
-    private List<Long> pollOptionIds = new ArrayList<>();
+    public Long id;
+    public String title;
+    public List<Long> pollOptionIds = new ArrayList<>();
 }
