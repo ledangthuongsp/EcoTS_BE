@@ -2,6 +2,7 @@ package com.example.EcoTS.Controllers.Newsfeed;
 
 import com.example.EcoTS.DTOs.Request.Newsfeed.NewsfeedRequest;
 import com.example.EcoTS.DTOs.Request.Newsfeed.PollRequest;
+import com.example.EcoTS.DTOs.Response.Newsfeed.CommentAllReponse;
 import com.example.EcoTS.DTOs.Response.Newsfeed.NewsfeedResponse;
 import com.example.EcoTS.Models.Newsfeed.Comment;
 import com.example.EcoTS.Models.Newsfeed.Newsfeed;
@@ -47,8 +48,8 @@ public class NewsfeedController {
     }
     // READ: Get all newsfeeds
     @GetMapping("/getAll")
-    public ResponseEntity<List<NewsfeedResponse>> getAllNewsfeeds() {
-        List<NewsfeedResponse> newsfeeds = newsfeedService.getAllNewsfeed();
+    public ResponseEntity<List<Newsfeed>> getAllNewsfeeds() {
+        List<Newsfeed> newsfeeds = newsfeedService.getAllNewsfeed();
         return ResponseEntity.ok(newsfeeds);
     }
     @GetMapping(value = "/get-your-activity", name = "Cai nay la de lay nhung activity ma minh da post len")
@@ -121,8 +122,8 @@ public class NewsfeedController {
 
     // Lấy toàn bộ comment của một newsfeed
     @GetMapping("/{newsfeedId}/comments")
-    public ResponseEntity<List<Comment>> getAllComments(@PathVariable Long newsfeedId) {
-        List<Comment> comments = newsfeedService.getAllComments(newsfeedId);
+    public ResponseEntity<List<CommentAllReponse>> getAllComments(@PathVariable Long newsfeedId) {
+        List<CommentAllReponse> comments = newsfeedService.getAllComments(newsfeedId);
         return ResponseEntity.ok(comments);
     }
 
