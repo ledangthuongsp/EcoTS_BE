@@ -215,6 +215,14 @@ public class CloudinaryService {
         }
         return urls;
     }
+    public String uploadContract(MultipartFile file) throws IOException {
+        Map response = cloudinary.uploader().upload(file.getBytes(),
+                ObjectUtils.asMap(
+                        "resource_type", "auto",
+                        "folder", "Contract" // Thêm folder "Reviews"
+                ));
+        return (String) response.get("url");
+    }
 }
 
 

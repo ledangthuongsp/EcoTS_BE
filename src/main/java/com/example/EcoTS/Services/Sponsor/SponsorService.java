@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.security.SecureRandom;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -69,7 +70,12 @@ public class SponsorService {
         if (sponsorCreateOpt.isPresent()) {
             SponsorCreate sponsorCreate = sponsorCreateOpt.get();
 
-            // Chuyển thông tin từ bảng tạm vào bảng sponsor
+            // Check if the email already exists in SponsorCreate or Sponsor table
+            if (isEmailAlreadyExists(sponsorCreate.getEmail())) {
+                throw new RuntimeException("Email already exists. Please use a different email address.");
+            }
+
+            // Proceed with creating Sponsor from SponsorCreate
             Sponsor sponsor = new Sponsor();
             sponsor.setCompanyUsername(sponsorCreate.getCompanyName());
             sponsor.setCompanyPassword(generateRandomPassword());  // Mật khẩu ngẫu nhiên
@@ -94,6 +100,20 @@ public class SponsorService {
             emailService.sendTemporaryPassword(sponsorCreate.getEmail(), sponsor.getCompanyPassword());
         }
     }
+
+    // Method to check if the email already exists in either the SponsorCreate or Sponsor table
+    private boolean isEmailAlreadyExists(String email) {
+        // Check in SponsorCreate
+        if (sponsorCreateRepository.findByEmail(email).isPresent()) {
+            return true;
+        }
+        // Check in Sponsor
+        if (sponsorRepository.findByCompanyEmailContact(email) != null) {
+            return true;
+        }
+        return false;
+    }
+
     public boolean isFirstTimeLogin(Long sponsorId) {
         Sponsor sponsor = sponsorRepository.findById(sponsorId)
                 .orElseThrow(() -> new RuntimeException("Sponsor not found"));
@@ -147,5 +167,9 @@ public class SponsorService {
     @Transactional
     public void deleteSponsor(Long id) {
         sponsorRepository.deleteById(id);
+    }
+
+    public List<SponsorCreate> getAllPendingSponsors() {
+        return sponsorCreateRepository.findByStatus(SponsorCreate.Status.PENDING);
     }
 }

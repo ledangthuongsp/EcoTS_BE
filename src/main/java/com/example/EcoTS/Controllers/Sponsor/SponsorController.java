@@ -7,6 +7,7 @@ import com.example.EcoTS.Models.Sponsor;
 import com.example.EcoTS.Models.SponsorCreate;
 import com.example.EcoTS.Models.SponsorQRCode;
 import com.example.EcoTS.Repositories.Newsfeed.NewsfeedRepository;
+import com.example.EcoTS.Repositories.SponsorCreateRepository;
 import com.example.EcoTS.Repositories.SponsorRepository;
 import com.example.EcoTS.Services.CloudinaryService.CloudinaryService;
 import com.example.EcoTS.Services.Sponsor.SponsorQRCodeService;
@@ -43,12 +44,39 @@ public class SponsorController {
     @Autowired
     private SponsorMapper sponsorMapper;
 
+    @Autowired
+    private SponsorCreateRepository sponsorCreateRepository;
     // API tạo mới sponsor
     @PostMapping("/create")
-    public ResponseEntity<SponsorCreate> createSponsor(@RequestBody SponsorCreate sponsorCreate) {
+    public ResponseEntity<SponsorCreate> createSponsor(@RequestParam("file") MultipartFile file,
+                                                       @RequestParam("companyName") String companyName,
+                                                       @RequestParam("natureOfBusiness") String natureOfBusiness,
+                                                       @RequestParam("address") String address,
+                                                       @RequestParam("postcode") String postcode,
+                                                       @RequestParam("contactName") String contactName,
+                                                       @RequestParam("contactPhone") String contactPhone,
+                                                       @RequestParam("email") String email,
+                                                       @RequestParam("taxNumber") String taxNumber,
+                                                       @RequestParam("idea") String idea) throws IOException {
+        // Your file handling logic
+        String fileUrl = cloudinaryService.uploadContract(file); // Use cloud service or your local server to store the file
+        // Then create SponsorCreate object and save to DB
+        SponsorCreate sponsorCreate = new SponsorCreate();
+        sponsorCreate.setCompanyName(companyName);
+        sponsorCreate.setAddress(address);
+        sponsorCreate.setNatureOfBusiness(natureOfBusiness);
+        sponsorCreate.setPostcode(postcode);
+        sponsorCreate.setContactName(contactName);
+        sponsorCreate.setContactPhone(contactPhone);
+        sponsorCreate.setEmail(email);
+        sponsorCreate.setTaxNumber(taxNumber);
+        sponsorCreate.setIdea(idea);
+        sponsorCreate.setAdditionalFileUrl(fileUrl);
+        sponsorCreate.setStatus(SponsorCreate.Status.PENDING);
         SponsorCreate createdSponsor = sponsorService.createSponsor(sponsorCreate);
         return ResponseEntity.ok(createdSponsor);
     }
+
 
     // API cập nhật sponsor
     @PutMapping("/update/{id}")
@@ -218,5 +246,10 @@ public class SponsorController {
         // Xác nhận sponsor và gửi mật khẩu qua email
         sponsorService.confirmSponsor(id);
         return ResponseEntity.noContent().build();  // Trả về HTTP 204 No Content khi xác nhận thành công
+    }
+    @GetMapping("/admin/get-pending-sponsor")
+    public ResponseEntity<List<SponsorCreate>> getAllSponsorPending(){
+        List<SponsorCreate> sponsorCreates = sponsorCreateRepository.findByStatus(SponsorCreate.Status.PENDING);
+        return ResponseEntity.ok(sponsorCreates);
     }
 }

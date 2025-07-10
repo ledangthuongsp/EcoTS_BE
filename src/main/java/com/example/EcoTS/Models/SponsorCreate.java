@@ -24,6 +24,7 @@ public class SponsorCreate {
     private String natureOfBusiness;
     private String address;
     private String contactName;
+    private String postcode;
     private String contactPhone;
     private String email;
     private String taxNumber;
