@@ -14,4 +14,6 @@ public interface RewardItemLocationRepository extends JpaRepository<RewardItemLo
     List<RewardItemLocation> findByLocationId(Long locationId);
     List<RewardItemLocation> findByRewardItemId(Long rewardItemId);
 
+    List<RewardItemLocation> findByRewardItemIdAndStockLessThan(Long rewardItemId, Long stock);
+
 }

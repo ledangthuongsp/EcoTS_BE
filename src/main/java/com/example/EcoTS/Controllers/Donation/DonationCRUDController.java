@@ -49,7 +49,7 @@ public class DonationCRUDController {
     /**
      * Sponsor (admin) tạo mới donation
      */
-    @PostMapping(value = "/admin/create/{sponsorId}",
+    @PostMapping(value = "/sponsor/create/{sponsorId}",
             consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
     public ResponseEntity<DonationResponseDTO> createDonation(
             @PathVariable Long sponsorId,
@@ -71,7 +71,7 @@ public class DonationCRUDController {
     /**
      * Cập nhật donation
      */
-    @PutMapping(value = "/admin/update/{id}",
+    @PutMapping(value = "/sponsor/update/{id}",
             consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
     public ResponseEntity<DonationResponseDTO> updateDonation(
             @PathVariable Long id,
@@ -95,7 +95,7 @@ public class DonationCRUDController {
      * Xóa donation
      */
 
-    @DeleteMapping("/admin/donate/delete-donation-by-id")
+    @DeleteMapping("/sponsor/donate/delete-donation-by-id")
     public ResponseEntity<String> deleteDonation(@RequestParam Long donationId) {
         try {
             donationRepository.deleteById(donationId);
@@ -104,5 +104,12 @@ public class DonationCRUDController {
             logger.error("Error deleting donation with id {}: {}", donationId, e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to delete donation: " + e.getMessage());
         }
+    }
+    // Get donations by Sponsor ID
+    @GetMapping("/sponsor/{sponsorId}/donations")
+    public ResponseEntity<List<DonationResponseDTO>> getDonationsBySponsorId(
+            @PathVariable Long sponsorId) {
+        List<DonationResponseDTO> donations = donationService.getDonationsBySponsorId(sponsorId);
+        return ResponseEntity.ok(donations);
     }
 }

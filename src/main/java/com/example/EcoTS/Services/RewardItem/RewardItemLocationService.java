@@ -140,6 +140,35 @@ public class RewardItemLocationService {
 
         return responses;
     }
+    @Transactional
+    public List<RewardItemStockResponse> getLocationsWithLowStockForRewardItem(Long rewardItemId, Long threshold) {
+        // Lấy RewardItem theo id
+        RewardItem rewardItem = rewardItemRepository.findById(rewardItemId)
+                .orElseThrow(() -> new RuntimeException("Reward Item not found"));
 
+        // Lấy tất cả RewardItemLocation có rewardItemId và tồn kho nhỏ hơn threshold
+        List<RewardItemLocation> rilList = rewardItemLocationRepository.findByRewardItemIdAndStockLessThan(rewardItemId, threshold);
+        List<RewardItemStockResponse> lowStockItems = new ArrayList<>();
+
+        // Duyệt qua tất cả RewardItemLocation và tạo danh sách trả về
+        for (RewardItemLocation ril : rilList) {
+            Locations location = ril.getLocation();
+            List<String> imageUrls = rewardItem.getRewardItemUrl() != null ? rewardItem.getRewardItemUrl() : new ArrayList<>();
+
+            lowStockItems.add(RewardItemStockResponse.builder()
+                    .rewardItemId(rewardItem.getId())
+                    .rewardItemName(rewardItem.getItemName())
+                    .rewardItemDescription(rewardItem.getItemDescription())
+                    .rewardItemImageUrl(imageUrls)
+                    .stock(ril.getStock())
+                    .importing(ril.getImporting())
+                    .pending(ril.getPending())
+                    .locationId(location.getId())
+                    .locationName(location.getLocationName())
+                    .build());
+        }
+
+        return lowStockItems;
+    }
 
 }
