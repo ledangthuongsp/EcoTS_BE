@@ -69,21 +69,23 @@ public class DonationService {
 
         Donations saved = donationRepository.save(donation);
 
-        // Cập nhật quan hệ hai chiều (nếu cần)
         sponsor.getDonations().add(saved);
         sponsorRepository.save(sponsor);
 
-        // Tạo và gửi notification
-        Notifications notif = Notifications.builder()
-                .title("New Donation Created")
-                .description("A new donation has been created: " + title)
-                .build();
-        notificationRepository.save(notif);
-        notificationService.notifyAllUsers(
-                notif.getTitle(),
-                notif.getDescription(),
-                sponsor.getCompanyUsername()
-        );
+//        // Tạo và gửi notification
+//        Notifications notif = Notifications.builder()
+//                .title("New Donation Created")
+//                .description("A new donation has been created: " + title)
+//                .build();
+//        notificationRepository.save(notif);
+//        List<Users> usersList = userRepository.findAll();
+//        for (Users user : usersList) {
+//            notificationService.notifyAllUsers(
+//                    user.getUsername(), // Assuming 'notifyUser' method sends a notification to a specific user
+//                    notif.getTitle(),
+//                    notif.getDescription()
+//            );
+//        }
 
         return donationMapper.toDTO(saved);
     }

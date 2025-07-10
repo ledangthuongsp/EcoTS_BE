@@ -49,10 +49,10 @@ public class DonationCRUDController {
     /**
      * Sponsor (admin) tạo mới donation
      */
-    @PostMapping(value = "/sponsor/create/{sponsorId}",
+    @PostMapping(value = "/donate/sponsor/create",
             consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
     public ResponseEntity<DonationResponseDTO> createDonation(
-            @PathVariable Long sponsorId,
+            @RequestParam Long sponsorId,
             @RequestParam("title")       String title,
             @RequestParam("name")        String name,
             @RequestParam("description") String description,
@@ -71,10 +71,10 @@ public class DonationCRUDController {
     /**
      * Cập nhật donation
      */
-    @PutMapping(value = "/sponsor/update/{id}",
+    @PutMapping(value = "/donate/sponsor/update",
             consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
     public ResponseEntity<DonationResponseDTO> updateDonation(
-            @PathVariable Long id,
+            @RequestParam Long id,
             @RequestParam(value = "title",        required = false) String title,
             @RequestParam(value = "name",         required = false) String name,
             @RequestParam(value = "description",  required = false) String description,
@@ -95,7 +95,7 @@ public class DonationCRUDController {
      * Xóa donation
      */
 
-    @DeleteMapping("/sponsor/donate/delete-donation-by-id")
+    @DeleteMapping("/donate/sponsor/delete-donation-by-id")
     public ResponseEntity<String> deleteDonation(@RequestParam Long donationId) {
         try {
             donationRepository.deleteById(donationId);
@@ -106,7 +106,7 @@ public class DonationCRUDController {
         }
     }
     // Get donations by Sponsor ID
-    @GetMapping("/sponsor/{sponsorId}/donations")
+    @GetMapping("/donate/sponsor/{sponsorId}/donations")
     public ResponseEntity<List<DonationResponseDTO>> getDonationsBySponsorId(
             @PathVariable Long sponsorId) {
         List<DonationResponseDTO> donations = donationService.getDonationsBySponsorId(sponsorId);

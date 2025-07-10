@@ -21,6 +21,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.tensorflow.op.math.Mul;
 
 import java.io.IOException;
 import java.sql.Timestamp;
@@ -80,11 +81,23 @@ public class SponsorController {
 
 
     // API cập nhật sponsor
-    @PutMapping("/update/{id}")
-    public ResponseEntity<SponsorResponse> updateSponsor(@PathVariable Long id, @RequestBody Sponsor sponsorDetails) {
-        SponsorResponse updatedSponsor = sponsorService.updateSponsor(id, sponsorDetails);
-        return ResponseEntity.ok(updatedSponsor);
+    @PostMapping(value = "/update", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
+    public ResponseEntity<SponsorResponse> updateSponsor(@RequestParam Long id,
+                                                         @RequestParam String companyUsername,
+                                                         @RequestPart MultipartFile file, // Accept the file
+                                                         @RequestParam String companyName,
+                                                         @RequestParam String companyPhoneNumberContact,
+                                                         @RequestParam String companyAddress,
+                                                         @RequestParam String businessDescription,
+                                                         @RequestParam String companyDirectorName,
+                                                         @RequestParam String companyTaxNumber) throws IOException {
+        // Passing the file and other parameters to the service
+        SponsorResponse updatedSponsor = sponsorService.updateSponsor(id, companyUsername, file, companyName, companyPhoneNumberContact, companyAddress,
+                businessDescription, companyDirectorName, companyTaxNumber);
+
+        return ResponseEntity.ok(updatedSponsor); // Return updated sponsor response
     }
+
 
     // API lấy thông tin sponsor theo id
     @GetMapping("/{id}")

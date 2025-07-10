@@ -223,6 +223,14 @@ public class CloudinaryService {
                 ));
         return (String) response.get("url");
     }
+    public String uploadSponsorAvatar(MultipartFile file) throws IOException {
+        Map response = cloudinary.uploader().upload(file.getBytes(),
+                ObjectUtils.asMap(
+                        "resource_type", "auto",
+                        "folder", "Sponsor" // Thêm folder "Reviews"
+                ));
+        return (String) response.get("url");
+    }
 }
 
 

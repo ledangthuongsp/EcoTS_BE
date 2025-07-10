@@ -11,6 +11,7 @@ import com.example.EcoTS.Repositories.SponsorCreateRepository;
 import com.example.EcoTS.Repositories.SponsorQRCodeRepository;
 import com.example.EcoTS.Repositories.SponsorRepository;
 import com.example.EcoTS.Repositories.UserRepository;
+import com.example.EcoTS.Services.CloudinaryService.CloudinaryService;
 import com.example.EcoTS.Services.Email.EmailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -41,6 +42,8 @@ public class SponsorService {
     @Autowired
     private SponsorCreateRepository sponsorCreateRepository;
 
+    @Autowired
+    private CloudinaryService cloudinaryService;
     private String generateRandomPassword() {
         String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
         SecureRandom random = new SecureRandom();
@@ -146,42 +149,50 @@ public class SponsorService {
 
     // Cập nhật thông tin sponsor
     @Transactional
-    public SponsorResponse updateSponsor(Long id, Sponsor sponsorDetails) {
+    public SponsorResponse updateSponsor(Long id, String companyUsername, MultipartFile file, String companyName,
+                                         String companyPhoneNumberContact, String companyAddress, String businessDescription,
+                                         String companyDirectorName, String companyTaxNumber) throws IOException {
+
+        // Retrieve the sponsor from the database
         Sponsor sponsor = sponsorRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Sponsor không tồn tại với id: " + id));
 
-        // Cập nhật các trường, nhưng không thay đổi email, password và points
-        if (sponsorDetails.getCompanyUsername() != null) {
-            sponsor.setCompanyUsername(sponsorDetails.getCompanyUsername());
+        // Upload the avatar file to Cloudinary and get the URL
+        String sponsorAvatarUrl = cloudinaryService.uploadSponsorAvatar(file);
+
+        // Update sponsor fields
+        if (companyUsername != null) {
+            sponsor.setCompanyUsername(companyUsername);
         }
-        if (sponsorDetails.getAvatarUrl() != null) {
-            sponsor.setAvatarUrl(sponsorDetails.getAvatarUrl());
+        if (companyName != null) {
+            sponsor.setCompanyName(companyName);
         }
-        if (sponsorDetails.getCompanyName() != null) {
-            sponsor.setCompanyName(sponsorDetails.getCompanyName());
+        if (companyPhoneNumberContact != null) {
+            sponsor.setCompanyPhoneNumberContact(companyPhoneNumberContact);
         }
-        if (sponsorDetails.getCompanyPhoneNumberContact() != null) {
-            sponsor.setCompanyPhoneNumberContact(sponsorDetails.getCompanyPhoneNumberContact());
+        if (companyAddress != null) {
+            sponsor.setCompanyAddress(companyAddress);
         }
-        if (sponsorDetails.getCompanyAddress() != null) {
-            sponsor.setCompanyAddress(sponsorDetails.getCompanyAddress());
+        if (businessDescription != null) {
+            sponsor.setBusinessDescription(businessDescription);
         }
-        if (sponsorDetails.getBusinessDescription() != null) {
-            sponsor.setBusinessDescription(sponsorDetails.getBusinessDescription());
+        if (companyDirectorName != null) {
+            sponsor.setCompanyDirectorName(companyDirectorName);
         }
-        if (sponsorDetails.getCompanyDirectorName() != null) {
-            sponsor.setCompanyDirectorName(sponsorDetails.getCompanyDirectorName());
-        }
-        if (sponsorDetails.getCompanyTaxNumber() != null) {
-            sponsor.setCompanyTaxNumber(sponsorDetails.getCompanyTaxNumber());
+        if (companyTaxNumber != null) {
+            sponsor.setCompanyTaxNumber(companyTaxNumber);
         }
 
-        // Không thay đổi password, email và points
-        // Do đó, chúng không được cập nhật trong khi save
+        // Set the new avatar URL (if the file was uploaded)
+        if (sponsorAvatarUrl != null) {
+            sponsor.setAvatarUrl(sponsorAvatarUrl);
+        }
 
+        // Save the updated sponsor back to the database
         Sponsor updated = sponsorRepository.save(sponsor);
-        return sponsorMapper.toDTO(updated);
+        return sponsorMapper.toDTO(updated); // Map to DTO and return
     }
+
 
 
     // Lấy thông tin sponsor theo id
