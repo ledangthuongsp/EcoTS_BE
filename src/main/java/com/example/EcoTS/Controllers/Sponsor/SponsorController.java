@@ -241,7 +241,7 @@ public class SponsorController {
         ));
     }
     // API admin xác nhận sponsor
-    @PutMapping("/admin/confirm/{id}")
+    @PutMapping("/admin/confirm")
     public ResponseEntity<Void> confirmSponsor(@RequestParam Long id) {
         // Xác nhận sponsor và gửi mật khẩu qua email
         sponsorService.confirmSponsor(id);
@@ -260,5 +260,31 @@ public class SponsorController {
         response.put("exists", emailExists);
         return ResponseEntity.ok(response);
     }
+    // API Get All Sponsors
+    @GetMapping("/get-all-sponsors")
+    public ResponseEntity<List<SponsorResponse>> getAllSponsors() {
+        try {
+            // Fetch all sponsors from the repository
+            List<Sponsor> sponsors = sponsorRepository.findAll();
 
+            // If there are no sponsors found, return an empty list
+            if (sponsors.isEmpty()) {
+                return ResponseEntity.ok(Collections.emptyList());
+            }
+
+            // Map each Sponsor entity to SponsorResponse DTO
+            List<SponsorResponse> sponsorResponses = new ArrayList<>();
+            for (Sponsor sponsor : sponsors) {
+                SponsorResponse sponsorResponse = sponsorMapper.toDTO(sponsor);
+                sponsorResponses.add(sponsorResponse);
+            }
+
+            // Return the list of SponsorResponse objects
+            return ResponseEntity.ok(sponsorResponses);
+        } catch (Exception e) {
+            // Handle any exception that occurs during fetching
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Collections.singletonList(new SponsorResponse()));
+        }
+    }
 }

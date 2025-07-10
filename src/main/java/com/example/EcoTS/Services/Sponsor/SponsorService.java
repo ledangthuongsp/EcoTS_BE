@@ -70,15 +70,26 @@ public class SponsorService {
         if (sponsorCreateOpt.isPresent()) {
             SponsorCreate sponsorCreate = sponsorCreateOpt.get();
 
-            // Check if the email already exists in SponsorCreate or Sponsor table
+            // Kiểm tra xem email đã tồn tại trong SponsorCreate hoặc Sponsor table hay không
             if (isEmailAlreadyExists(sponsorCreate.getEmail())) {
+                // Nếu email đã tồn tại, xóa bản ghi sponsorCreate đang Pending
+                sponsorCreateRepository.delete(sponsorCreate);
+
+                // Gửi email thông báo lỗi đến người dùng
+                emailService.sendEmail(
+                        sponsorCreate.getEmail(),
+                        "Email already exists",
+                        "We are sorry, but the email you provided already has an account in our system. Please check again later."
+                );
+
+                // Ném ngoại lệ để dừng quá trình xử lý nếu email trùng
                 throw new RuntimeException("Email already exists. Please use a different email address.");
             }
 
-            // Proceed with creating Sponsor from SponsorCreate
+            // Nếu không trùng email, tiếp tục xác nhận sponsor và tạo tài khoản mới
             Sponsor sponsor = new Sponsor();
             sponsor.setCompanyUsername(sponsorCreate.getCompanyName());
-            sponsor.setCompanyPassword(generateRandomPassword());  // Mật khẩu ngẫu nhiên
+            sponsor.setCompanyPassword(generateRandomPassword());  // Tạo mật khẩu ngẫu nhiên
             sponsor.setAvatarUrl("");  // Tạm thời chưa có avatar
             sponsor.setCompanyName(sponsorCreate.getCompanyName());
             sponsor.setCompanyPhoneNumberContact(sponsorCreate.getContactPhone());
@@ -92,7 +103,7 @@ public class SponsorService {
             // Lưu sponsor vào bảng sponsor
             sponsorRepository.save(sponsor);
 
-            // Cập nhật trạng thái sponsorCreate là CONFIRMED
+            // Cập nhật trạng thái sponsorCreate thành CONFIRMED
             sponsorCreate.setStatus(SponsorCreate.Status.CONFIRMED);
             sponsorCreateRepository.save(sponsorCreate);
 
