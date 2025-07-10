@@ -252,4 +252,13 @@ public class SponsorController {
         List<SponsorCreate> sponsorCreates = sponsorCreateRepository.findByStatus(SponsorCreate.Status.PENDING);
         return ResponseEntity.ok(sponsorCreates);
     }
+
+    @GetMapping("/check-email")
+    public ResponseEntity<Map<String, Boolean>> checkEmail(@RequestParam String email) {
+        boolean emailExists = sponsorCreateRepository.findByEmail(email).isPresent() || sponsorRepository.findByCompanyEmailContact(email) != null;
+        Map<String, Boolean> response = new HashMap<>();
+        response.put("exists", emailExists);
+        return ResponseEntity.ok(response);
+    }
+
 }
