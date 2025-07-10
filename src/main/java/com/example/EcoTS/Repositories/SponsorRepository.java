@@ -15,4 +15,6 @@ public interface SponsorRepository extends JpaRepository<Sponsor, Long> {
     Sponsor findByCompanyUsername(String username);
     @Query("SELECT s.companyPoints FROM Sponsor s WHERE s.id = :sponsorId")
     double findCompanyPointsBySponsorId(@Param("sponsorId") Long sponsorId);
+
+    Sponsor findByCompanyEmailContact(String companyEmailContact);
 }

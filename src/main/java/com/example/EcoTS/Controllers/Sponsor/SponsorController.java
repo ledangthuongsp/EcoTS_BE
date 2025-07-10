@@ -4,6 +4,7 @@ import com.example.EcoTS.DTOs.Response.Sponsor.SponsorResponse;
 import com.example.EcoTS.Mappers.SponsorMapper;
 import com.example.EcoTS.Models.Newsfeed.Newsfeed;
 import com.example.EcoTS.Models.Sponsor;
+import com.example.EcoTS.Models.SponsorCreate;
 import com.example.EcoTS.Models.SponsorQRCode;
 import com.example.EcoTS.Repositories.Newsfeed.NewsfeedRepository;
 import com.example.EcoTS.Repositories.SponsorRepository;
@@ -41,10 +42,11 @@ public class SponsorController {
     private NewsfeedRepository newsfeedRepository;
     @Autowired
     private SponsorMapper sponsorMapper;
+
     // API tạo mới sponsor
     @PostMapping("/create")
-    public ResponseEntity<SponsorResponse> createSponsor(@RequestBody Sponsor sponsor) {
-        SponsorResponse createdSponsor = sponsorService.createSponsor(sponsor);
+    public ResponseEntity<SponsorCreate> createSponsor(@RequestBody SponsorCreate sponsorCreate) {
+        SponsorCreate createdSponsor = sponsorService.createSponsor(sponsorCreate);
         return ResponseEntity.ok(createdSponsor);
     }
 
@@ -148,6 +150,12 @@ public class SponsorController {
     @PostMapping("/login")
     public ResponseEntity<String> login(@RequestParam String username, @RequestParam String password) {
         Sponsor sponsor = sponsorRepository.findByCompanyUsername(username);
+
+        if (sponsor == null) {
+            sponsor = sponsorRepository.findByCompanyEmailContact(username);
+        }
+
+        // Kiểm tra mật khẩu
         if (sponsor != null && sponsor.getCompanyPassword().equals(password)) {
             return ResponseEntity.ok("Login successful");
         }
@@ -204,5 +212,11 @@ public class SponsorController {
                 "ended", ended
         ));
     }
-
+    // API admin xác nhận sponsor
+    @PutMapping("/admin/confirm/{id}")
+    public ResponseEntity<Void> confirmSponsor(@RequestParam Long id) {
+        // Xác nhận sponsor và gửi mật khẩu qua email
+        sponsorService.confirmSponsor(id);
+        return ResponseEntity.noContent().build();  // Trả về HTTP 204 No Content khi xác nhận thành công
+    }
 }

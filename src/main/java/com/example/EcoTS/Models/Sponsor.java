@@ -27,6 +27,7 @@ public class Sponsor {
     private String companyDirectorName;
     private String companyTaxNumber;
     private double companyPoints;
+    private boolean firstLogin = true;
 
     @OneToMany(mappedBy = "sponsor", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Locations> locations;
