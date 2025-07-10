@@ -176,12 +176,8 @@ public class SponsorController {
     }
     // Login Sponsor
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestParam String username, @RequestParam String password) {
-        Sponsor sponsor = sponsorRepository.findByCompanyUsername(username);
-
-        if (sponsor == null) {
-            sponsor = sponsorRepository.findByCompanyEmailContact(username);
-        }
+    public ResponseEntity<String> login(@RequestParam String email, @RequestParam String password) {
+        Sponsor sponsor = sponsorRepository.findByCompanyEmailContact(email);
 
         // Kiểm tra mật khẩu
         if (sponsor != null && sponsor.getCompanyPassword().equals(password)) {
@@ -194,6 +190,15 @@ public class SponsorController {
     @GetMapping("/get-by-username")
     public ResponseEntity<SponsorResponse> getSponsorByUsername(@RequestParam String username) {
         Sponsor sponsor = sponsorRepository.findByCompanyUsername(username);
+        if (sponsor != null) {
+            SponsorResponse dto = sponsorMapper.toDTO(sponsor);
+            return ResponseEntity.ok(dto);
+        }
+        return ResponseEntity.status(404).body(null);
+    }
+    @GetMapping("/get-by-email")
+    public ResponseEntity<SponsorResponse> getSponsorByEmail(@RequestParam String email) {
+        Sponsor sponsor = sponsorRepository.findByCompanyEmailContact(email);
         if (sponsor != null) {
             SponsorResponse dto = sponsorMapper.toDTO(sponsor);
             return ResponseEntity.ok(dto);

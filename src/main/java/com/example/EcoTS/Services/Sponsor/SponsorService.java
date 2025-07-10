@@ -115,9 +115,6 @@ public class SponsorService {
     // Method to check if the email already exists in either the SponsorCreate or Sponsor table
     private boolean isEmailAlreadyExists(String email) {
         // Check in SponsorCreate
-        if (sponsorCreateRepository.findByEmail(email).isPresent()) {
-            return true;
-        }
         // Check in Sponsor
         if (sponsorRepository.findByCompanyEmailContact(email) != null) {
             return true;
@@ -172,7 +169,6 @@ public class SponsorService {
                 .orElseThrow(() -> new RuntimeException("Sponsor không tồn tại với id: " + id));
         return sponsorMapper.toDTO(sponsor);
     }
-
 
     // Xóa sponsor
     @Transactional
