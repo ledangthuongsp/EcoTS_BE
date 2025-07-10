@@ -14,5 +14,6 @@ public class CommentAllReponse {
     private String message;
     private List<String> imgUrls;
     private String userAvatarUrl;
+    private String fullName;
 }
 

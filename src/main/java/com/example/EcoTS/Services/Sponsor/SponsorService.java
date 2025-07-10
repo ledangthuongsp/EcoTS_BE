@@ -130,13 +130,17 @@ public class SponsorService {
 
     // Cập nhật mật khẩu khi sponsor đổi mật khẩu lần đầu
     @Transactional
-    public void changePassword(Long sponsorId, String newPassword) {
+    public void changePassword(Long sponsorId, String oldPassword, String newPassword) {
         Sponsor sponsor = sponsorRepository.findById(sponsorId)
                 .orElseThrow(() -> new RuntimeException("Sponsor not found"));
 
-        // Đổi mật khẩu và đánh dấu không phải lần đăng nhập đầu tiên nữa
-        sponsor.setCompanyPassword(newPassword);  // Mã hóa mật khẩu trước khi lưu
-        sponsor.setFirstLogin(false);  // Đánh dấu sponsor đã đăng nhập lần đầu
+        // Kiểm tra mật khẩu cũ
+        if (!sponsor.getCompanyPassword().equals(oldPassword)) {
+            throw new RuntimeException("Old password is incorrect");
+        }
+
+        // Cập nhật mật khẩu mới
+        sponsor.setCompanyPassword(newPassword);
         sponsorRepository.save(sponsor);
     }
 
@@ -146,22 +150,39 @@ public class SponsorService {
         Sponsor sponsor = sponsorRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Sponsor không tồn tại với id: " + id));
 
-        // Cập nhật các trường (không động chạm đến quan hệ locations/donations)
-        sponsor.setCompanyUsername(sponsorDetails.getCompanyUsername());
-        sponsor.setCompanyPassword(sponsorDetails.getCompanyPassword());
-        sponsor.setAvatarUrl(sponsorDetails.getAvatarUrl());
-        sponsor.setCompanyName(sponsorDetails.getCompanyName());
-        sponsor.setCompanyPhoneNumberContact(sponsorDetails.getCompanyPhoneNumberContact());
-        sponsor.setCompanyEmailContact(sponsorDetails.getCompanyEmailContact());
-        sponsor.setCompanyAddress(sponsorDetails.getCompanyAddress());
-        sponsor.setBusinessDescription(sponsorDetails.getBusinessDescription());
-        sponsor.setCompanyDirectorName(sponsorDetails.getCompanyDirectorName());
-        sponsor.setCompanyTaxNumber(sponsorDetails.getCompanyTaxNumber());
-        sponsor.setCompanyPoints(sponsorDetails.getCompanyPoints());
+        // Cập nhật các trường, nhưng không thay đổi email, password và points
+        if (sponsorDetails.getCompanyUsername() != null) {
+            sponsor.setCompanyUsername(sponsorDetails.getCompanyUsername());
+        }
+        if (sponsorDetails.getAvatarUrl() != null) {
+            sponsor.setAvatarUrl(sponsorDetails.getAvatarUrl());
+        }
+        if (sponsorDetails.getCompanyName() != null) {
+            sponsor.setCompanyName(sponsorDetails.getCompanyName());
+        }
+        if (sponsorDetails.getCompanyPhoneNumberContact() != null) {
+            sponsor.setCompanyPhoneNumberContact(sponsorDetails.getCompanyPhoneNumberContact());
+        }
+        if (sponsorDetails.getCompanyAddress() != null) {
+            sponsor.setCompanyAddress(sponsorDetails.getCompanyAddress());
+        }
+        if (sponsorDetails.getBusinessDescription() != null) {
+            sponsor.setBusinessDescription(sponsorDetails.getBusinessDescription());
+        }
+        if (sponsorDetails.getCompanyDirectorName() != null) {
+            sponsor.setCompanyDirectorName(sponsorDetails.getCompanyDirectorName());
+        }
+        if (sponsorDetails.getCompanyTaxNumber() != null) {
+            sponsor.setCompanyTaxNumber(sponsorDetails.getCompanyTaxNumber());
+        }
+
+        // Không thay đổi password, email và points
+        // Do đó, chúng không được cập nhật trong khi save
 
         Sponsor updated = sponsorRepository.save(sponsor);
         return sponsorMapper.toDTO(updated);
     }
+
 
     // Lấy thông tin sponsor theo id
     public SponsorResponse getSponsorById(Long id) {

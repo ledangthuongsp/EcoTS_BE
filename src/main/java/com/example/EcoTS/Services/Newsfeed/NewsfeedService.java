@@ -274,14 +274,15 @@ public class NewsfeedService {
             for (Comment comment : comments) {
                 // Lấy thông tin avatar từ userId (Giả sử bạn có phương thức getUserAvatarUrl để lấy avatar)
                 String userAvatarUrl = getUserAvatarUrl(comment.getUserId());
-
+                Users user = userRepository.findById(comment.getUserId()).orElseThrow(() -> new RuntimeException("User not found with id: " + comment.getUserId()));
                 // Tạo đối tượng CommentAllReponse và thêm vào danh sách
                 CommentAllReponse commentAllReponse = CommentAllReponse.builder()
                         .id(comment.getId())
                         .userId(comment.getUserId())
                         .message(comment.getMessage())
                         .imgUrls(comment.getImgUrls())
-                        .userAvatarUrl(userAvatarUrl) // Thêm thông tin avatar
+                        .userAvatarUrl(userAvatarUrl)
+                        .fullName(user.getFullName())// Thêm thông tin avatar
                         .build();
 
                 commentAllReponses.add(commentAllReponse);

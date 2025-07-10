@@ -53,5 +53,4 @@ public class Donations {
     @UpdateTimestamp
     @Column(name = "updated_at")
     private Timestamp updatedAt;
-
 }

@@ -1,5 +1,6 @@
 package com.example.EcoTS.Controllers.Sponsor;
 
+import com.example.EcoTS.DTOs.Request.Sponsor.SponsorLoginRequest;
 import com.example.EcoTS.DTOs.Response.Sponsor.SponsorResponse;
 import com.example.EcoTS.Mappers.SponsorMapper;
 import com.example.EcoTS.Models.Newsfeed.Newsfeed;
@@ -176,11 +177,11 @@ public class SponsorController {
     }
     // Login Sponsor
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestParam String email, @RequestParam String password) {
-        Sponsor sponsor = sponsorRepository.findByCompanyEmailContact(email);
+    public ResponseEntity<String> login(@RequestBody SponsorLoginRequest sponsorLoginRequest) {
+        Sponsor sponsor = sponsorRepository.findByCompanyEmailContact(sponsorLoginRequest.getEmail());
 
         // Kiểm tra mật khẩu
-        if (sponsor != null && sponsor.getCompanyPassword().equals(password)) {
+        if (sponsor != null && sponsor.getCompanyPassword().equals(sponsorLoginRequest.getPassword())) {
             return ResponseEntity.ok("Login successful");
         }
         return ResponseEntity.status(401).body("Invalid username or password");
@@ -292,4 +293,16 @@ public class SponsorController {
                     .body(Collections.singletonList(new SponsorResponse()));
         }
     }
+    @PostMapping("/sponsor/change-password")
+    public ResponseEntity<String> changePassword(@RequestParam Long sponsorId,
+                                                 @RequestParam String oldPassword,
+                                                 @RequestParam String newPassword) {
+        try {
+            sponsorService.changePassword(sponsorId, oldPassword, newPassword);
+            return ResponseEntity.ok("Password updated successfully");
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(400).body(e.getMessage());
+        }
+    }
+
 }

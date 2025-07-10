@@ -13,7 +13,6 @@ import org.springframework.stereotype.Repository;
 @Hidden
 public interface SponsorRepository extends JpaRepository<Sponsor, Long> {
     Sponsor findByCompanyUsername(String username);
-    Sponsor findByCompanyEmailContact(String email);
     @Query("SELECT s.companyPoints FROM Sponsor s WHERE s.id = :sponsorId")
     double findCompanyPointsBySponsorId(@Param("sponsorId") Long sponsorId);
 
