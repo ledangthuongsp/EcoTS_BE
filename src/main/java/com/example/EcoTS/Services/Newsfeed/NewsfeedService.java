@@ -283,6 +283,7 @@ public class NewsfeedService {
                         .imgUrls(comment.getImgUrls())
                         .userAvatarUrl(userAvatarUrl)
                         .fullName(user.getFullName())// Thêm thông tin avatar
+                        .createdAt(comment.getCreatedAt())
                         .build();
 
                 commentAllReponses.add(commentAllReponse);
