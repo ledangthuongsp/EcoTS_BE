@@ -6,7 +6,7 @@ EcoTS là một dự án nhằm mục đích phân loại rác và khuyến khí
 
 ## Tính Năng
 
-- **Phân Loại Rác**: Hệ thống sử dụng công nghệ TensorFlow (YOLOv8) để phân loại rác thành các loại chính: nhựa, giấy, thủy tinh, kim loại.
+- **Phân Loại Rác**: Hệ thống phân loại được phát triển dựa trên việc fine-tune model  để phân loại rác thành các loại chính: nhựa, giấy, thủy tinh, kim loại.
 - **Hoạt Động Thiện Nguyện**: Cung cấp thông tin về các hoạt động thiện nguyện và sự kiện quyên góp trong cộng đồng.
 - **Quyên Góp**: Tích hợp chức năng quyên góp để hỗ trợ các dự án bảo vệ môi trường.
 
